@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "writing-latex": {
+      "source": "RayIci/skills-latex",
+      "sourceType": "github",
+      "skillPath": "skills/writing-latex/SKILL.md",
+      "computedHash": "13b397b6592134752c27478e2669eadca780bd2153b91bcb3d1191b9d221f145"
+    }
+  }
+}

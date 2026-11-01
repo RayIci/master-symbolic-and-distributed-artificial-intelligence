@@ -1,0 +1,27 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper, total={6in, 9in}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[parfill]{parskip}
+\usepackage{minted}            % code listings; needs latexmk -shell-escape
+\setminted{breaklines=true, fontsize=\small, linenos=true, frame=lines, framesep=2mm}
+
+\input{preamble/preamble}      % boxes, colours, macros, plot style, solutions toggle
+% \renewcommand{\nbwhytitle}{Why this matters for <field>}
+% \showsolutionsfalse          % uncomment to hide all exercise solutions
+
+\title{<Title>}
+\author{<Author>}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+% one line per section, in reading order
+% \input{sections/<topic>/<topic>}
+
+\end{document}

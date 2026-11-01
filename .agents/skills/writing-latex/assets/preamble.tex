@@ -1,0 +1,118 @@
+% =====================================================================
+%  Shared preamble: explanation boxes, colours, macros, plot style and
+%  the solutions toggle. Load once from main.tex: \input{preamble/preamble}
+%  Prefix "nb" = notes box. Self-contained: loads what it needs.
+% =====================================================================
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+\providecommand{\R}{\mathbb{R}}
+
+\usepackage{environ}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{cancel}
+\usepackage{array}
+\tcbuselibrary{skins,breakable}
+\makeatletter\@ifpackageloaded{babel}{\usetikzlibrary{babel}}{}\makeatother
+\usetikzlibrary{arrows.meta,calc,decorations.pathreplacing,angles,quotes,patterns,3d,positioning}
+\usepgfplotslibrary{fillbetween,groupplots}
+
+% common style for function plots
+\pgfplotsset{
+  nbplot/.style={axis lines=middle, width=6.2cm, height=4.6cm, samples=200, trig format plots=rad,
+    xlabel={$x$}, ylabel={$y$},
+    every axis x label/.style={at={(ticklabel* cs:1)}, anchor=west},
+    every axis y label/.style={at={(ticklabel* cs:1)}, anchor=south},
+    tick label style={font=\scriptsize}, label style={font=\small},
+    title style={font=\small, yshift=7pt},
+    legend style={font=\scriptsize, draw=none, fill=white, fill opacity=0.85, text opacity=1},
+    legend cell align=left, clip=true},
+}
+
+% ---------------------------------------------------------------------
+%  Solutions toggle: \showsolutionstrue  -> solutions printed
+%                    \showsolutionsfalse -> solutions hidden
+% ---------------------------------------------------------------------
+\newif\ifshowsolutions
+\showsolutionstrue
+
+% ---------------------------------------------------------------------
+%  Colours
+% ---------------------------------------------------------------------
+\definecolor{nbblue}{HTML}{1F5FAD}
+\definecolor{nbred}{HTML}{C0392B}
+\definecolor{nbgreen}{HTML}{1E8449}
+\definecolor{nborange}{HTML}{D35400}
+\definecolor{nbpurple}{HTML}{6C3483}
+\definecolor{nbteal}{HTML}{117A65}
+\definecolor{nbgray}{HTML}{5D6D7E}
+
+% ---------------------------------------------------------------------
+%  Boxes
+% ---------------------------------------------------------------------
+\tcbset{
+  nbbase/.style={enhanced, breakable, arc=2pt, boxrule=0.6pt,
+    left=6pt, right=6pt, top=4pt, bottom=4pt,
+    fonttitle=\bfseries\small, before skip=8pt, after skip=8pt}
+}
+
+\newcommand{\nboptitle}[2]{#1\if\relax\detokenize{#2}\relax\else\ --- #2\fi}
+
+\newtcolorbox{nbdef}[1]{nbbase, colback=nbblue!4, colframe=nbblue,
+  title={Definition --- #1}}
+\newtcolorbox{nbfact}[1]{nbbase, colback=nbgreen!4, colframe=nbgreen,
+  title={Key result --- #1}}
+\newtcolorbox{nbintuition}[1][]{nbbase, colback=nborange!5, colframe=nborange,
+  title={\nboptitle{Intuition}{#1}}}
+\newtcolorbox{nbexample}[1]{nbbase, colback=nbpurple!4, colframe=nbpurple,
+  title={Worked example --- #1}}
+\newtcolorbox{nbwarning}[1][]{nbbase, colback=nbred!4, colframe=nbred,
+  title={\nboptitle{Watch out}{#1}}}
+\newcommand{\nbwhytitle}{Why this matters}   % \renewcommand per project
+\newtcolorbox{nbwhy}[1][]{nbbase, colback=nbteal!5, colframe=nbteal,
+  title={\nboptitle{\nbwhytitle}{#1}}}
+\newtcolorbox{nbsummary}[1][]{nbbase, colback=nbgray!6, colframe=nbgray,
+  title={\nboptitle{Cheat sheet}{#1}}}
+\newtcolorbox{nbexercise}[2]{nbbase, colback=white, colframe=black!70,
+  title={Exercise #1 --- #2}}
+\newtcolorbox{nbsolutionbox}{nbbase, colback=nbgreen!2, colframe=nbgreen!60!black,
+  borderline west={2pt}{0pt}{nbgreen}, title={Solution}}
+
+\NewEnviron{nbsolution}{%
+  \ifshowsolutions
+    \begin{nbsolutionbox}\BODY\end{nbsolutionbox}%
+  \fi}
+
+% ---------------------------------------------------------------------
+%  Macros
+% ---------------------------------------------------------------------
+% grey justification at the end of a line of algebra
+\newcommand{\reason}[1]{\qquad\text{\small\color{nbgray}$\triangleleft$\ #1}}
+\newcommand{\vect}[1]{\mathbf{#1}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\ip}[2]{\langle #1, #2\rangle}
+\newcommand{\norm}[1]{\lVert #1\rVert}
+\newcommand{\abs}[1]{\lvert #1\rvert}
+\newcommand{\T}{^{\top}}
+\newcommand{\Span}{\operatorname{Span}}
+\newcommand{\rank}{\operatorname{rk}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Real}{\operatorname{Re}}
+\newcommand{\Imag}{\operatorname{Im}}
+\newcommand{\dd}{\,\mathrm{d}}
+\newcommand{\col}[1]{\begin{pmatrix}#1\end{pmatrix}}
