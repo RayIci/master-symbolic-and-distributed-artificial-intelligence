@@ -22,17 +22,20 @@ from pydantic import BaseModel, Field
 
 from lab.config import MODEL, REASONING
 
-llm = ChatOllama(model=MODEL, temperature=0.7, reasoning=REASONING)
+llm = ChatOllama(model=MODEL, temperature=0.0, reasoning=REASONING)
 
 
 # ---------------------------------------------------------------------------
 # Exercise 1.1
 # ---------------------------------------------------------------------------
 # TODO (1.1): add an {audience} placeholder to the system message
-prompt = ChatPromptTemplate.from_messages([
-    ("system", "You are a helpful assistant who answers clearly and concisely."),
-    ("user", "{input}"),
-])
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", "You are a helpful assistant who answers clearly and concisely."),
+        ("user", "{input}"),
+        ("user", "Explain it to a {audience}."),
+    ]
+)
 
 chain = prompt | llm | StrOutputParser()
 
@@ -46,19 +49,30 @@ class Explanation(BaseModel):
     title: str = Field(description="A catchy title for the explanation")
     # TODO (1.2): add a `summary` (str) and a `keywords` (list[str]) field,
     #             each one with a Field(description=...) — the description is sent to the model!
+    summary: str = Field(description="A concise summary of the topic max 2 sentences")
+    keywords: list[str] = Field(description="A list of relevant keywords for the topic")
 
 
 # TODO (1.2): build the structured chain:  prompt | llm.with_structured_output(Explanation)
-structured_chain = None
+structured_chain = prompt | llm.with_structured_output(Explanation)
 
 
 if __name__ == "__main__":
     question = "Explain the theory of relativity."
+    audiences = ["10-year-old", "physics PhD student"]
 
-    # TODO (1.1): invoke `chain` for two different audiences and print the answers
-    print(chain.invoke({"input": question}))
+    def explain_to_audience(audience: str):
+        # TODO (1.1): invoke `chain` for two different audiences and print the answers
+        print(f"\n--- Explaining to {audience} ---")
+        inv_params = {"input": question, "audience": audience}
+        print(chain.invoke(inv_params))
 
-    # TODO (1.2): invoke `structured_chain`, then print result.title, result.summary, result.keywords
-    if structured_chain is not None:
-        result = structured_chain.invoke({"input": question})
-        print(type(result), result)
+        print(f"\n--- Structured explanation to {audience} ---")
+        # TODO (1.2): invoke `structured_chain`, then print result.title, result.summary, result.keywords
+        result = structured_chain.invoke(inv_params)
+        for field in result.model_fields:  # pyright: ignore[reportAttributeAccessIssue]
+            print(f" - {field}: {getattr(result, field)}\n")
+        print("\n\n")
+
+    for audience in audiences:
+        explain_to_audience(audience)
