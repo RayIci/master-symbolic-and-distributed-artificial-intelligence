@@ -1,0 +1,453 @@
+/* ==========================================================================
+   Agentic AI Lab — reveal.js theme: recycled paper & ink (light only)
+   ========================================================================== */
+
+:root {
+  --paper: #f3eee2;
+  --paper-light: #fbf8f0;
+  --ink: #1f2a44;          /* blue-black fountain-pen ink */
+  --ink-soft: #55607a;
+  --red: #a8322a;          /* red ink: accents */
+  --blue: #1d4e89;         /* blue ink: links, tools */
+  --green: #2f6b3a;        /* green ink: solutions */
+  --pencil: #8a8270;       /* pencil: muted text, comments */
+  --rule: #cfc6b0;         /* thin printed rules */
+  --font-serif: "Young Serif", Georgia, "Times New Roman", serif;
+  --font-sans: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* ---------- recycled paper: multicolour flecks, one paper colour per step ---------- */
+html { --paper: #ddd1b6; }                          /* intro: grey-beige */
+html[data-step="step-00"] { --paper: #efdcaa; }     /* setup: ivory */
+html[data-step="step-01"] { --paper: #b9d5ea; }     /* chain: powder blue */
+html[data-step="step-02"] { --paper: #c3dca9; }     /* tools: sage green */
+html[data-step="step-03"] { --paper: #f1bfac; }     /* workflow: pale salmon */
+html[data-step="step-04"] { --paper: #f4da78; }     /* agents + tools: pale yellow */
+html[data-step="wrap-up"] { --paper: #cfc1e8; }     /* wrap-up: lavender */
+
+html, body, .reveal-viewport {
+  background-color: var(--paper);
+  /* two offset fleck layers of different size, so the tile repetition is not visible */
+  background-image:
+    radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 65%),
+    radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0) 62%, rgba(90, 75, 50, 0.10) 100%),
+    url("paper.svg"),
+    url("paper.svg");
+  background-size: auto, auto, 640px 640px, 433px 433px;
+  background-position: 0 0, 0 0, 0 0, 211px 137px;
+  transition: background-color 0.6s ease;
+  color: var(--ink);
+}
+
+/* overview (Esc): every step shows its own paper colour */
+.reveal.overview .slides > section { background-color: #ddd1b6; outline: 1px solid var(--rule); }
+.reveal.overview .slides > section#step-00 > section { background-color: #efdcaa; }
+.reveal.overview .slides > section#step-01 > section { background-color: #b9d5ea; }
+.reveal.overview .slides > section#step-02 > section { background-color: #c3dca9; }
+.reveal.overview .slides > section#step-03 > section { background-color: #f1bfac; }
+.reveal.overview .slides > section#step-04 > section { background-color: #f4da78; }
+.reveal.overview .slides > section#wrap-up > section { background-color: #cfc1e8; }
+.reveal.overview .slides > section.stack { background-color: transparent; outline: 0; }
+
+.reveal {
+  font-family: var(--font-sans);
+  font-size: 32px;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+.reveal .slides { text-align: left; }
+.reveal .slides section { height: 100%; }
+
+/* ---------- typography ---------- */
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+  font-family: var(--font-serif);
+  color: var(--ink);
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.15;
+  margin: 0 0 0.6em 0;
+  text-transform: none;
+}
+.reveal h1 { font-size: 2.3em; }
+.reveal h2 {
+  font-size: 1.5em;
+  display: inline-block;
+  padding-bottom: 0.12em;
+  /* a slightly uneven ink stroke under the title */
+  background-image: linear-gradient(100deg, transparent 0%, var(--red) 1%, var(--red) 60%, rgba(168, 50, 42, 0.5) 85%, transparent 100%);
+  background-size: 100% 3px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+}
+.reveal h3 { font-size: 1.1em; color: var(--ink-soft); }
+.reveal h4 { font-size: 1em; }
+.reveal p, .reveal li { line-height: 1.45; }
+.reveal ul, .reveal ol { display: block; margin-left: 1.1em; }
+.reveal li { margin: 0.25em 0; }
+.reveal li::marker { color: var(--red); }
+.reveal strong { color: var(--red); font-weight: 600; }
+.reveal em { color: inherit; font-style: italic; }
+.reveal a { color: var(--blue); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.reveal small, .reveal .small { font-size: 0.65em; color: var(--pencil); line-height: 1.45; }
+.reveal p > small:only-child, .reveal section > small { display: block; }
+.reveal blockquote {
+  width: auto; margin: 0.8em 0; padding: 0.4em 1em;
+  background: rgba(255, 255, 255, 0.35);
+  border-left: 4px solid var(--red);
+  box-shadow: none; font-style: normal;
+}
+
+.reveal table { border-collapse: collapse; font-size: 0.72em; margin: 0.5em 0; }
+.reveal table th, .reveal table td { border-bottom: 1px solid var(--rule); padding: 0.35em 0.8em; text-align: left; }
+.reveal table th { color: var(--ink-soft); font-weight: 600; border-bottom: 2px solid var(--ink); }
+
+/* ---------- code ---------- */
+.reveal code, #run-output {
+  font-variant-ligatures: none;   /* show code as typed: no "<-" -> arrow ligatures */
+}
+.reveal code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--rule);
+  padding: 0 0.25em;
+  border-radius: 3px;
+  color: var(--ink);
+}
+.reveal pre {
+  position: relative;
+  width: 100%;
+  margin: 0.5em 0;
+  font-size: 0.56em;
+  box-shadow: none;
+}
+.reveal pre code {
+  display: block;
+  background: var(--paper-light);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--blue);
+  border-radius: 4px;
+  padding: 0.9em 1.1em;
+  max-height: 560px;
+  line-height: 1.5;
+  font-size: 1em;
+  box-shadow: 0 6px 14px -10px rgba(60, 45, 20, 0.45);
+}
+.reveal pre.tall code { max-height: 640px; }
+.reveal pre.small code { font-size: 0.85em; }
+.reveal pre code table { font-size: inherit; margin: 0; }
+.reveal pre code table td { border: 0; padding: 0; }
+.reveal .hljs-ln-numbers { color: var(--pencil); padding-right: 0.8em; opacity: 0.7; }
+
+/* "printout" blocks: terminal commands and outputs, on ruled paper */
+.reveal pre.term code {
+  background-color: #fffdf7;
+  border-left-color: var(--pencil);
+  background-image: repeating-linear-gradient(180deg, transparent 0, transparent 1.45em, rgba(29, 78, 137, 0.06) 1.45em, rgba(29, 78, 137, 0.06) 1.5em);
+}
+
+/* highlight.js — ink palette */
+.reveal .hljs { color: var(--ink); background: var(--paper-light); }
+.reveal pre.term .hljs { background-color: #fffdf7; }
+.reveal .hljs-keyword, .reveal .hljs-built_in, .reveal .hljs-literal,
+.reveal .hljs-selector-tag, .reveal .hljs-type { color: var(--blue); font-weight: 600; }
+.reveal .hljs-string, .reveal .hljs-regexp { color: var(--green); }
+.reveal .hljs-comment, .reveal .hljs-quote, .reveal .hljs-meta { color: var(--pencil); font-style: italic; }
+.reveal .hljs-number, .reveal .hljs-symbol, .reveal .hljs-bullet { color: var(--red); }
+.reveal .hljs-title, .reveal .hljs-title.function_, .reveal .hljs-section { color: var(--ink); font-weight: 700; }
+.reveal .hljs-attr, .reveal .hljs-attribute, .reveal .hljs-variable, .reveal .hljs-params,
+.reveal .hljs-subst, .reveal .hljs-property { color: var(--ink); }
+
+/* ---------- layout helpers ---------- */
+.reveal .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; align-items: start; }
+.reveal .cols > * { min-width: 0; }
+.reveal .cols.wide-left { grid-template-columns: 3fr 2fr; }
+.reveal .center { text-align: center; }
+.reveal .muted { color: var(--pencil); }
+
+/* step label: a rubber stamp */
+.reveal .step-label {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.55em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--red);
+  border: 2px solid var(--red);
+  border-radius: 4px;
+  padding: 0.15em 0.7em;
+  margin-bottom: 0.8em;
+  transform: rotate(-1.5deg);
+  opacity: 0.88;
+}
+
+/* step title slides */
+.reveal section.step-title h1 { font-size: 2.7em; margin-top: 0.2em; }
+.reveal section.step-title .lead { font-size: 1.0em; color: var(--ink-soft); max-width: 26em; }
+
+/* cards: small sheets of paper */
+.reveal .card {
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.7em 1em;
+  font-size: 0.8em;
+  box-shadow: 0 8px 18px -14px rgba(60, 45, 20, 0.6);
+}
+.reveal .card h4 { margin: 0 0 0.3em 0; font-size: 1em; }
+
+/* exercise / solution boxes: index cards with an ink margin */
+.reveal section.exercise h2::before { content: "✍  "; }
+.reveal section.solution h2::before { content: "✓  "; color: var(--green); }
+.reveal section.solution h2 {
+  background-image: linear-gradient(100deg, transparent 0%, var(--green) 1%, var(--green) 60%, rgba(47, 107, 58, 0.5) 85%, transparent 100%);
+}
+.reveal .task {
+  background: var(--paper-light);
+  border: 1px solid var(--rule);
+  border-left: 5px double var(--red);
+  border-radius: 3px;
+  padding: 0.6em 1em;
+  font-size: 0.8em;
+  margin: 0.4em 0 0.8em 0;
+  box-shadow: 0 8px 18px -14px rgba(60, 45, 20, 0.6);
+}
+.reveal section.solution .task { border-left-color: var(--green); }
+.reveal .file {
+  font-family: var(--font-mono);
+  font-size: 0.55em;
+  color: var(--pencil);
+  font-weight: 400;
+}
+
+/* timing (agenda) */
+.reveal .time { font-family: var(--font-mono); color: var(--blue); font-size: 0.8em; }
+
+/* mermaid diagrams */
+.reveal .diagram { display: flex; justify-content: center; margin: 0.6em 0; }
+.reveal .diagram svg { max-width: 100%; max-height: 520px; height: auto; }
+
+/* progress + controls */
+.reveal .progress { color: var(--red); height: 3px; background: rgba(31, 42, 68, 0.08); }
+.reveal .controls { color: var(--ink); }
+.reveal .slide-number {
+  background: transparent; color: var(--pencil);
+  font-family: var(--font-mono); font-size: 14px;
+  left: 16px; right: auto; bottom: 12px;
+}
+
+/* ==========================================================================
+   ▶ Run buttons + output panel
+   ========================================================================== */
+.reveal .run-btn {
+  position: absolute; top: 8px; right: 8px; z-index: 2;
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid var(--red); background: var(--paper);
+  color: var(--red); font-size: 15px; line-height: 1; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 0 0 3px;
+  box-shadow: 0 2px 6px -2px rgba(60, 45, 20, 0.5);
+  transition: transform 0.12s, background 0.12s, color 0.12s;
+}
+.reveal .run-btn:hover { background: var(--red); color: var(--paper-light); transform: scale(1.08); }
+.reveal .run-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+#run-panel {
+  position: fixed; left: 4%; right: 4%; bottom: 0; height: 62%;
+  z-index: 40;
+  display: flex; flex-direction: column;
+  background-color: #fffdf6;
+  border: 1px solid var(--rule); border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+  box-shadow: 0 -12px 40px -16px rgba(40, 30, 10, 0.55);
+  transform: translateY(105%);
+  visibility: hidden;
+  transition: transform 0.25s ease-out, visibility 0s linear 0.25s;
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
+#run-panel.open { transform: translateY(0); visibility: visible; transition: transform 0.25s ease-out; }
+#run-panel header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; border-bottom: 1px dashed var(--rule);
+  font-size: 15px;
+}
+#run-panel header > * { white-space: nowrap; flex-shrink: 0; }
+#run-panel .run-title { font-family: var(--font-mono); font-weight: 600; }
+#run-panel .run-status { color: var(--pencil); flex-shrink: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+#run-panel .run-status.live { color: var(--green); }
+#run-panel .run-status.error { color: var(--red); }
+#run-panel .run-badge {
+  font-size: 12px; color: var(--red); border: 1px solid var(--red);
+  border-radius: 3px; padding: 1px 6px; transform: rotate(-1deg);
+}
+#run-panel .run-badge[hidden] { display: none; }
+#run-panel .spacer { flex: 1; }
+#run-panel button {
+  font: 600 14px var(--font-sans); color: var(--ink);
+  background: var(--paper); border: 1px solid var(--rule); border-radius: 4px;
+  padding: 4px 12px; cursor: pointer;
+}
+#run-panel button:hover { border-color: var(--ink); }
+#run-panel button[disabled] { opacity: 0.4; cursor: default; }
+#run-output {
+  flex: 1; overflow: auto; margin: 0; padding: 14px 18px 24px;
+  font: 15px/1.5 var(--font-mono); white-space: pre-wrap; word-break: break-word;
+  color: var(--ink);
+}
+#run-output .a-bold { font-weight: 700; }
+#run-output .a-dim { opacity: 0.6; }
+#run-output .a-31 { color: var(--red); }
+#run-output .a-32 { color: var(--green); }
+#run-output .a-33 { color: #8a5a00; }
+#run-output .a-34 { color: var(--blue); }
+#run-output .a-35 { color: #7a2e6b; }
+#run-output .a-36 { color: #1f6f78; }
+#run-output .cursor { display: inline-block; width: 0.55em; height: 1.1em; vertical-align: text-bottom; background: var(--ink); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+@media print {
+  .reveal .run-btn, #run-panel { display: none; }
+}
+
+/* ==========================================================================
+   ICAROS column — pixel theme from its logo (only for section#icaros)
+   palette from icaros/runtime/web/static/app.css
+   ========================================================================== */
+html[data-step="thanks"] { --paper: #cfc1e8; }      /* last slide: same lavender as the wrap-up */
+.reveal.overview .slides > section#thanks > section { background-color: #cfc1e8; }
+
+#icaros {
+  --icarus-sky: #1446be;
+  --icarus-ink: #141416;
+  --icarus-linen: #ebebe9;
+  --icarus-star: #fac828;
+  --icarus-heart: #e41919;
+  --pixel-font: "Press Start 2P", ui-monospace, monospace;
+  --pixel-text: "Pixelify Sans", "Work Sans", system-ui, sans-serif;
+}
+
+/* the sky: deep blue with pixel stars, instead of the recycled paper */
+html[data-step="icaros"] body,
+html[data-step="icaros"] .reveal-viewport {
+  background-color: #1446be;
+  background-image: url("img/icaros-sky.svg");
+  background-size: 448px 448px;
+  image-rendering: pixelated;
+}
+.reveal.overview .slides > section#icaros > section {
+  background: #1446be url("img/icaros-sky.svg");
+}
+
+.reveal .slides > section#icaros,
+.reveal .slides > section#icaros p,
+.reveal .slides > section#icaros li,
+.reveal .slides > section#icaros td,
+.reveal .slides > section#icaros th {
+  color: #ebebe9;
+  font-family: var(--pixel-text);
+}
+/* a hard pixel shadow keeps the text readable over the stars */
+.reveal .slides > section#icaros p,
+.reveal .slides > section#icaros li,
+.reveal .slides > section#icaros td,
+.reveal .slides > section#icaros th,
+.reveal .slides > section#icaros small { text-shadow: 2px 2px 0 #0a2466; }
+
+.reveal .slides > section#icaros h1,
+.reveal .slides > section#icaros h2,
+.reveal .slides > section#icaros h3 {
+  font-family: var(--pixel-font);
+  color: #ebebe9;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.35;
+  text-shadow: 4px 4px 0 #141416;
+}
+.reveal .slides > section#icaros h1 { font-size: 2.2em; }
+.reveal .slides > section#icaros h2 {
+  font-size: 0.95em;
+  padding-bottom: 0.5em;
+  /* a dotted pixel underline instead of the ink stroke */
+  background-image: repeating-linear-gradient(90deg, #fac828 0 8px, transparent 8px 16px);
+  background-size: 100% 4px;
+}
+.reveal .slides > section#icaros strong { color: #fac828; font-weight: 600; }
+.reveal .slides > section#icaros em { color: #ebebe9; }
+.reveal .slides > section#icaros small { color: #c9d6f5; }
+.reveal .slides > section#icaros a { color: #fac828; }
+.reveal .slides > section#icaros li::marker { color: #e41919; content: "■  "; font-size: 0.7em; }
+.reveal .slides > section#icaros .file { color: #c9d6f5; font-family: var(--pixel-text); font-size: 0.5em; }
+
+/* inline code: little linen tiles */
+.reveal .slides > section#icaros code {
+  background: #141416; color: #fac828; border: 0; border-radius: 0;
+}
+
+/* code blocks and diagrams: linen windows with a hard pixel border and shadow */
+.reveal .slides > section#icaros pre code,
+.reveal .slides > section#icaros .diagram {
+  background: #ebebe9;
+  color: #141416;
+  border: 4px solid #141416;
+  border-radius: 0;
+  box-shadow: 8px 8px 0 #141416;
+}
+.reveal .slides > section#icaros pre code code { border: 0; box-shadow: none; }
+.reveal .slides > section#icaros .hljs { background: #ebebe9; }
+.reveal .slides > section#icaros .diagram { padding: 12px; }
+/* mermaid labels are HTML: give them the ink colour back, without the sky shadow */
+.reveal .slides > section#icaros .diagram p,
+.reveal .slides > section#icaros .diagram span,
+.reveal .slides > section#icaros .diagram div,
+.reveal .slides > section#icaros .diagram small {
+  color: #141416; text-shadow: none; font-family: var(--pixel-text);
+}
+.reveal .slides > section#icaros pre code,
+.reveal .slides > section#icaros pre code * { text-shadow: none; }
+.reveal .slides > section#icaros .run-btn {
+  border-radius: 0; border: 3px solid #141416; background: #fac828; color: #141416;
+  box-shadow: 3px 3px 0 #141416;
+}
+.reveal .slides > section#icaros .run-btn:hover { background: #e41919; color: #ebebe9; transform: none; }
+
+/* tables: pixel rules */
+.reveal .slides > section#icaros table { font-size: 0.8em; }
+.reveal .slides > section#icaros table th { color: #fac828; border-bottom: 4px solid #ebebe9; }
+.reveal .slides > section#icaros table td { border-bottom: 2px dashed rgba(235, 235, 233, 0.45); }
+.reveal .slides > section#icaros table code { background: #141416; color: #fac828; }
+
+/* title slide: text + big logo */
+.reveal .icaros-hero { display: grid; grid-template-columns: 1fr auto; gap: 1.5em; align-items: center; height: 100%; }
+.reveal .icaros-logo {
+  width: 288px; height: 396px;              /* 6x the 48x66 original */
+  image-rendering: pixelated;
+  border: 6px solid #141416;
+  box-shadow: 12px 12px 0 #141416;
+  margin: 0; max-width: none; max-height: none;
+}
+.reveal .slides > section#icaros .lead { font-size: 1em; max-width: 24em; color: #ebebe9; }
+.reveal .pixel-label {
+  display: inline-block;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.45em;
+  color: #141416;
+  background: #fac828;
+  padding: 0.5em 0.8em;
+  box-shadow: 4px 4px 0 #141416;
+  margin-bottom: 1.2em;
+}
+
+/* the ▶ output panel, when opened from the Icaros column */
+html[data-step="icaros"] #run-panel {
+  border: 4px solid #141416; border-bottom: 0; border-radius: 0;
+  background: #ebebe9; box-shadow: 0 -8px 0 #141416;
+}
+html[data-step="icaros"] #run-panel button { border-radius: 0; border: 2px solid #141416; }
+html[data-step="icaros"] .reveal .controls { color: #fac828; }
+html[data-step="icaros"] .reveal .slide-number { color: #c9d6f5; font-family: "Press Start 2P", monospace; font-size: 10px; }
+html[data-step="icaros"] .reveal .progress { color: #fac828; }

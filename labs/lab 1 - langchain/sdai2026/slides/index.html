@@ -1,0 +1,1204 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agentic AI Lab</title>
+  <meta name="description" content="SDAI 2026 — Building agentic AI systems with local LLMs (Ollama + LangChain + LangGraph)">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Work+Sans:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&family=Press+Start+2P&family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reset.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+<div class="reveal">
+<div class="slides">
+
+<!-- =====================================================================
+     TITLE + AGENDA
+     ===================================================================== -->
+<section data-markdown><textarea data-template>
+<!-- .slide: class="step-title" -->
+<span class="step-label">SDAI 2026 · Hands-on lab</span>
+
+# Agentic AI<br>with local LLMs
+
+<p class="lead">From a single prompt to agentic workflows where LLMs use tools — all running on your laptop with <strong>Ollama</strong>, <strong>LangChain</strong> and <strong>LangGraph</strong>.</p>
+
+<small>Press <code>→</code> for the next step, <code>↓</code> to go deeper inside a step, <code>Esc</code> for the overview. The <strong>▶</strong> on a code block runs it.</small>
+
+Note:
+Welcome. 2 hours, 4 steps. Everybody should have run check_setup.py already.
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Agenda <small>· ~2 hours</small>
+
+| | Step | What you build |
+|---|---|---|
+| <span class="time">10'</span> | **00 · Setup** | Ollama + model + Python env |
+| <span class="time">20'</span> | **01 · Chain** | prompt → LLM → output |
+| <span class="time">30'</span> | **02 · Tools** | an agentic loop: the LLM *acts* through tools |
+| <span class="time">30'</span> | **03 · Workflow** | a graph of collaborating LLMs |
+| <span class="time">25'</span> | **04 · Agentic workflow** | a workflow of agentic loops with tools |
+| <span class="time">5'</span> | Wrap-up | limits & next steps |
+
+Every step = **demo** (`demo.py`, runs as-is) + **exercise** (`exercise.py`, with `TODO`s).
+
+Note:
+Each step builds on the previous one. Demo first (5'), then they work on exercise.py.
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## What is *agentic AI*?
+
+<div class="cols">
+<div>
+
+An **LLM** maps text → text.
+
+**Agentic AI** puts an LLM in a **loop** where it can:
+
+- **decide** what to do next
+- **act** through *tools* (functions, APIs, …)
+- **observe** the result and continue
+- **stop** when the goal is reached
+
+</div>
+<div>
+
+```mermaid
+flowchart TD
+    U([User goal]) --> L[LLM decides]
+    L -->|tool call| T[Tool runs]
+    T -->|observation| L
+    L -->|final answer| A([Answer])
+```
+
+</div>
+</div>
+
+> Today we climb this ladder one step at a time: **chain → agentic loop → workflow → agentic workflow**.
+
+<small>⚠️ Not to be confused with <em>agents</em> in the multi-agent-systems sense (autonomous, with beliefs, goals and plans): more on that at the end.</small>
+</textarea></section>
+
+<!-- =====================================================================
+     STEP 00 — SETUP
+     ===================================================================== -->
+<section id="step-00">
+<section data-markdown><textarea data-template>
+<!-- .slide: class="step-title" -->
+<span class="step-label">Step 00 · 10 minutes</span>
+
+# Setup
+
+<p class="lead">A local LLM server, one small model, one Python environment.</p>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Why local, why Ollama?
+
+<div class="cols">
+<div class="card">
+
+#### Ollama
+- runs open-weight LLMs **on your laptop**
+- REST API on `localhost:11434`
+- `ollama pull`, `ollama run`, `ollama list`
+- no API keys, no costs, data stays local
+
+</div>
+<div class="card">
+
+#### Our model: `qwen3:4b-instruct`
+- ~2.5 GB, runs on CPU / Apple Silicon
+- supports **tool calling**
+- *instruct* = no "thinking" phase ⇒ fast
+- small ⇒ *not very smart*: <br>a great way to see where agentic AI breaks
+
+</div>
+</div>
+
+<small>Any tool-capable model works: change it in <code>lab/config.py</code> or with <code>LAB_MODEL=llama3.2 uv run …</code></small>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Install
+
+```bash
+# 1. Ollama  →  https://ollama.com/download  (then start the app)
+ollama pull qwen3:4b-instruct
+
+# 2. The lab (a git repository inside a zip)
+unzip sdai2026-lab.zip && cd sdai2026     # from the course page
+
+# 3. Python environment with uv  →  https://docs.astral.sh/uv/
+uv sync
+
+# 4. Check everything
+uv run scripts/check_setup.py
+```
+<!-- .element: class="term" -->
+
+<small>No <code>uv</code>? <code>python3.12 -m venv .venv && source .venv/bin/activate && pip install -e .</code> then use <code>python</code> instead of <code>uv run</code>.</small>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Repository layout
+
+```text
+sdai2026/
+├── lab/              # shared config (MODEL) + pretty printing
+├── scripts/
+│   ├── check_setup.py
+│   └── run_all.sh    # runs every demo, saves outputs/
+├── services/         # a fake REST API used as a "real" tool
+├── steps/
+│   ├── 01-chain/          README.md · demo.py · exercise.py
+│   ├── 02-tools/          …
+│   ├── 03-workflow/       …
+│   └── 04-agentic-workflow/   …
+└── slides/           # these slides: uv run slides/serve.py
+```
+
+<small>It is a git repository: each step is a tag (<code>git checkout step-02</code>), commit your work as you go. Solutions after the lab, as a git bundle on the course page.</small>
+</textarea></section>
+</section>
+
+<!-- =====================================================================
+     STEP 01 — CHAIN
+     ===================================================================== -->
+<section id="step-01">
+<section data-markdown><textarea data-template>
+<!-- .slide: class="step-title" -->
+<span class="step-label">Step 01 · 20 minutes</span>
+
+# Chain
+
+<p class="lead">Talk to a local LLM from Python and compose the basic LangChain building blocks.</p>
+
+<span class="file">steps/01-chain/</span>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## A chain is a pipeline
+
+```mermaid
+flowchart LR
+    I(["{'input': '...'}"]) --> P[ChatPromptTemplate]
+    P -->|messages| L[ChatOllama]
+    L -->|AIMessage| O[StrOutputParser]
+    O --> R(["'text'"])
+```
+
+- every block is a **Runnable**: `.invoke()`, `.stream()`, `.batch()`
+- `a | b` = "feed the output of `a` into `b`" (*LCEL*)
+- no agency yet: **one fixed path**, one LLM call
+
+Note:
+Insist on the idea of Runnable: the same interface will be used by agentic loops and graphs later.
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## The code <span class="file">· demo.py</span>
+
+```python [1-3|5-6|8-12|14-15|17-19]
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_ollama import ChatOllama
+
+# 1. The local LLM served by Ollama
+llm = ChatOllama(model=MODEL, temperature=0.7, reasoning=REASONING)
+
+# 2. A prompt TEMPLATE: {input} is filled in at invocation time
+prompt = ChatPromptTemplate.from_messages([
+    ("system", "You are a helpful assistant who answers clearly and concisely."),
+    ("user", "{input}"),
+])
+
+# 3. The chain (LCEL "pipe" syntax)
+chain = prompt | llm | StrOutputParser()
+
+# 4. Run it — or stream it token by token
+result = chain.invoke({"input": "Explain the theory of relativity in an easy way."})
+for token in chain.stream({"input": "Give me 3 fun facts about llamas."}): ...
+```
+<!-- .element: data-run="steps/01-chain/demo.py" -->
+
+```bash
+uv run steps/01-chain/demo.py
+```
+<!-- .element: class="term" -->
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Structured output
+
+Free text is hard to use **in a program**. Ask for a schema instead:
+
+```python
+class Explanation(BaseModel):
+    title: str = Field(description="A catchy title for the explanation")
+    summary: str = Field(description="...")
+
+structured = llm.with_structured_output(Explanation)
+result = structured.invoke("Explain relativity")   # -> Explanation(title=..., summary=...)
+```
+
+- the Pydantic model becomes a **JSON schema** sent to Ollama
+- Ollama **constrains decoding** so the output is valid JSON for that schema
+- the `description`s are part of the prompt: **write them well**
+
+> This is the same mechanism that will let the model produce **tool calls** in step 02.
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+<!-- .slide: class="exercise" -->
+## Exercise 01 <span class="file">· steps/01-chain/exercise.py</span>
+
+<div class="task">
+
+**1.1 · More template variables** — add an `{audience}` variable to the prompt so that the same question
+is explained *"to a 10-year-old"* or *"to a physics PhD student"*. Invoke the chain twice and compare.
+
+</div>
+<div class="task">
+
+**1.2 · Structured output** — complete the `Explanation` model (`title`, `summary`, `keywords: list[str]`)
+and build `structured_chain = prompt | llm.with_structured_output(Explanation)`. Print each field separately.
+
+</div>
+
+*Think about:* what changes with `temperature=0`? And without the `Field(description=...)`?
+
+<small>⏱ 12 minutes · solutions after the lab (<code>sdai2026-solutions.bundle</code>)</small>
+</textarea></section>
+</section>
+
+<!-- =====================================================================
+     STEP 02 — TOOLS
+     ===================================================================== -->
+<section id="step-02">
+<section data-markdown><textarea data-template>
+<!-- .slide: class="step-title" -->
+<span class="step-label">Step 02 · 30 minutes</span>
+
+# Tools
+
+<p class="lead">The LLM stops just <em>talking</em> and starts <strong>acting</strong>: it decides which function to call, observes the result, and keeps going.</p>
+
+<span class="file">steps/02-tools/ · services/mock_api.py</span>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## The model does **not** run your code
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant A as Agentic loop
+    participant L as LLM (Ollama)
+    participant T as Tools (Python)
+    U->>A: "What is 5 + 3, then × 2?"
+    A->>L: messages + tool schemas
+    L-->>A: tool_call add(x=5, y=3)
+    A->>T: add(5, 3)
+    T-->>A: 8
+    A->>L: messages + ToolMessage("8")
+    L-->>A: tool_call multiply(x=8, y=2)
+    A->>T: multiply(8, 2)
+    T-->>A: 16
+    A->>L: messages + ToolMessage("16")
+    L-->>A: "The result is 16"
+    A-->>U: final answer
+```
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Defining tools <span class="file">· demo.py</span>
+
+<div class="cols wide-left">
+<div>
+
+```python [1-4|6-9|11-15]
+@tool
+def add(x: int, y: int) -> int:
+    """Adds 2 numbers and returns the result"""
+    return x + y
+
+@tool
+def multiply(x: int, y: int) -> int:
+    """Multiplies 2 numbers and returns the result"""
+    return x * y
+
+assistant = create_agent(
+    model=ChatOllama(model=MODEL, temperature=0),
+    tools=[add, multiply],
+    system_prompt="Always use the tools to do arithmetic.",
+)
+```
+<!-- .element: data-run="steps/02-tools/demo.py" -->
+
+<small>LangChain calls what <code>create_agent</code> returns an "agent": we call it an <strong>agentic loop</strong>.</small>
+
+</div>
+<div>
+
+What the model **sees**:
+
+```json
+{
+  "name": "add",
+  "description":
+    "Adds 2 numbers and returns the result",
+  "parameters": {
+    "x": {"type": "integer"},
+    "y": {"type": "integer"}
+  }
+}
+```
+
+> **name + docstring + type hints** = the only documentation the LLM has.
+
+</div>
+</div>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Look inside the loop
+
+```python
+answer = assistant.invoke({"messages": [{"role": "user", "content": question}]})
+print_trace(answer["messages"])     # from lab/display.py
+```
+<!-- .element: data-run="steps/02-tools/demo.py" -->
+
+```text
+[0] USER  What is 5 + 3, and then multiply the result by 2?
+[1] AI -> TOOL CALL  add({"x": 5, "y": 3})
+[1] AI -> TOOL CALL  multiply({"x": 8, "y": 2})
+[2] TOOL RESULT (add)  8
+[3] TOOL RESULT (multiply)  16
+[4] AI  The result of 5 + 3 is 8, and multiplying 8 by 2 gives 16.
+```
+<!-- .element: class="term" -->
+
+- `AIMessage.tool_calls` — the model's **request** (here: **two** at once!)
+- `ToolMessage` — **our** answer, appended to the conversation
+- the loop stops when the AI replies **without** tool calls
+
+<small>🤔 Look at message [1]: how could the model call <code>multiply(8, 2)</code> before knowing that 5 + 3 = 8?</small>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Tools can touch the real world
+
+A tool is just Python: HTTP calls, databases, files, shell…
+
+<div class="cols">
+<div>
+
+```bash
+# second terminal
+uv run services/mock_api.py
+```
+<!-- .element: class="term" -->
+
+```bash
+curl "localhost:8765/api/weather?city=Bologna"
+```
+<!-- .element: class="term" -->
+
+```json
+{"city": "Bologna", "temperature_c": 14,
+ "condition": "fog", "humidity": 88, "wind_kmh": 5}
+```
+
+</div>
+<div class="card">
+
+#### `services/mock_api.py`
+fake but deterministic data, no keys needed
+
+- `/api/weather?city=…`
+- `/api/search?q=…`
+- `/api/stats?topic=…`
+
+⚠️ With real APIs, tools that **change** things (send mail, pay, delete) need **guardrails** and human approval.
+
+</div>
+</div>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+<!-- .slide: class="exercise" -->
+## Exercise 02 <span class="file">· steps/02-tools/exercise.py</span>
+
+<div class="task">
+
+**2.1 · More tools** — add `subtract`, `divide` and `power`; ask *"What is (12 − 4) to the power of 2, divided by 4?"*.
+Does the model call the tools in the right order? What does `divide` do with 0?
+
+</div>
+<div class="task">
+
+**2.2 · A REST tool** — implement `get_weather(city)` calling `GET /api/weather?city=…` with `requests`.
+Ask *"Should I bring an umbrella in Bologna or in Rome today?"* → one question, **two** tool calls.
+
+</div>
+<div class="task">
+
+**2.3 · Docstrings matter** — give `multiply` the docstring *"Adds two numbers"*, or drop the type hints. What happens?
+
+</div>
+
+<small>⏱ 20 minutes</small>
+</textarea></section>
+</section>
+
+<!-- =====================================================================
+     STEP 03 — WORKFLOW
+     ===================================================================== -->
+<section id="step-03">
+<section data-markdown><textarea data-template>
+<!-- .slide: class="step-title" -->
+<span class="step-label">Step 03 · 30 minutes</span>
+
+# Workflow
+
+<p class="lead">Several LLMs with different <strong>roles</strong> collaborate through a shared <strong>state</strong>, in a <strong>graph</strong> run by LangGraph.</p>
+
+<span class="file">steps/03-workflow/</span>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Researcher → Analyst → Writer
+
+<div class="cols">
+<div>
+
+```mermaid
+flowchart TD
+    S([START]) --> R[🔎 researcher]
+    R --> A[📊 analyst]
+    A --> W[📝 writer]
+    W --> E([END])
+```
+
+</div>
+<div>
+
+- **same model**, different **system prompts**
+- each node reads the **state** and writes **its own key**
+- the output of one role is the input of the next
+- smaller, focused prompts work **better** with small models than one giant prompt
+
+</div>
+</div>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## State, nodes, edges <span class="file">· demo.py</span>
+
+```python [1-5|7-13|15-20|22]
+class State(TypedDict):          # the shared "blackboard"
+    topic: str
+    research: str
+    analysis: str
+    final_output: str
+
+def researcher(state: State) -> dict:     # a node: State -> partial update
+    text = ask_llm(
+        "You are an experienced researcher. Be factual and concise.",
+        f"Collect the most important facts about: {state['topic']}",
+    )
+    return {"research": text}             # only the keys you change
+...
+workflow = StateGraph(State)
+workflow.add_node("researcher", researcher)
+workflow.add_node("analyst", analyst)
+workflow.add_node("writer", writer)
+workflow.add_edge(START, "researcher")
+workflow.add_edge("researcher", "analyst")  # ... analyst -> writer -> END
+
+app = workflow.compile()   # a Runnable again: .invoke() .stream() .get_graph()
+```
+<!-- .element: data-run="steps/03-workflow/demo.py" -->
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Branches and loops: conditional edges
+
+```python
+def route(state: State) -> str:
+    return "writer" if state["feedback"].startswith("REVISE") else END
+
+workflow.add_conditional_edges("critic", route, {"writer": "writer", END: END})
+```
+
+<div class="cols">
+<div>
+
+- a **router** is a plain function: reads the state, returns the **name** of the next node
+- this is how you build loops, retries, branches
+- ⚠️ every loop needs a **stop condition**
+
+</div>
+<div class="card">
+
+#### Workflow or agentic loop?
+
+**Workflow** (step 03): *you* decide the control flow → predictable, testable.
+
+**Agentic loop** (step 02): the *LLM* decides → flexible, less predictable.
+
+Real systems **mix both** (step 04).
+
+</div>
+</div>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+<!-- .slide: class="exercise" -->
+## Exercise 03 <span class="file">· steps/03-workflow/exercise.py</span>
+
+<div class="cols wide-left">
+<div>
+<div class="task">
+
+**3.1 · A critic in the loop** — add a `critic` node after the writer that answers `APPROVED` or `REVISE: <what to improve>`.
+If REVISE, go back to the writer (which must **use the feedback**), **at most 2 times**; otherwise `END`.
+
+You need: state keys `feedback`, `revisions` · a router · `add_conditional_edges`.
+
+</div>
+<div class="task">
+
+**3.2 · Visualise** — `print(app.get_graph().draw_mermaid())` → paste into [mermaid.live](https://mermaid.live).
+
+</div>
+</div>
+<div>
+
+```mermaid
+flowchart TD
+    S([START]) --> R[researcher]
+    R --> A[analyst]
+    A --> W[writer]
+    W --> C{critic}
+    C -->|REVISE| W
+    C -->|APPROVED / limit| E([END])
+```
+
+</div>
+</div>
+
+<small>⏱ 20 minutes</small>
+</textarea></section>
+</section>
+
+<!-- =====================================================================
+     STEP 04 — AGENTIC WORKFLOW
+     ===================================================================== -->
+<section id="step-04">
+<section data-markdown><textarea data-template>
+<!-- .slide: class="step-title" -->
+<span class="step-label">Step 04 · 25 minutes</span>
+
+# Agentic workflow
+
+<p class="lead">Step 02 + step 03: every node of the graph runs its own <strong>agentic loop</strong> with <strong>specialised tools</strong>.</p>
+
+<span class="file">steps/04-agentic-workflow/ · tools.py · services/mock_api.py</span>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## A team of specialists
+
+```mermaid
+flowchart LR
+    S([START]) --> R
+    subgraph R[🔎 researcher loop]
+        direction TB
+        r1[web_search]
+        r2[get_statistics]
+    end
+    R --> A
+    subgraph A[📊 analyst loop]
+        direction TB
+        a1[calculate_growth]
+        a2[calculate_percentage]
+        a3[get_statistics]
+    end
+    A --> W[📝 writer<br/><small>plain LLM</small>]
+    W --> E([END])
+    R -. HTTP .-> API[(mock API)]
+    A -. HTTP .-> API
+```
+
+- **few tools per loop** → small models choose much better
+- **graph** = control flow we decide · **agentic loop** = local decisions of the LLM
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Agentic loops as nodes <span class="file">· demo.py</span>
+
+```python [1-8|10-14|16-18]
+researcher_llm = create_agent(
+    model=model,
+    tools=[web_search, get_statistics],
+    system_prompt=(
+        "You are a research specialist. Use web_search and get_statistics to gather facts "
+        "and numbers. ... Only report information returned by the tools."
+    ),
+)
+
+def run_with_tools(llm, name: str, task: str) -> str:
+    result = llm.invoke({"messages": [{"role": "user", "content": task}]})
+    print_trace(result["messages"], tools_only=True)   # which tools did it use?
+    return result["messages"][-1].content
+
+def researcher(state: State) -> dict:     # the node wraps the agentic loop
+    return {"research": run_with_tools(researcher_llm, "🔎 researcher",
+                                  f"Research this topic: {state['topic']}")}
+```
+<!-- .element: data-run="steps/04-agentic-workflow/demo.py" -->
+
+<small>What <code>create_agent</code> builds is itself a LangGraph graph → you can nest graphs inside graphs.</small>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Robust tools <span class="file">· tools.py</span>
+
+```python
+def _get(path: str, **params) -> str:
+    try:
+        r = requests.get(f"{MOCK_API_URL}{path}", params=params, timeout=5)
+        return json.dumps(r.json())
+    except requests.RequestException as e:
+        # Never crash inside a tool: return the error so the LLM can react to it
+        return f"ERROR: could not reach the API ({e.__class__.__name__})."
+
+@tool
+def get_statistics(topic: str) -> str:
+    """Returns a time series of statistics about a topic.
+    Available topics: 'ai adoption', 'ai devices', 'ai market', 'llm usage students'."""
+    return _get("/api/stats", topic=topic)
+```
+
+- return **text** the LLM can read, **errors included**
+- list valid values in the docstring → fewer wrong calls
+- always set a **timeout**
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+<!-- .slide: class="exercise" -->
+## Exercise 04 <span class="file">· steps/04-agentic-workflow/exercise.py</span>
+
+<div class="cols wide-left">
+<div>
+<div class="task">
+
+**4.1 · A router** — add a `router` node at `START` that classifies the request with **structured output** (step 01)
+into `"weather"` or `"report"`, plus a **conditional edge** (step 03) to a new `weather` agentic loop (`get_weather`)
+or to the research pipeline.
+
+</div>
+<div class="task">
+
+**4.2 · A new tool** — write `cagr(start_value, end_value, years)` = `(end/start)^(1/years) − 1`
+and give it to the analyst. Is it used? If not: better docstring / system prompt.
+
+</div>
+</div>
+<div>
+
+```mermaid
+flowchart TD
+    S([START]) --> Ro{router}
+    Ro -->|weather| Wa[🌦 weather assistant]
+    Ro -->|report| R[🔎 researcher]
+    R --> A[📊 analyst]
+    A --> W[📝 writer]
+    Wa --> E([END])
+    W --> E
+```
+
+</div>
+</div>
+
+<small>⏱ 15 minutes</small>
+</textarea></section>
+</section>
+
+<!-- =====================================================================
+     WRAP-UP
+     ===================================================================== -->
+<section id="wrap-up">
+<section data-markdown><textarea data-template>
+## What we built
+
+| Step | Pattern | Who decides the flow? |
+|---|---|---|
+| 01 | **chain** — prompt → LLM → parser | nobody: fixed |
+| 02 | **agentic loop** — LLM ↔ tools | the LLM |
+| 03 | **workflow** — graph with shared state | you (+ conditional edges) |
+| 04 | **agentic workflow** — graph of agentic loops with tools | both |
+
+> An agentic AI system is mostly **software engineering around an LLM**: state, control flow, tools, error handling, limits.
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Lessons from a 4B model
+
+- tool calls can be **wrong or missing** → validate, return clear errors, keep the toolset small
+- models **hallucinate** even with tools → ask them to ground on tool results, and check
+- every loop needs a **limit** (revisions, `recursion_limit`)
+- **temperature 0** for tool use, higher for creative writing
+- *thinking* models are smarter but **much slower**: in an agentic loop they think before *every* step
+- prompts are code: **version them, test them**
+
+<div class="card">
+
+#### Where to go next
+**Memory** (checkpointers, `thread_id`) · **human-in-the-loop** (`interrupt`) · **MCP** (standard tool servers) · **RAG** (search over your documents) · **evaluation** of agentic systems · bigger models (`ollama pull qwen3:14b`, cloud models)
+
+</div>
+</textarea></section>
+</section>
+
+<!-- =====================================================================
+     ICAROS — what we are working on (pixel theme, see theme.css)
+     ===================================================================== -->
+<section id="icaros">
+<section data-markdown><textarea data-template>
+<!-- .slide: class="icaros-title" -->
+<div class="icaros-hero">
+<div>
+
+<span class="pixel-label">What we are working on</span>
+
+# Icaros
+
+<p class="lead">Real <strong>agents</strong> — with explicit <strong>beliefs, goals and plans</strong> (BDI, AgentSpeak) — and an LLM you can <strong>grant one faculty at a time</strong>.</p>
+
+<small>Today we built <strong>agentic AI</strong>: the LLM drives the loop, and we wrote the control flow around it in Python.<br>In Icaros the agents are BDI agents in a multi-agent system, and the LLM is one of their faculties.</small>
+
+</div>
+<img class="icaros-logo" src="img/icarus.png" alt="Icaros logo: Icarus in pixel art">
+</div>
+
+Note:
+Teaser, 2-3 minutes max. The point: same ideas of today (tools, loops, limits) but inside an agent model with explicit mental state.
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Icaros architecture
+
+<div class="cols wide-left">
+<div>
+
+```mermaid
+flowchart LR
+    subgraph MAS["MAS · .mas2i"]
+        direction LR
+        subgraph AG["agent · .asl"]
+            direction TB
+            B[(beliefs)]
+            P[(plans)]
+            R{{"BDI cycle<br/>event → plan → act"}}
+            B --> R
+            P --> R
+        end
+        ENV["environment<br/><small>Python</small>"]
+        R <--> ENV
+    end
+    LLM["LLM<br/><small>Ollama · OpenAI · Anthropic</small>"]
+    J[("journal + RAG")]
+    R <-. "selections · .talk · .run" .-> LLM
+    J -.-> LLM
+```
+
+</div>
+<div>
+
+- the **plans** are the agent's know-how and become the LLM's **tools** (doc-comment = tool description)
+- the LLM can **choose** among applicable plans, **answer** (`.talk`) or **drive** a session (`.run`)
+- every LLM decision ends up in a **journal** the agent can read back
+
+</div>
+</div>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## How much power do you give the LLM?
+
+| Level | The LLM can… |
+|---|---|
+| `still` | nothing: classic BDI reasoning only |
+| `talk` | read its journal, search beliefs by meaning, **answer** |
+| `run` | pursue goals the agent **already has plans** for |
+| `fly` | **write new plans** into the plan library |
+| `burn` | also write new **actions in Python** 🔥 |
+
+<small>Set per agent in the <code>.mas2i</code> (<code>gen_limit: run</code>): the same agent can go from fully predictable to fully generative — with a bound you choose. Like Icarus, fly too close to the sun…</small>
+</textarea></section>
+
+<section data-markdown><textarea data-template>
+## Example: the missing plan <span class="file">· demos/icaros-barista/</span>
+
+<div class="cols wide-left">
+<div>
+
+```text
+/** Grinds the beans that are on the counter.
+ *  @when there are beans and they have not been ground yet */
++!grind : have(beans)
+    <-  .println("grinding"); +have(grounds).
+
+/** Brews the coffee from the grounds and the hot water.
+ *  @when there are already grounds AND the water is already hot */
++!brew : have(grounds) & have(hot_water)
+    <-  .println("brewing"); +have(coffee).
+
+// ... +!fetch_beans, +!boil_water ...
+// NO plan for +!make_coffee!
+
++!start
+    <-  .run("Make a coffee. You have one goal per step ...");
+        .talk("Explain the coffee: which steps and why.", Answer);
+        .println(Answer);
+        .stopMAS.
+```
+<!-- .element: data-run="demos/icaros-barista/barista.mas2i" -->
+
+</div>
+<div>
+
+```text
+agent barista:
+    gen_limit: run
+    agentic {
+        provider: ollama
+        model:    qwen3:4b-instruct
+        llm_tools:
+            - plans
+                - fetch_beans
+                - grind
+                - boil_water
+                - brew
+    }
+```
+
+<small>The agent knows the <strong>steps</strong> but not the <strong>recipe</strong>: during <code>.run</code> the model <em>is</em> the missing plan, guided by beliefs and guards. At <code>fly</code> it could write it down for next time.</small>
+
+</div>
+</div>
+
+<small>▶ runs <code>demos/icaros-barista</code> (needs Icaros, otherwise a recorded run) · 🚧 Work in progress — <a href="https://github.com/icaros-lang">github.com/icaros-lang</a></small>
+</textarea></section>
+</section>
+
+<!-- =====================================================================
+     THANK YOU
+     ===================================================================== -->
+<section id="thanks">
+<section data-markdown><textarea data-template>
+<!-- .slide: class="step-title" -->
+<span class="step-label">Thank you</span>
+
+# Questions?
+
+<p class="lead">Solutions after the lab, on the course page: <code>git fetch ../sdai2026-solutions.bundle solutions:solutions</code></p>
+
+<small>Docs: <a href="https://docs.langchain.com">docs.langchain.com</a> · <a href="https://ollama.com/search?c=tools">ollama.com/search?c=tools</a></small>
+</textarea></section>
+</section>
+
+
+
+
+
+
+
+
+
+</div>
+</div>
+
+<!-- ▶ output panel -->
+<div id="run-panel" role="dialog" aria-label="Script output" aria-hidden="true">
+  <header>
+    <span class="run-title" id="run-title"></span>
+    <span class="run-status" id="run-status"></span>
+    <span class="run-badge" id="run-badge" hidden title="Start uv run slides/serve.py to run the scripts live">recorded · live: uv run slides/serve.py</span>
+    <span class="spacer"></span>
+    <button id="run-stop" type="button" disabled>■ Stop</button>
+    <button id="run-close" type="button">✕ Close</button>
+  </header>
+  <pre id="run-output"></pre>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/markdown/markdown.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/highlight/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/notes/notes.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/plugin/zoom/zoom.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<!-- Recorded outputs for the ▶ buttons when the slides are opened without serve.py (generated by scripts/record_outputs.py) -->
+<script src="recordings.js"></script>
+<script>
+  // ---------- mermaid diagrams: ```mermaid fences inside markdown slides ----------
+  // Rendered off-screen with mermaid.render(). The off-screen container gets "normal" text metrics:
+  // reveal sets line-height:1 on <body>, which breaks the text measurements of some diagram types.
+  let diagramCounter = 0;
+  const sandbox = document.createElement("div");
+  sandbox.style.cssText = "position:absolute;left:-10000px;top:0;width:1200px;line-height:1.5;font-size:16px;";
+  document.body.appendChild(sandbox);
+
+  async function renderDiagrams() {
+    if (!window.mermaid) return;
+    mermaid.initialize({
+      startOnLoad: false,
+      theme: "base",
+      fontFamily: '"Work Sans", system-ui, sans-serif',
+      flowchart: { curve: "basis", htmlLabels: true },
+      themeVariables: {
+        background: "transparent",
+        primaryColor: "#fbf8f0",
+        primaryBorderColor: "#1f2a44",
+        primaryTextColor: "#1f2a44",
+        secondaryColor: "#f3eee2",
+        tertiaryColor: "#efe8d6",
+        lineColor: "#1f2a44",
+        textColor: "#1f2a44",
+        clusterBkg: "rgba(255,255,255,0.35)",
+        clusterBorder: "#8a8270",
+        edgeLabelBackground: "#f3eee2",
+        actorBkg: "#fbf8f0",
+        actorBorder: "#1f2a44",
+        signalColor: "#1f2a44",
+        signalTextColor: "#1f2a44",
+        fontSize: "16px",
+      },
+    });
+    const blocks = document.querySelectorAll(".reveal pre code.mermaid, .reveal pre code.language-mermaid");
+    for (const el of blocks) {
+      const holder = el.closest("pre");
+      const src = el.textContent;
+      try {
+        const { svg } = await mermaid.render(`diagram-${diagramCounter++}`, src, sandbox);
+        const div = document.createElement("div");
+        div.className = "diagram";
+        div.innerHTML = svg;
+        holder.replaceWith(div);
+      } catch (err) {
+        console.error("Mermaid error", err, src);
+      }
+    }
+    Reveal.layout();
+  }
+
+  // ---------- ▶ run buttons ----------
+  // Live mode: slides served by `uv run slides/serve.py` -> the script really runs, output is streamed.
+  // Replay mode: slides opened as a file / on a static host -> the recorded output (recordings.js) is replayed.
+  const panel = document.getElementById("run-panel");
+  const out = document.getElementById("run-output");
+  const titleEl = document.getElementById("run-title");
+  const statusEl = document.getElementById("run-status");
+  const badge = document.getElementById("run-badge");
+  const stopBtn = document.getElementById("run-stop");
+  let liveServer = null;     // Promise<bool>
+  let currentRun = null;     // { abort() }
+
+  function checkServer() {
+    if (location.protocol === "file:") return Promise.resolve(false);
+    return fetch("api/health", { cache: "no-store" })
+      .then(r => r.ok)
+      .catch(() => false);
+  }
+
+  // ANSI SGR codes used by lab/display.py -> ink-coloured spans
+  const ansiState = { classes: [] };
+  function escapeHtml(s) {
+    return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function ansiToHtml(text) {
+    let html = "";
+    const parts = text.split(/\x1b\[([0-9;]*)m/);
+    for (let i = 0; i < parts.length; i++) {
+      if (i % 2 === 0) {
+        if (!parts[i]) continue;
+        const cls = ansiState.classes.join(" ");
+        html += cls ? `<span class="${cls}">${escapeHtml(parts[i])}</span>` : escapeHtml(parts[i]);
+      } else {
+        for (const code of (parts[i] || "0").split(";").map(Number)) {
+          if (code === 0) ansiState.classes = [];
+          else if (code === 1) ansiState.classes.push("a-bold");
+          else if (code === 2) ansiState.classes.push("a-dim");
+          else if (code >= 30 && code <= 37) {
+            ansiState.classes = ansiState.classes.filter(c => !/^a-3\d$/.test(c));
+            ansiState.classes.push(`a-${code}`);
+          }
+        }
+      }
+    }
+    return html;
+  }
+
+  const cursor = document.createElement("span");
+  cursor.className = "cursor";
+  cursor.innerHTML = "&nbsp;";
+
+  function write(text) {
+    cursor.remove();
+    out.insertAdjacentHTML("beforeend", ansiToHtml(text));
+    out.appendChild(cursor);
+    out.scrollTop = out.scrollHeight;
+  }
+
+  function setStatus(text, kind = "") {
+    statusEl.textContent = text;
+    statusEl.className = "run-status " + kind;
+  }
+
+  function openPanel(script) {
+    if (currentRun) currentRun.abort();
+    out.textContent = "";
+    ansiState.classes = [];
+    titleEl.textContent = (script.endsWith(".mas2i") ? "$ icaros " : "$ uv run ") + script;
+    panel.classList.add("open");
+    panel.setAttribute("aria-hidden", "false");
+  }
+
+  function closePanel() {
+    if (currentRun) currentRun.abort();
+    panel.classList.remove("open");
+    panel.setAttribute("aria-hidden", "true");
+  }
+
+  function finished(t0, ok = true, aborted = false) {
+    cursor.remove();
+    stopBtn.disabled = true;
+    currentRun = null;
+    const secs = ((performance.now() - t0) / 1000).toFixed(1);
+    if (aborted) setStatus(`stopped after ${secs}s`, "error");
+    else setStatus(ok ? `done in ${secs}s` : `failed after ${secs}s`, ok ? "" : "error");
+  }
+
+  async function runLive(script) {
+    badge.hidden = true;
+    const ctrl = new AbortController();
+    const t0 = performance.now();
+    let aborted = false;
+    currentRun = { abort() { aborted = true; ctrl.abort(); } };
+    stopBtn.disabled = false;
+    setStatus("running…", "live");
+    write("");
+    try {
+      const resp = await fetch("api/run?script=" + encodeURIComponent(script), { signal: ctrl.signal });
+      if (resp.status === 503 && resp.headers.get("X-Fallback") === "replay") {
+        // the server cannot run this one here (e.g. Icaros not installed): show the recording
+        currentRun = null;
+        return runReplay(script);
+      }
+      if (!resp.ok) { write(await resp.text()); return finished(t0, false); }
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        write(decoder.decode(value, { stream: true }));
+      }
+      const ok = !/\[exit code [1-9]\d*\]\s*$/.test(out.textContent);
+      finished(t0, ok);
+    } catch (err) {
+      if (!aborted) write(`\n[connection error: ${err.message}]`);
+      finished(t0, false, aborted);
+    }
+  }
+
+  function runReplay(script) {
+    const rec = (window.RECORDINGS || {})[script];
+    badge.hidden = false;
+    if (!rec) {
+      setStatus("no recording", "error");
+      write(`No recorded output for ${script}.\n\nRun it live:\n  uv run slides/serve.py   (then open http://localhost:8080)\n`);
+      cursor.remove();
+      return;
+    }
+    const lines = rec.output.split(/(?<=\n)/);
+    const t0 = performance.now();
+    let i = 0, timer = null;
+    currentRun = { abort() { clearTimeout(timer); finished(t0, true, true); } };
+    stopBtn.disabled = false;
+    setStatus(`replaying… (${rec.model})`, "live");
+    const step = () => {
+      if (i >= lines.length) {
+        cursor.remove(); stopBtn.disabled = true; currentRun = null;
+        setStatus(`recorded: ${rec.seconds}s · ${rec.model} · ${rec.date}`);
+        return;
+      }
+      write(lines[i++]);
+      timer = setTimeout(step, 25 + Math.random() * 60);
+    };
+    step();
+  }
+
+  async function run(script) {
+    openPanel(script);
+    if (await liveServer) runLive(script);
+    else runReplay(script);
+  }
+
+  function addRunButtons() {
+    for (const pre of document.querySelectorAll(".reveal pre[data-run]")) {
+      const script = pre.dataset.run;
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "run-btn";
+      btn.title = "Run " + script;
+      btn.setAttribute("aria-label", "Run " + script);
+      btn.textContent = "▶";
+      btn.addEventListener("click", e => { e.stopPropagation(); run(script); });
+      pre.appendChild(btn);
+    }
+  }
+
+  stopBtn.addEventListener("click", () => currentRun && currentRun.abort());
+  document.getElementById("run-close").addEventListener("click", closePanel);
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && panel.classList.contains("open")) { e.stopImmediatePropagation(); closePanel(); }
+  }, true);
+  liveServer = checkServer();
+
+  // ---------- reveal.js ----------
+  Reveal.initialize({
+    hash: true,
+    slideNumber: "c/t",
+    width: 1280,
+    height: 760,
+    margin: 0.06,
+    center: false,
+    transition: "slide",
+    transitionSpeed: "fast",
+    highlight: { highlightOnLoad: true },
+    plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealZoom],
+  }).then(() => { addRunButtons(); renderDiagrams(); setPaper(); });
+
+  // ---------- one paper colour per step (see html[data-step] in theme.css) ----------
+  function setPaper() {
+    const slide = Reveal.getCurrentSlide();
+    const top = slide && slide.closest(".slides > section");
+    document.documentElement.dataset.step = (top && top.id) || "intro";
+  }
+  Reveal.on("slidechanged", setPaper);
+</script>
+</body>
+</html>

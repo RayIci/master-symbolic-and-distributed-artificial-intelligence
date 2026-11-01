@@ -1,0 +1,26 @@
+# Demo for the SDAI 2026 lab slides (adapted from icaros examples/missing-plan).
+# The barista knows the four steps of making a coffee but has no plan for
+# making one: at the `run` rung the LLM stands in for the missing plan.
+#
+# Needs a local ollama and Icaros, bundled in demos/wheels/ (see demos/README.md):
+#   uvx --python 3.14t --from "demos/wheels/icaros-0.1.0-py3-none-any.whl[ollama]" \
+#       icaros demos/icaros-barista/barista.mas2i --headless
+
+mas missing_plan {
+    agent barista:
+        gen_limit: run
+        agentic {
+            provider: ollama
+            model: qwen3:4b-instruct
+            params {
+                num_ctx: 8192
+            }
+            llm_tools:
+                - plans
+                    - fetch_beans
+                    - grind
+                    - boil_water
+                    - brew
+                - journal
+        }
+}
