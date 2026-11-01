@@ -80,7 +80,9 @@ workflow.add_edge("writer", END)
 app = workflow.compile()
 
 if __name__ == "__main__":
-    result = app.invoke({"topic": "The benefits of artificial intelligence in medicine"})
+    result = app.invoke(
+        {"topic": "The benefits of artificial intelligence in medicine"}
+    )
 
     banner("RESEARCHER")
     print(result["research"])
