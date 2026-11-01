@@ -43,6 +43,18 @@ def multiply(x: int, y: int) -> int:
 
 # TODO (2.1): add the `subtract`, `divide` and `power` tools
 #             Hint: what should `divide` return when dividing by zero? (a tool can return an error message!)
+@tool
+def subtract(x: int, y: int) -> int:
+    """Subtracts 2 numbers and returns the result"""
+    return x - y
+
+
+@tool
+def divide(x: int, y: int) -> str:
+    """Divides 2 numbers and returns the result, or an error message if dividing by zero"""
+    if y == 0:
+        return "Error: Cannot divide by zero"
+    return str(x / y)
 
 
 # TODO (2.2): implement the weather tool
@@ -50,11 +62,13 @@ def multiply(x: int, y: int) -> int:
 def get_weather(city: str) -> str:
     """TODO: write a docstring that tells the model WHEN to use this tool"""
     # Hint: requests.get(f"{MOCK_API_URL}/api/weather", params={"city": city}, timeout=5).json()
-    raise NotImplementedError
+    return requests.get(
+        f"{MOCK_API_URL}/api/weather", params={"city": city}, timeout=5
+    ).json()
 
 
 # TODO (2.1, 2.2): register all the tools
-tools = [add, multiply]
+tools = [add, multiply, subtract, divide, get_weather]
 
 model = ChatOllama(model=MODEL, temperature=0, reasoning=REASONING)
 
@@ -74,3 +88,4 @@ def ask(question: str) -> None:
 if __name__ == "__main__":
     ask("What is (12 - 4) to the power of 2, divided by 4?")  # 2.1
     # ask("Should I bring an umbrella in Bologna or in Rome today?")  # TODO (2.2): uncomment
+    ask("Should I bring an umbrella in Bologna or in Rome today?")  # sanity check
