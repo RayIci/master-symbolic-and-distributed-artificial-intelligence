@@ -1,0 +1,165 @@
+\subsection{Quantifiers}
+\label{sec:quantifiers}
+\slidesrc{FOL: 14--20}
+
+Quantification is the central part of first-order logic. With terms and predicates alone
+we still cannot say:
+\begin{itemize}[nosep]
+  \item all men have a mother;
+  \item every natural number has a prime factor.
+\end{itemize}
+These sentences speak about \emph{all} objects, without naming them. We need quantifiers.
+
+\subsubsection{The three quantifiers and their syntax}
+\slidesrc{FOL: 15--18}
+
+\begin{nbdef}{Quantifiers (slide 15)}
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Symbol} & \textbf{Name} & \textbf{Read} \\
+\midrule
+$\forall$ & universal quantifier & ``for all \ldots'' \\
+$\exists$ & existential quantifier & ``there exists \ldots'' (at least one) \\
+$\exists_1$ & unique quantifier & ``there exists a unique \ldots'' (exactly one) \\
+\bottomrule
+\end{tabular}
+\end{center}
+In the Z notation of the slides a quantified formula has the form
+\[ \text{quantifier}\ \ \text{signature} \bullet \text{predicate} \]
+where the signature is \emph{variable : type}. Example: $\forall x : \mathit{Man} \bullet
+\mathit{Mortal}(x)$.
+\end{nbdef}
+
+\begin{nbexample}{reading quantified formulas (slides 17--18)}
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{6.2cm} X@{}}
+\toprule
+\textbf{Formula} & \textbf{Meaning} \\
+\midrule
+$\forall x : \mathit{Man} \bullet \mathit{Mortal}(x)$ & for all $x$ of type Man, $x$ is mortal (all men are mortal) \\
+$\forall x : \mathit{Man} \bullet \exists_1 y : \mathit{Woman} \bullet \mathit{MotherOf}(x, y)$ & every man has exactly one mother ($y$ is the mother of $x$) \\
+$\exists m : \mathit{Monitor} \bullet \mathit{MonitorState}(m, \mathit{ready})$ & there is a monitor in the ready state \\
+$\forall r : \mathit{Reactor} \bullet \exists_1 t : 100..1000 \bullet \mathit{Temp}(r) = t$ & every reactor has a temperature in the range 100 to 1000 \\
+$\exists n : \N \bullet n = n * n$ & some natural number is equal to its own square (true: $0$ and $1$) \\
+$\exists c : \mathit{EC} \bullet \mathit{Borders}(c, \mathit{Albania})$ & some EC country borders Albania (Greece) \\
+$\forall m, n : \mathit{Person} \bullet \neg \mathit{Superior}(m, n)$ & no person is superior to another \\
+$\forall m : \mathit{Person} \bullet \neg \exists n : \mathit{Person} \bullet \mathit{Superior}(m, n)$ & ditto (same meaning) \\
+\bottomrule
+\end{tabularx}
+\end{nbexample}
+
+\paragraph{Without types.} Most AI texts (and Prolog) use untyped FOL: there is one big
+domain of objects, and types become ordinary predicates. The typed formulas translate
+with a fixed pattern that is worth memorising.
+
+\begin{nbfact}{Typed to untyped quantifiers}
+\notinslides
+\begin{align*}
+\forall x : T \bullet P(x) \quad &\text{becomes}\quad \forall x\,\big(T(x) \limp P(x)\big) \\
+\exists x : T \bullet P(x) \quad &\text{becomes}\quad \exists x\,\big(T(x) \land P(x)\big)
+\end{align*}
+\textbf{$\forall$ goes with $\limp$, $\exists$ goes with $\land$.}
+\end{nbfact}
+
+\begin{nbwarning}[The two classic translation mistakes]
+\begin{itemize}[nosep]
+  \item ``All men are mortal'' is $\forall x\,(\mathit{Man}(x) \limp \mathit{Mortal}(x))$,
+        \textbf{not} $\forall x\,(\mathit{Man}(x) \land \mathit{Mortal}(x))$: the latter
+        says that \emph{everything} (every chair, every number) is a man and is mortal.
+  \item ``Some monitor is ready'' is $\exists x\,(\mathit{Monitor}(x) \land
+        \mathit{Ready}(x))$, \textbf{not} $\exists x\,(\mathit{Monitor}(x) \limp
+        \mathit{Ready}(x))$: the latter is true as soon as there exists any object that is
+        not a monitor (false antecedent!), even if no monitor is ready.
+\end{itemize}
+\end{nbwarning}
+
+\begin{nbwarning}[The order of quantifiers matters]
+\notinslides
+$\forall x\,\exists y\,\mathit{MotherOf}(x, y)$: everybody has a mother (possibly a
+different one for each $x$): true. \\
+$\exists y\,\forall x\,\mathit{MotherOf}(x, y)$: there is one $y$ who is the mother of
+everybody: false. Swapping $\forall$ and $\exists$ changes the meaning; swapping two
+$\forall$ (or two $\exists$) does not.
+\end{nbwarning}
+
+\subsubsection{Free and bound variables}
+\notinslides
+
+A quantifier $\forall x$ or $\exists x$ \textbf{binds} the variable $x$ inside its
+\textbf{scope} (the formula it is applied to). An occurrence of a variable that is not
+bound by any quantifier is \textbf{free}. In
+$\forall x\,(\mathit{gt}(x, y) \limp \mathit{gt}(x, 0))$, $x$ is bound and $y$ is free.
+A formula with no free variables is a \textbf{sentence} (or \emph{closed} formula): only
+sentences are simply true or false in an interpretation; a formula with free variables,
+like $\mathit{gt}(x, 3)$, needs a value for its free variables (slide 13). This
+distinction comes back in the proof rules of Section~\ref{sec:proof-theory-fol}.
+
+\subsubsection{Quantifiers as big conjunctions and disjunctions}
+\slidesrc{FOL: 19--20}
+
+\begin{nbfact}{Quantifiers over a finite set (slide 19)}
+Universal quantification is like conjunction, existential quantification like
+disjunction:
+\begin{align*}
+\forall n : \{2, 4, 6\} \bullet \mathit{Even}(n) \quad &\text{is the same as}\quad
+  \mathit{Even}(2) \land \mathit{Even}(4) \land \mathit{Even}(6) \\
+\exists n : \{7, 8, 9\} \bullet \mathit{Prime}(n) \quad &\text{is the same as}\quad
+  \mathit{Prime}(7) \lor \mathit{Prime}(8) \lor \mathit{Prime}(9)
+\end{align*}
+\end{nbfact}
+
+\begin{nbfact}{Duality of $\forall$ and $\exists$ (slide 20)}
+\begin{align*}
+\forall x : T \bullet P(x) \quad &\liff\quad \neg\,\exists x : T \bullet \neg P(x) \\
+\exists x : T \bullet P(x) \quad &\liff\quad \neg\,\forall x : T \bullet \neg P(x)
+\end{align*}
+Saying that everything has some property is the same as saying that there is nothing that
+does not have it. Saying that something has the property is the same as saying that it is
+not the case that everything lacks it.
+\end{nbfact}
+
+\begin{nbintuition}[Duality is De Morgan in disguise]
+Over the finite set $\{a, b, c\}$:
+\begin{align*}
+\neg\,\forall x\, P(x)
+  &= \neg\big(P(a) \land P(b) \land P(c)\big) && \reason{$\forall$ = big $\land$} \\
+  &\equiv \neg P(a) \lor \neg P(b) \lor \neg P(c) && \reason{De Morgan} \\
+  &= \exists x\, \neg P(x) && \reason{$\exists$ = big $\lor$}
+\end{align*}
+Negating both sides gives the first duality law. Practical reading: to refute ``all
+monitors are ready'' you need one monitor that is \emph{not} ready (a counterexample).
+\end{nbintuition}
+
+\begin{nbfact}{The unique quantifier, defined with the other two}
+\notinslides
+$\exists_1 x\, P(x) \;\equiv\; \exists x\,\big(P(x) \land \forall y\,(P(y) \limp y = x)\big)$:
+there is an $x$ with the property, and any $y$ with the property is that same $x$.
+\end{nbfact}
+
+\begin{nbexercise}{Q.1}{Translate into FOL (added)}
+Use the predicates $\mathit{Student}(x)$, $\mathit{Course}(x)$, $\mathit{Attends}(x, y)$,
+$\mathit{Passed}(x, y)$.
+\begin{enumerate}[nosep]
+  \item Every student attends some course.
+  \item Some course is attended by every student.
+  \item No student passed a course without attending it.
+  \item Not every student passed SDAI.
+\end{enumerate}
+\end{nbexercise}
+\begin{nbsolution}
+\begin{enumerate}[nosep]
+  \item $\forall x\,\big(\mathit{Student}(x) \limp \exists y\,(\mathit{Course}(y) \land
+        \mathit{Attends}(x, y))\big)$
+  \item $\exists y\,\big(\mathit{Course}(y) \land \forall x\,(\mathit{Student}(x) \limp
+        \mathit{Attends}(x, y))\big)$ \ (stronger than 1: the order of quantifiers changed)
+  \item $\neg \exists x\, \exists y\, \big(\mathit{Student}(x) \land \mathit{Passed}(x, y)
+        \land \neg \mathit{Attends}(x, y)\big)$, equivalently
+        $\forall x\, \forall y\, \big(\mathit{Student}(x) \land \mathit{Passed}(x, y)
+        \limp \mathit{Attends}(x, y)\big)$ (by duality and De Morgan).
+  \item $\neg \forall x\,(\mathit{Student}(x) \limp \mathit{Passed}(x, \mathit{sdai}))$,
+        equivalently $\exists x\,(\mathit{Student}(x) \land \neg \mathit{Passed}(x,
+        \mathit{sdai}))$: some student did not pass SDAI.
+\end{enumerate}
+\textbf{Lesson}: always check the pattern $\forall \ldots \limp$, $\exists \ldots \land$.
+\end{nbsolution}

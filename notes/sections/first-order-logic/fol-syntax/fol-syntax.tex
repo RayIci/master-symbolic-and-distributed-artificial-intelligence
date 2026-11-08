@@ -1,0 +1,180 @@
+\subsection{Syntax of FOL: terms and predicates}
+\label{sec:fol-syntax}
+\slidesrc{FOL: 4--13}
+
+First-order logic is a generalisation of propositional logic with much greater expressive
+power. Its language has two layers:
+\begin{itemize}[nosep]
+  \item \textbf{terms} talk about \emph{objects} (numbers, people, monitors);
+  \item \textbf{predicates} (atoms) talk about \emph{facts} on those objects, and are true
+        or false.
+\end{itemize}
+Formulas are then built from atoms with the connectives of propositional logic and with
+quantifiers (Section~\ref{sec:quantifiers}).
+
+\subsubsection{Terms: constants, variables, functions}
+\slidesrc{FOL: 5--10}
+
+\begin{nbdef}{Term (slide 5)}
+The basic components of FOL are \textbf{terms}. A term denotes some \emph{object}, other
+than true or false.
+\end{nbdef}
+
+The slides use a \emph{typed} version of FOL (as in the Z specification language): every
+object belongs to a set, its \emph{type} ($\N$, $\Z$, Person, Monitor, \ldots).
+
+\begin{nbdef}{Constant and variable (slide 6)}
+\begin{itemize}[nosep]
+  \item A \textbf{constant} of type $T$ is a name that denotes some \emph{particular}
+        object in the set $T$. Examples: $8$ (the number eight, in $\N$ and $\Z$);
+        $\mathit{mike}$ (the individual Michael Wooldridge); $S$ after ``let $S$ be the
+        set $\{1,2,3\}$'' (by saying what it denotes we have given it an
+        \textbf{interpretation}).
+  \item A \textbf{variable} of type $T$ is a name that can denote \emph{any} value in the
+        set $T$. A variable of type $\N$ can stand for any natural number.
+\end{itemize}
+\end{nbdef}
+
+\begin{nbdef}{Functional term (slides 7--8)}
+FOL has a set of \textbf{function symbols}; each denotes a function. Each function symbol
+has an \textbf{arity} $n \in \N$ (its number of arguments), an argument type for each
+argument and a return type. If $f$ is a function symbol of type $T$, with arity $n$ and
+argument types $T_1, \ldots, T_n$, and $\tau_1, \ldots, \tau_n$ are terms of types
+$T_1, \ldots, T_n$, then
+\[ f(\tau_1, \ldots, \tau_n) \]
+is a \textbf{functional term} (of type $T$).
+\end{nbdef}
+
+This is just like a function in a programming language: the slides' Modula-2 example
+\code{PROCEDURE f(a1:T1; ... an:Tn) : T;} declares a function with $n$ typed arguments and
+return type $T$.
+
+\begin{nbexample}{the function \emph{plus} (slide 9)}
+Let $\mathit{plus}$ take two natural numbers and return their sum. Then:
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Acceptable terms} & \textbf{Not acceptable} \\
+\midrule
+$\mathit{plus}(2, 3)$ & $\mathit{plus}(-1, 0)$ \quad ($-1 \notin \N$: wrong type) \\
+$\mathit{plus}(0, 1)$ & $\mathit{plus}(0.1, 2)$ \quad ($0.1 \notin \N$: wrong type) \\
+$\mathit{plus}(\mathit{plus}(1, 2), 4)$ & $\mathit{plus}(1)$ \quad (wrong arity; added) \\
+$\mathit{plus}(\mathit{plus}(\mathit{plus}(0, 1), 2), 4)$ & \\
+\bottomrule
+\end{tabular}
+\end{center}
+Terms can be nested: the argument of a function can itself be a functional term.
+\end{nbexample}
+
+Writing $2 + 3$ instead of $\mathit{plus}(2,3)$ is merely a convention (infix notation);
+for logic, $+, -, /, *, \sqrt{\ }, \sin, \cos, \ldots$ are all function symbols. For
+instance $(x + 3) * \sin 90$ is the term $\mathit{times}(\mathit{plus}(x, 3),
+\sin(90))$ (slide 10).
+
+\begin{center}
+\begin{forest}
+for tree={draw, rounded corners, font=\small, l sep=4mm, s sep=6mm, edge={thick}}
+[$\mathit{times}$, fill=nbpurple!12
+  [$\mathit{plus}$, fill=nbpurple!12 [$x$, fill=nborange!15] [$3$, fill=nbblue!10]]
+  [$\sin$, fill=nbpurple!12 [$90$, fill=nbblue!10]]]
+\end{forest}
+\captionof{figure}{The term $(x+3)*\sin 90$ as a tree. Purple: function symbols; blue:
+constants; orange: variables. Leaves are always constants or variables.}
+\end{center}
+
+\subsubsection{Predicates}
+\slidesrc{FOL: 11--13}
+
+\begin{nbdef}{Predicate (atom) (slide 11)}
+FOL contains a stock of \textbf{predicate symbols}, standing for relationships between
+objects. Each has an arity and a type for each argument. If $P$ is a predicate symbol of
+arity $n$ with argument types $T_1, \ldots, T_n$, and $\tau_1, \ldots, \tau_n$ are terms of
+those types, then
+\[ P(\tau_1, \ldots, \tau_n) \]
+is a \textbf{predicate} (also called an \textbf{atom} or atomic formula), which will be
+either true or false under some interpretation.
+\end{nbdef}
+
+\begin{nbexample}{the predicate \emph{gt} (slide 12)}
+Let $\mathit{gt}$ (``greater than'') take two natural numbers. Then $\mathit{gt}(4,3)$ is a
+predicate that evaluates to \emph{true}, $\mathit{gt}(3,4)$ is a predicate that evaluates to
+\emph{false}, while $\mathit{gt}(-1, 2)$ is not a predicate at all ($-1$ has the wrong
+type). The usual mathematical relations $>, <, =, \geq, \leq, \neq, \in, \subset,
+\subseteq$ are predicate symbols written infix. Predicates combine with the connectives:
+$(2 > 3) \land (6 = 7) \lor (\sqrt 4 = 2)$.
+\end{nbexample}
+
+\begin{nbwarning}[Terms vs.\ predicates: the most common confusion]
+A \textbf{term} names an \emph{object}; it is never true or false. A \textbf{predicate}
+states a \emph{fact}; it is always true or false (under an interpretation).
+$\mathit{plus}(2,3)$ is a term (it denotes 5); $\mathit{gt}(\mathit{plus}(2,3), 4)$ is a
+predicate (it is true). Writing $\mathit{gt}(4,3) \land 5$ is nonsense: you cannot ``and''
+a number. Likewise $\mathit{mother}(\mathit{ann})$ (a function: \emph{the mother of Ann}, a
+person) differs from $\mathit{mother}(\mathit{mary}, \mathit{ann})$ (a predicate:
+\emph{Mary is the mother of Ann}, a fact).
+\end{nbwarning}
+
+Some vocabulary (slide 13):
+\begin{itemize}[nosep]
+  \item a predicate with variables, e.g.\ $\mathit{gt}(x, 3)$, cannot be evaluated until we
+        know what $x$ stands for (an interpretation of the variables);
+  \item a predicate that contains \textbf{no variables} is a \textbf{proposition}
+        (e.g.\ $\mathit{gt}(4,3)$);
+  \item predicates of arity 1 are called \textbf{properties}, for example
+        $\mathit{Man}(x)$, $\mathit{Mortal}(x)$,
+        $\mathit{Malfunctioning}(x)$, all with one argument;
+  \item predicates of arity 0 (no arguments) are called \textbf{primitive propositions}:
+        they are exactly the atomic propositions of propositional logic. So propositional
+        logic is the special case of FOL where all predicates have arity 0.
+\end{itemize}
+
+\begin{nbwhiteboard}[label=wb:terms-atoms]{Terms and atoms}{written after the FOL lectures}
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\linewidth}{@{}c X@{}}
+\toprule
+\textbf{Rule} & \textbf{Definition (as on the board)} \\
+\midrule
+1 & A \textbf{variable} is a term. \\
+2 & A \textbf{constant} is a term. \\
+3 & If $f$ is a \textbf{function symbol} with arity $m$, and $T_1, \ldots, T_m$ are terms,
+    then $f(T_1, \ldots, T_m)$ is a term. \\
+4 & If $p$ is a \textbf{predicate symbol} with arity $m$, and $T_1, \ldots, T_m$ are
+    terms, then $p(T_1, \ldots, T_m)$ is an \textbf{atom}. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  b/.style={draw, rounded corners, thick, align=center, minimum height=0.8cm}]
+  \node[b, draw=nborange, fill=nborange!10] (v) at (0,1.1) {variable\\[-2pt]\footnotesize $X$, $Y$};
+  \node[b, draw=nbblue, fill=nbblue!10] (c) at (0,-0.4) {constant\\[-2pt]\footnotesize $\mathit{socrates}$, $8$};
+  \node[b, draw=nbpurple, fill=nbpurple!10, minimum width=2.3cm] (t) at (3.6,0.35) {\textbf{TERM}\\[-2pt]\footnotesize denotes an object};
+  \node[b, draw=nbgreen, fill=nbgreen!10, minimum width=2.3cm] (a) at (9.4,0.35) {\textbf{ATOM}\\[-2pt]\footnotesize true or false};
+  \draw[->, thick] (v) -- node[above, sloped, font=\scriptsize]{rule 1} (t);
+  \draw[->, thick] (c) -- node[below, sloped, font=\scriptsize]{rule 2} (t);
+  \draw[->, thick, nbpurple] (t.north) .. controls +(0.4,1.3) and +(-0.4,1.3) .. node[above, font=\scriptsize, align=center]{rule 3: $f(T_1,\ldots,T_m)$} (t.north east);
+  \draw[->, thick, nbgreen!70!black] (t) -- node[above=2pt, font=\scriptsize]{rule 4: $p(T_1,\ldots,T_m)$} (a);
+\end{tikzpicture}
+\end{center}
+\wbphoto{sections/first-order-logic/fol-syntax/assets/whiteboard-6-1.jpg}
+The definition is \textbf{recursive}: rule 3 builds terms out of terms, so terms can be
+nested as deeply as we want ($f(g(X), c)$). Rule 4 is applied \emph{once}, on top: an atom
+contains terms, but an atom is never an argument of a function or of another predicate.
+Example with $X$ a variable, $\mathit{socrates}$ a constant, $\mathit{father}$ a
+function of arity 1, $\mathit{older}$ a predicate of arity 2:
+$\mathit{father}(\mathit{socrates})$ is a term (rule 3),
+$\mathit{older}(\mathit{father}(\mathit{socrates}), X)$ is an atom (rule 4).
+Exactly the same definitions hold in Prolog (Section~\ref{sec:prolog}), where variables
+start with an upper-case letter, as on the board.
+\end{nbwhiteboard}
+
+\begin{nbwhy}[A small knowledge base]
+\notinslides
+A university information system could use: constants $\mathit{alice}$, $\mathit{bob}$,
+$\mathit{sdai}$; a function $\mathit{advisor}(x)$ (the advisor of student $x$); predicates
+$\mathit{student}(x)$, $\mathit{enrolled}(x, c)$, $\mathit{passed}(x, c, \mathit{grade})$.
+The atom $\mathit{enrolled}(\mathit{alice}, \mathit{sdai})$ is a row in a database table;
+$\mathit{enrolled}(\mathit{advisor}(\mathit{bob}), \mathit{sdai})$ says that Bob's advisor
+attends SDAI. This is exactly how Prolog programs and agents' belief bases store knowledge.
+\end{nbwhy}

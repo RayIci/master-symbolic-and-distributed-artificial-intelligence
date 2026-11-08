@@ -181,3 +181,13 @@ After editing, always: compile and fix every error; check the log for undefined
 references and overfull boxes above ~5pt; render the new pages and look at them
 (no poppler on this machine: use PyMuPDF from a scratch venv to render PNGs).
 `main.pdf` is **not** gitignored: commit it, fully built, with every content change.
+
+## Layout lessons learned
+
+- Never put `\ref`/links inside box titles: the link colour is unreadable on the coloured
+  title bar. Put the reference in the box body instead.
+- Fitch proofs side by side (`multicols`) must use the short derived-rule names (MT, HS,
+  DS, DeM, ¬¬); long justifications run into the next column.
+- `fitchproof` cannot sit in an LR-mode table cell (`c` column): use `p{...}` columns.
+- Long formulas in tables inside boxes overflow: abbreviate predicate names (say so in the
+  text) rather than shrinking the font.

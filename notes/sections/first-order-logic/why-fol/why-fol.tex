@@ -1,0 +1,44 @@
+\subsection{Why not propositional logic?}
+\label{sec:why-fol}
+\slidesrc{FOL: 2--3}
+
+Consider the argument:
+\begin{center}
+\begin{tabular}{l}
+all monitors are ready \\
+X12 is a monitor \\
+\hline
+therefore X12 is ready
+\end{tabular}
+\end{center}
+Intuitively it is \emph{sound}: if we accept that the two premises (above the line) are
+true, we must accept that the conclusion is true too. Each of the three statements is a
+proposition (true or false), so we could try propositional logic:
+\begin{center}
+$p$ = ``all monitors are ready'', \quad $q$ = ``X12 is a monitor'', \quad $r$ = ``X12 is ready''.
+\end{center}
+But then the argument becomes $p,\ q \;/\therefore\; r$, which is \textbf{not} valid: the
+valuation $p = q = \true$, $r = \false$ makes the premises true and the conclusion false.
+The sense of the argument is lost, because the connection between ``monitors'',
+``X12'' and ``ready'' is hidden inside the atomic propositions.
+
+\begin{nbintuition}[Propositional logic is too coarse-grained]
+Propositional logic sees sentences as black boxes. The validity of the monitor argument
+depends on what is \emph{inside} the boxes: the same individual (X12), the same property
+(being a monitor, being ready), and the word ``all''. We need a logic that can name
+individuals, express properties and relations, and quantify over all individuals:
+first-order logic. In FOL the argument becomes
+\[
+\forall x\,(\mathit{Monitor}(x) \limp \mathit{Ready}(x)),\quad \mathit{Monitor}(X12)
+\;/\therefore\; \mathit{Ready}(X12)
+\]
+and it is valid (Section~\ref{sec:proof-theory-fol}).
+\end{nbintuition}
+
+\begin{nbwhy}
+The slides come from a Software Engineering course, where FOL is used for \textbf{formal
+specification} (e.g.\ the Z notation): ``every reactor has a temperature between 100 and
+1000'' is a requirement about \emph{all} reactors. In AI the same language describes
+knowledge bases (``every employee has a manager''), database queries (SQL is essentially
+FOL), and the beliefs of agents.
+\end{nbwhy}

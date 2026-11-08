@@ -1,2 +1,54 @@
 \section{First-order logic}
 \label{sec:first-order-logic}
+\slidesrc{FOL: 1--21; Proof theory (FOL): 1--4}
+
+Propositional logic treats ``all monitors are ready'' as one indivisible block, true or
+false. It cannot look \emph{inside} the sentence and see that it talks about \emph{all}
+objects of a certain kind. \textbf{First-order logic} (FOL, also called \emph{predicate
+logic}) can: it has names for objects, functions, relations between objects and, above
+all, \textbf{quantifiers} (``for all'', ``there exists''). It is the logic behind Prolog
+and behind the beliefs of BDI agents.
+
+This chapter covers, in the order of the slides:
+\begin{enumerate}[nosep]
+  \item why propositional logic is not enough;
+  \item the syntax of FOL: terms (constants, variables, functions) and predicates;
+  \item quantifiers ($\forall$, $\exists$, $\exists_1$) and how to translate English into FOL;
+  \item decidability: FOL has no truth-table method, and no method at all that always works;
+  \item proof theory for FOL: Frege/Hilbert-style axioms, soundness, the sequent calculus LK.
+\end{enumerate}
+
+\input{sections/first-order-logic/why-fol/why-fol}
+\input{sections/first-order-logic/fol-syntax/fol-syntax}
+\input{sections/first-order-logic/quantifiers/quantifiers}
+\input{sections/first-order-logic/decidability/decidability}
+\input{sections/first-order-logic/proof-theory-fol/proof-theory-fol}
+
+\begin{nbsummary}[First-order logic]
+\begin{itemize}[nosep]
+  \item \textbf{Terms} denote objects: constants ($\mathit{socrates}$, $8$), variables
+        ($x$), functional terms $f(t_1,\ldots,t_n)$ ($\mathit{plus}(2,3)$,
+        $\mathit{mother}(x)$). A term is never true or false.
+  \item \textbf{Atoms} (predicates): $P(t_1,\ldots,t_n)$, true or false under an
+        interpretation. Arity 1 = \emph{property}; arity 0 = \emph{primitive proposition};
+        an atom without variables is a \emph{proposition}.
+  \item Formulas: atoms combined with $\neg, \land, \lor, \limp, \liff$ and quantifiers
+        $\forall x$ (for all), $\exists x$ (there exists), $\exists_1 x$ (exactly one).
+  \item Translation pattern: ``all $A$ are $B$'' = $\forall x\,(A(x) \limp B(x))$;
+        ``some $A$ is $B$'' = $\exists x\,(A(x) \land B(x))$.
+  \item $\forall$ over a finite set = big $\land$; $\exists$ = big $\lor$. Duality:
+        $\forall x\,P(x) \equiv \neg\exists x\,\neg P(x)$,
+        $\exists x\,P(x) \equiv \neg\forall x\,\neg P(x)$.
+  \item \textbf{Valid} = true under all interpretations. Validity in FOL is
+        \textbf{undecidable} (no algorithm always answers yes/no).
+  \item $\Gamma \proves \varphi$: $\varphi$ is provable from $\Gamma$ (syntax, rules).
+        $\Gamma \entails \varphi$: $\varphi$ is true in every model of $\Gamma$ (semantics).
+        \textbf{Soundness}: $\Gamma \proves \varphi \Rightarrow \Gamma \entails \varphi$.
+  \item Frege/Hilbert system: many axioms + Modus Ponens + two quantifier rules.
+        Sequent calculus LK: one axiom $A \to A$ + many rules; $\forall$-right and
+        $\exists$-left need a fresh \emph{eigenvariable}.
+  \item Socrates (Whiteboard~\ref{wb:modus-ponens}): instantiate
+        $\forall x(\mathit{human}(x) \limp \mathit{mortal}(x))$ with $x = \mathit{socrates}$,
+        then Modus Ponens.
+\end{itemize}
+\end{nbsummary}

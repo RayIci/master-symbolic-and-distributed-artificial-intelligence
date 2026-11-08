@@ -1,0 +1,51 @@
+\subsection{Decidability}
+\label{sec:decidability}
+\slidesrc{FOL: 21}
+
+In propositional logic some formulas are tautologies (true under all interpretations), and
+there is a \emph{procedure}, the truth-table method, that tells in a finite time whether any
+formula is a tautology.
+
+\begin{nbdef}{Valid formula (slide 21)}
+A formula of FOL that is true under all interpretations is said to be \textbf{valid}
+(it is the FOL analogue of a tautology).
+\end{nbdef}
+
+Truth tables do not work for FOL: an interpretation chooses a domain of objects (possibly
+infinite, like $\N$) and a meaning for every symbol, so there are infinitely many
+interpretations and a ``truth table'' would be infinite. Is there \emph{any other}
+procedure guaranteed to tell us, in a finite amount of time, whether a FOL formula is or
+is not valid? \textbf{No.}
+
+\begin{nbfact}{Undecidability of FOL (Church and Turing, 1936)}
+There is no algorithm that, given any FOL formula, always terminates and correctly answers
+whether the formula is valid. FOL is said to be \textbf{undecidable}.
+\end{nbfact}
+
+\begin{nbintuition}[Semi-decidable: ``yes'' can be found, ``no'' may never come]
+\notinslides
+FOL is \emph{semi-decidable}: there are procedures (e.g.\ enumerating all proofs, or
+resolution) that, if the formula \emph{is} valid, will find a proof in finite time. If the
+formula is \emph{not} valid, the procedure may run forever, and at no point can you tell
+``not valid'' apart from ``valid, but the proof has not been found yet''. You will meet
+exactly this behaviour in Prolog: a query either succeeds, fails, or loops forever
+(Section~\ref{sec:prolog}).
+\end{nbintuition}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  b/.style={draw, rounded corners, thick, align=center, text width=4.6cm, minimum height=1.3cm}]
+  \node[b, draw=nbgreen, fill=nbgreen!8] (p) at (0,0) {\textbf{Propositional logic}\\decidable: truth tables always terminate (but $2^n$ rows)};
+  \node[b, draw=nbred, fill=nbred!8] (f) at (6.4,0) {\textbf{First-order logic}\\undecidable; semi-decidable (valid formulas have finite proofs)};
+  \draw[->, thick] (p) -- node[above, font=\scriptsize]{more expressive} node[below, font=\scriptsize]{less computable} (f);
+\end{tikzpicture}
+\captionof{figure}{The price of expressive power: FOL can say much more, but no algorithm can
+decide validity for all its formulas.}
+\end{center}
+
+\begin{nbwhy}
+This is why practical symbolic AI uses \emph{fragments} of FOL with better computational
+behaviour: Prolog uses Horn clauses with a specific search strategy
+(Section~\ref{sec:prolog}), description logics (behind ontologies and the Semantic Web) are
+decidable fragments, and agent languages such as AgentSpeak keep beliefs as ground atoms.
+\end{nbwhy}

@@ -1,0 +1,303 @@
+\subsection{Proof theory for first-order logic}
+\label{sec:proof-theory-fol}
+\slidesrc{Proof theory (FOL): 1--4}
+
+The source for this part is a set of university lecture notes (Math 260A, UCSD, 2012),
+more technical than the rest of the course. The goal here is to understand the
+\emph{ideas}: what a proof system for FOL looks like, what soundness means, and how
+quantifiers are handled.
+
+In propositional logic the simplest proof system is the truth table. In FOL there is no
+analogue: the truth tables would be infinite (Section~\ref{sec:decidability}). We go
+directly to \textbf{Frege-style} systems, called \textbf{Hilbert-style} systems in FOL:
+\emph{many axioms, very few rules}.
+
+\subsubsection{Frege (Hilbert-style) proofs}
+\slidesrc{Proof theory (FOL): 1--2}
+
+\begin{nbdef}{Axioms of the Frege system for FOL (page 1)}
+\begin{itemize}
+  \item \textbf{Propositional axioms}: all axioms of propositional Frege systems, such as
+        $\varphi \limp (\psi \limp \varphi)$, where now $\varphi, \psi$ can be any FOL
+        formulas.
+  \item \textbf{Quantifier axioms}: for any formula $\varphi$ and any term $t$,
+        \[ \varphi(t) \limp \exists x\,\varphi(x) \qquad\qquad \forall x\,\varphi(x) \limp \varphi(t) \]
+        (provided $t$ is \emph{substitutable} for $x$; the notes mostly ignore this
+        technical condition).
+  \item \textbf{Equality axioms} (if $=$ is in the language):
+        \begin{itemize}[nosep]
+          \item $\forall x\,(x = x)$ \hfill(reflexivity)
+          \item $\forall x \forall y\,(x = y \limp y = x)$ \hfill(symmetry)
+          \item $\forall x \forall y \forall z\,(x = y \land y = z \limp x = z)$ \hfill(transitivity)
+          \item $\forall \vec x\, \forall \vec y\,\big(x_1 = y_1 \land \cdots \land x_k = y_k
+                \limp f(x_1, \ldots, x_k) = f(y_1, \ldots, y_k)\big)$ for every function $f$
+                of arity $k$
+          \item $\forall \vec x\, \forall \vec y\,\big(x_1 = y_1 \land \cdots \land x_k = y_k
+                \limp (P(x_1, \ldots, x_k) \limp P(y_1, \ldots, y_k))\big)$ for every
+                relation $P$ of arity $k$ \hfill(substitution of equals)
+        \end{itemize}
+\end{itemize}
+\end{nbdef}
+
+\begin{nbwarning}[Corrections to page 1 of the notes]
+\begin{itemize}[nosep]
+  \item The notes say ``$t$ should be substitutable for $t$'': it should read ``for $x$''.
+  \item The last two equality axioms are printed without the hypothesis
+        $x_1 = y_1 \land \cdots \land x_k = y_k$, which would make them say that $f$ gives
+        the same value on \emph{any} arguments (false). The correct versions are written
+        above: equal inputs give equal outputs, and equal objects have the same properties.
+\end{itemize}
+\end{nbwarning}
+
+\begin{nbintuition}[Reading the quantifier axioms]
+$\forall x\,\varphi(x) \limp \varphi(t)$: ``if something holds for everything, it holds for
+any particular thing $t$'' (\emph{instantiation}). From ``all humans are mortal'' you may
+conclude ``if Socrates is human, Socrates is mortal''.
+$\varphi(t) \limp \exists x\,\varphi(x)$: ``if it holds for some particular $t$, then it
+holds for something'' (\emph{generalisation to $\exists$}). From
+$\mathit{Ready}(X12)$ conclude ``some monitor is ready''.
+\end{nbintuition}
+
+\begin{nbfact}{Rules of inference (pages 1--2)}
+\[
+\text{Modus Ponens:}\ \ \frac{\varphi \qquad \varphi \limp \psi}{\psi}
+\qquad\qquad
+\frac{\psi \limp \varphi}{\psi \limp \forall x\,\varphi}
+\qquad\qquad
+\frac{\varphi \limp \psi}{\exists x\,\varphi \limp \psi}
+\]
+The two quantifier rules require that \textbf{$x$ is not free in $\psi$}.
+\end{nbfact}
+
+\begin{nbintuition}[Why ``$x$ not free in $\psi$''?]
+Rule 2: if $\psi \limp \varphi(x)$ has been proved and $\psi$ says nothing about $x$, then
+the proof worked for an arbitrary $x$, so $\psi \limp \forall x\,\varphi$. Without the
+condition we could go from $x = 0 \limp x = 0$ to $x = 0 \limp \forall x\,(x = 0)$, i.e.\
+``if this number is 0 then every number is 0'': wrong. Rule 3: if $\varphi(x)$ implies
+$\psi$ whatever $x$ is, then knowing that \emph{some} $x$ satisfies $\varphi$ is enough
+to get $\psi$, provided $\psi$ itself does not depend on which $x$ it was.
+\end{nbintuition}
+
+\begin{nbwhiteboard}[label=wb:modus-ponens]{Modus Ponens: Socrates is mortal}{written during the FOL proof-theory lecture}
+\begin{center}
+\begin{tabular}{rl}
+\textcircled{\scriptsize 1} & $\forall x\,.\ \mathit{human}(x) \Rightarrow \mathit{mortal}(x)$ \\
+\textcircled{\scriptsize 2} & $\mathit{human}(\mathit{socrates})$ \\
+\hline
+ & $\mathit{mortal}(\mathit{socrates})$ \qquad \textsc{Modus Ponens}
+\end{tabular}
+\end{center}
+\wbphoto[0.6\linewidth]{sections/first-order-logic/proof-theory-fol/assets/whiteboard-6-2.jpg}
+The board shows Aristotle's syllogism (Section~\ref{sec:ai-history}) in FOL. Strictly
+speaking, Modus Ponens needs an implication whose antecedent is \emph{exactly}
+$\mathit{human}(\mathit{socrates})$, so a quantifier step comes first. In full, with the
+Frege system above:
+Writing $h$ for $\mathit{human}$, $m$ for $\mathit{mortal}$ and $s$ for
+$\mathit{socrates}$:
+\begin{center}
+\small
+\begin{tabular}{rll}
+1 & $\forall x\,(h(x) \limp m(x))$ & premise \\
+2 & $h(s)$ & premise \\
+3 & $\forall x\,(h(x) \limp m(x)) \limp (h(s) \limp m(s))$ & quantifier axiom with $t = s$ \\
+4 & $h(s) \limp m(s)$ & Modus Ponens 1, 3 \\
+5 & $m(s)$ & Modus Ponens 2, 4
+\end{tabular}
+\end{center}
+In Prolog the same knowledge is \code{mortal(X) :- human(X).} and \code{human(socrates).};
+the query \code{?- mortal(socrates).} answers \code{true}: Prolog's resolution does the
+instantiation ($X = \mathit{socrates}$, called \emph{unification}) and the Modus Ponens
+step in one go (Section~\ref{sec:prolog}).
+\end{nbwhiteboard}
+
+\subsubsection{Provability and soundness}
+\slidesrc{Proof theory (FOL): 2}
+
+\begin{nbdef}{Provability $\Gamma \proves \varphi$ (page 2)}
+Let $\Gamma$ be a set of formulas (the hypotheses). We write $\Gamma \proves \varphi$
+(``$\Gamma$ proves $\varphi$'') if there is a finite sequence of formulas, each coming from
+$\Gamma$, from the axioms, or from earlier formulas by an inference rule, ending at
+$\varphi$.
+\end{nbdef}
+
+Recall that $\Gamma \entails \varphi$ (``$\Gamma$ entails $\varphi$'') means: in every
+structure (interpretation) $M$ in which all formulas of $\Gamma$ are true, $\varphi$ is
+true too. $\proves$ is about \emph{symbols and rules}; $\entails$ is about \emph{meaning and
+truth}.
+
+\begin{nbfact}{Soundness theorem (page 2)}
+If $\Gamma \proves \varphi$, then $\Gamma \entails \varphi$. \quad (Everything provable is true.)
+\end{nbfact}
+
+\paragraph{Proof idea.} Take a proof $P$ of $\varphi$ from $\Gamma$ and a structure $M$ in
+which $\Gamma$ is true, i.e.\ for all object assignments $\sigma$ (values for the free
+variables) and all $\gamma \in \Gamma$, $M \entails \gamma[\sigma]$. Show by
+\textbf{induction on the number of lines} of $P$ that every line $\psi$ is true in $M$
+under all $\sigma$. Base cases: hypotheses (true by assumption) and axioms (true in every
+structure). Modus Ponens preserves truth (truth table of $\limp$). For the
+$\exists$-rule $\frac{\varphi \limp \psi}{\exists x\varphi \limp \psi}$ argue by
+contrapositive:
+\begin{enumerate}[nosep]
+  \item suppose $M \nentails (\exists x\varphi \limp \psi)[\sigma]$; then
+        $M \entails \exists x\varphi[\sigma]$ and $M \nentails \psi[\sigma]$;
+  \item the first fact gives an object $m$ of $M$ with $M \entails \varphi[\sigma(m/x)]$
+        ($\sigma$ changed so that $x$ denotes $m$);
+  \item let $\sigma' = \sigma(m/x)$. Since $x$ is not free in $\psi$, changing the value of
+        $x$ does not affect $\psi$, so $M \nentails \psi[\sigma']$;
+  \item under $\sigma'$, $\varphi$ is true and $\psi$ false, so
+        $M \nentails (\varphi \limp \psi)[\sigma']$: the premise of the rule is not true
+        under all assignments. Contrapositive: if the premise is, so is the conclusion.
+\end{enumerate}
+(The notes write $M \entails \psi[\sigma(m/x)]$ in step 2: it should be $\varphi$.) Note
+that we needed to \emph{change} the object assignment to make this work.
+
+\begin{nbfact}{Completeness (G\"odel, 1929)}
+\notinslides
+The converse also holds: if $\Gamma \entails \varphi$ then $\Gamma \proves \varphi$. So
+for FOL, ``provable'' and ``true in all models'' coincide. This does not contradict
+undecidability: a proof always \emph{exists} for valid formulas, but there is no
+algorithm that also tells you, in finite time, when \emph{no} proof exists.
+\end{nbfact}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth]
+  \node[draw, rounded corners, thick, nbpurple, fill=nbpurple!6, align=center, minimum width=3.5cm, minimum height=1.1cm] (s) at (0,0) {$\Gamma \proves \varphi$\\\footnotesize syntax: there is a proof};
+  \node[draw, rounded corners, thick, nbgreen, fill=nbgreen!6, align=center, minimum width=3.5cm, minimum height=1.1cm] (m) at (6.5,0) {$\Gamma \entails \varphi$\\\footnotesize semantics: true in every model};
+  \draw[->, thick] (s.north east) to[bend left=15] node[above]{soundness} (m.north west);
+  \draw[->, thick] (m.south west) to[bend left=15] node[below]{completeness} (s.south east);
+\end{tikzpicture}
+\captionof{figure}{Soundness: the rules never prove something false. Completeness: every
+truth that follows has a proof.}
+\end{center}
+
+\subsubsection{Sequent calculus LK}
+\slidesrc{Proof theory (FOL): 2--4}
+
+A second style of proof system, invented by Gentzen: the \textbf{sequent calculus}. A
+\textbf{sequent} has the form
+\[ \Gamma \to \Delta \qquad (\Gamma, \Delta \text{ finite lists of formulas}) \]
+and means: \emph{if all formulas in $\Gamma$ are true, then at least one formula in
+$\Delta$ is true}. LK (from the German \emph{Logischer Kalk\"ul}) has the opposite
+philosophy of Frege systems: \emph{one axiom, many rules}.
+
+\paragraph{Variable conventions.} $a, b, c, \ldots$ are used only for \emph{free}
+variables and $x, y, z, \ldots$ only for \emph{bound} variables. Consequence: a
+sub-formula of a formula is not always a formula. In $\forall x\,(x \leq a)$, the part
+$x \leq a$ is a \emph{semi-formula} ($x$ is not bound there); similarly $x + a$ is a
+\emph{semi-term}. With these conventions any term $t$ is always substitutable for a free
+variable $a$ in a formula $\varphi$.
+
+\begin{nbfact}{LK (page 3)}
+\textbf{Initial sequents}: $A \to A$, for any formula $A$. \\
+\textbf{Rules}: all rules of the propositional sequent calculus, plus four quantifier rules:
+\begin{center}
+\begin{tabular}{cc}
+\AxiomC{$\Gamma \to \Delta, A(b)$}
+\LeftLabel{\small $\forall$-right}
+\UnaryInfC{$\Gamma \to \Delta, \forall x A(x)$}
+\DisplayProof
+&
+\AxiomC{$\Gamma \to \Delta, A(t)$}
+\LeftLabel{\small $\exists$-right}
+\UnaryInfC{$\Gamma \to \Delta, \exists x A(x)$}
+\DisplayProof
+\\[18pt]
+\AxiomC{$A(b), \Gamma \to \Delta$}
+\LeftLabel{\small $\exists$-left}
+\UnaryInfC{$\exists x A(x), \Gamma \to \Delta$}
+\DisplayProof
+&
+\AxiomC{$A(t), \Gamma \to \Delta$}
+\LeftLabel{\small $\forall$-left}
+\UnaryInfC{$\forall x A(x), \Gamma \to \Delta$}
+\DisplayProof
+\end{tabular}
+\end{center}
+In $\forall$-right and $\exists$-left the free variable $b$ is an \textbf{eigenvariable}:
+it must not appear anywhere in the lower sequent (the substitution $x/b$ ``captures'' all
+occurrences of $b$). In $\exists$-right and $\forall$-left, $t$ is \emph{any} term and may
+occur in the lower sequent.
+\end{nbfact}
+
+\begin{nbintuition}[Eigenvariable = ``an arbitrary object we know nothing about'']
+\begin{itemize}[nosep]
+  \item \emph{$\forall$-right}: to prove ``for all $x$, $A(x)$'', prove $A(b)$ for a
+        \emph{fresh} $b$ about which the hypotheses say nothing. Like in maths: ``let $b$
+        be an arbitrary natural number\ldots''. If $b$ appeared in $\Gamma$ (e.g.\
+        $\Gamma$ says $b = 0$), it would not be arbitrary.
+  \item \emph{$\exists$-left}: if we know ``some $x$ has $A$'', we may give it a fresh name
+        $b$, but we cannot assume it is any object we already know.
+  \item \emph{$\exists$-right} and \emph{$\forall$-left}: to show ``something has $A$'',
+        exhibit any witness $t$; to use ``everything has $A$'', instantiate with any $t$.
+\end{itemize}
+\end{nbintuition}
+
+\subsubsection{LKe: adding equality}
+\slidesrc{Proof theory (FOL): 4}
+
+LK has no rules for $=$. \textbf{LKe} adds five initial sequents (for any terms
+$s, t, u, s_i, t_i$):
+\begin{itemize}[nosep]
+  \item $\to s = s$
+  \item $s = t \to t = s$
+  \item $s = t,\ t = u \to s = u$
+  \item $s_1 = t_1, \ldots, s_k = t_k \to f(s_1, \ldots, s_k) = f(t_1, \ldots, t_k)$ for any
+        \emph{function symbol} $f$ of arity $k$
+  \item $s_1 = t_1, \ldots, s_k = t_k,\ P(s_1, \ldots, s_k) \to P(t_1, \ldots, t_k)$ for
+        any relation $P$ of arity $k$
+\end{itemize}
+(The notes write ``for any formula $f$'': $f$ is a function symbol. The last sequent is
+printed with a second arrow; the version above is the intended one.)
+
+\begin{nbexample}{proving symmetry of equality in LKe (page 4)}
+Goal: $\to \forall x \forall y\,(x = y \limp y = x)$. Read the proof bottom-up as a plan,
+top-down as a derivation:
+\begin{center}
+\AxiomC{$a = b \to b = a$}
+\RightLabel{\small $\limp$-right}
+\UnaryInfC{$\to a = b \limp b = a$}
+\RightLabel{\small $\forall$-right ($b$ fresh)}
+\UnaryInfC{$\to \forall y\,(a = y \limp y = a)$}
+\RightLabel{\small $\forall$-right ($a$ fresh)}
+\UnaryInfC{$\to \forall x \forall y\,(x = y \limp y = x)$}
+\DisplayProof
+\end{center}
+\begin{enumerate}[nosep]
+  \item Start from the LKe initial sequent $a = b \to b = a$ (symmetry for the terms $a, b$).
+  \item $\limp$-right (a propositional rule: from $A, \Gamma \to \Delta, B$ infer
+        $\Gamma \to \Delta, A \limp B$) moves $a = b$ to the right as an antecedent.
+  \item $\forall$-right with eigenvariable $b$: $b$ does not occur in the lower sequent
+        $\to \forall y\,(a = y \limp y = a)$, so the condition holds.
+  \item $\forall$-right again with eigenvariable $a$.
+\end{enumerate}
+\end{nbexample}
+
+\subsubsection{Natural deduction rules for quantifiers}
+\notinslides
+
+To connect with the natural deduction of Section~\ref{sec:natural-deduction-prop}, here are
+the four quantifier rules in the same Intro/Elim style (same ideas as LK):
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+$\forall$\,Elim & from $\forall x\,\varphi(x)$ write $\varphi(t)$ for any term $t$ (instantiation) \\
+$\forall$\,Intro & if you derived $\varphi(b)$ for a fresh $b$ appearing in no open
+                   assumption, write $\forall x\,\varphi(x)$ \\
+$\exists$\,Intro & from $\varphi(t)$ write $\exists x\,\varphi(x)$ \\
+$\exists$\,Elim & from $\exists x\,\varphi(x)$, assume $\varphi(b)$ with $b$ fresh in a
+                  subproof; if you derive $\psi$ (not containing $b$), write $\psi$ outside \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{nbexample}{the monitor argument, proved}
+\begin{fitchproof}
+\hypo{1}{\forall x\,(\mathit{Monitor}(x) \limp \mathit{Ready}(x))} \RPrem
+\hypo{2}{\mathit{Monitor}(X12)} \RPrem
+\have{3}{\mathit{Monitor}(X12) \limp \mathit{Ready}(X12)} \by{$\forall$\,Elim}{1}
+\have{4}{\mathit{Ready}(X12)} \RImpE{3,2}
+\end{fitchproof}
+The argument of Section~\ref{sec:why-fol}, which propositional logic could not capture, becomes a two-step proof.
+\end{nbexample}
