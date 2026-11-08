@@ -1,0 +1,124 @@
+\subsection{Three ways of using MAS}
+\label{sec:uses-of-mas}
+\slidesrc{Intro to agents \& MAS: 18--41}
+
+Agents and MAS can enter a software project at three different levels:
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  b/.style={draw, rounded corners, thick, align=center, text width=4.0cm, minimum height=2.0cm}]
+  \node[b, draw=nbblue, fill=nbblue!7] (se) at (0,0) {\textbf{1. SE metaphor}\\analysis and design\\think of the system as agents\\[2pt]\footnotesize PDT, INGENIAS};
+  \node[b, draw=nbpurple, fill=nbpurple!7] (dev) at (4.7,0) {\textbf{2. Development}\\implementation\\the code \emph{is} agents\\[2pt]\footnotesize JADE, Jason};
+  \node[b, draw=nbgreen, fill=nbgreen!7] (sim) at (9.4,0) {\textbf{3. Simulation}\\model a real system\\as interacting agents\\[2pt]\footnotesize NetLogo};
+\end{tikzpicture}
+\captionof{figure}{The three uses of MAS (slides 18--41). They can be combined: e.g.\ design with
+agents and implement with mainstream technologies.}
+\end{center}
+
+\subsubsection{MAS as a software engineering metaphor}
+\slidesrc{Intro to agents \& MAS: 18--21}
+
+\begin{nbfact}{Zambonelli and Omicini (JAAMAS, 2004)}
+``\ldots today's software engineering approaches are increasingly adopting abstractions
+approaching that of agent-based computing. This trend can be better understood by
+recognising that \emph{the vast majority of modern distributed systems scenarios are
+intrinsically prone to be developed in terms of MASs}, and that modern distributed systems
+are already de facto MASs, i.e., they are indeed composed of autonomous, situated, and
+social components.''
+\end{nbfact}
+
+In other words: even if you never write a line of ``agent code'', thinking in terms of
+agents (who are the autonomous components? what are their goals? how do they interact?)
+helps in the \emph{analysis} and \emph{design} of distributed systems. Tools exist to support
+this: \textbf{PDT} (Prometheus Design Tool, RMIT University) and \textbf{INGENIAS}, which
+let you draw agents, goals, messages and data stores as diagrams. Methodologies are the
+topic of Section~\ref{sec:engineering-mas}.
+
+\subsubsection{Agent-based development}
+\slidesrc{Intro to agents \& MAS: 22--36}
+
+\begin{nbdef}{Agent-based development (slides 22--23)}
+Agents are employed as the technology for \textbf{implementing the software application
+itself}. This choice is usually made when
+\begin{itemize}[nosep]
+  \item the agent metaphor was already applied in the earlier engineering steps (analysis,
+        design);
+  \item the intelligence of the \emph{individual} agent is more relevant than the
+        ``emerging intelligence'' of the overall system;
+  \item complex patterns of interaction may be required;
+  \item the application is geographically \textbf{distributed}, \textbf{decentralised}, or
+        \textbf{open}.
+\end{itemize}
+\end{nbdef}
+
+Two agent platforms are shown: \textbf{JADE} (Java Agent DEvelopment framework,
+Section~\ref{sec:jade}), whose sniffer tool draws the messages exchanged by agents as a
+sequence diagram (slide 24), and \textbf{Jason} (slide 25, an interpreter of AgentSpeak, see
+the book \emph{Programming multi-agent systems in AgentSpeak using Jason};
+Section~\ref{sec:bdi-agentspeak}). (Slide 25 is labelled ``Jade'' but refers to Jason.)
+
+\begin{nbwarning}[Why industry rarely uses agent platforms (slides 26--27)]
+Many agent-based development tools exist, but they are \emph{not commercial projects
+supported by large and solid companies}. This is one of the reasons for the limited adoption
+of this technology by industry. A pragmatic answer: use technologies that are not
+officially tagged as ``agent-oriented'', but are very suitable for implementing software
+agents, in the \emph{implementation} stage, and a ``pure'' agent approach for the
+\emph{modelling and design} stages.
+\end{nbwarning}
+
+The slides then list research works that follow this idea, mapping agents onto mainstream
+technologies over the years:
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+\textbf{Year} & \textbf{Technology} & \textbf{Work shown on the slide} \\
+\midrule
+2009 & service-oriented computing & \emph{Agents and Service-Oriented Computing for Autonomic Computing: A Research Agenda} \\
+2011 & cloud & \emph{Software Agents as Cloud Computing Services}; \emph{Cloud Computing and Software Agents: Towards Cloud Intelligent Services} \\
+2013 & web services & JADE Web Services Integration Gateway (WSIG) \\
+2013 & Internet of Things & \emph{From Internet of Things to Internet of Agents} \\
+2015 & Internet of Things & \emph{Agents of Things (AoT): an intelligent operational concept of the IoT} \\
+2018 & IoT and the Web & EMAS 2018 keynote: \emph{Autonomous Agents for Flexible Hypermedia Systems} \\
+2023 & virtual reality & \emph{VEsNA}: virtual environments via natural language agents, applied to factory automation (Gatti, Mascardi) \\
+2024 & extended reality & XRIA 2024: first workshop on ``eXtended Reality \& Intelligent Agents'' at ECAI \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{Agents implemented with mainstream technologies (slides 28--36).}
+\end{center}
+
+\begin{nbwhy}[Agents everywhere, under other names]
+A microservice that watches a queue, decides and calls other services is an agent in
+disguise; so is an IoT device that negotiates energy prices, or a non-player character in a
+VR training environment that understands spoken commands. The agent \emph{concepts}
+(autonomy, goals, interaction) transfer to these technologies even when no agent platform is
+used.
+\end{nbwhy}
+
+\subsubsection{MAS for simulation}
+\slidesrc{Intro to agents \& MAS: 37--41}
+
+\begin{nbfact}{Agent-based modelling and simulation (Macal and North, 2007)}
+``Agent-based modeling and simulation (ABMS) is a new approach to modeling systems
+comprised of autonomous, interacting agents. ABMS promises to have far-reaching effects on
+the way that businesses use computers to support decision-making and researchers use
+electronic laboratories to support their research.''
+
+``Some have gone so far as to contend that ABMS is a \emph{third way of doing science}, in
+addition to traditional deductive and inductive reasoning. [\ldots] Applications range from
+modeling agent behavior in the stock market, supply chains, and consumer markets, to
+predicting the spread of epidemics, the threat of bio-warfare, and the factors responsible
+for the fall of ancient civilizations.''
+\end{nbfact}
+
+The tool shown on slide 41 is \textbf{NetLogo}, a programmable environment where thousands
+of simple agents (``turtles'') move on a grid of ``patches'' and the global behaviour is
+observed in real time. ABMS is the topic of Section~\ref{sec:abms}.
+
+\begin{nbintuition}[Deduction, induction, simulation]
+Deduction: from general laws to particular consequences (logic, Part~II). Induction: from
+many observations to general laws (statistics, machine learning). Simulation: write the
+\emph{local} rules of each individual, run them, and \emph{observe} what global phenomenon
+emerges (a traffic jam, an epidemic wave, a market crash). That is the ``third way''.
+\end{nbintuition}

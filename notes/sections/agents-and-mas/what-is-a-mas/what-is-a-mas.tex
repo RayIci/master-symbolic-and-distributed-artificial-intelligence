@@ -1,0 +1,81 @@
+\subsection{What is a multi-agent system?}
+\label{sec:what-is-a-mas}
+\slidesrc{Intro to agents \& MAS: 12--17}
+
+A single agent is rarely enough: interesting problems require several agents, each with
+its own goals and abilities, that interact. Such a system is a \textbf{multi-agent system}
+(MAS). Slide 12 shows the classic picture, redrawn in Figure~\ref{fig:mas-structure}.
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  ag/.style={ellipse, draw=nbgreen!60!black, fill=nbgreen!35, thick, minimum width=1.4cm, minimum height=0.75cm, font=\small\bfseries}]
+  % environment
+  \draw[thick, nbgray, fill=nbgray!15] (5.2,-2.6) ellipse (5.0cm and 0.9cm);
+  \node[font=\small\bfseries, nbgray!70!black] at (5.2,-3.85) {Environment};
+  \fill[nbblue!25, draw=nbblue] (2.4,-2.55) ellipse (0.9cm and 0.3cm);
+  \fill[nbblue!25, draw=nbblue] (4.1,-2.55) ellipse (0.9cm and 0.3cm);
+  \fill[nbblue!25, draw=nbblue] (7.6,-2.45) ellipse (0.8cm and 0.3cm);
+  % organizations
+  \draw[thick, nbgray] (2.9,0.6) ellipse (2.7cm and 1.35cm);
+  \draw[thick, nbgray] (7.1,0.75) ellipse (2.9cm and 1.45cm);
+  \node[font=\small\bfseries] at (0.4,2.1) {Organisation};
+  % agents
+  \node[ag] (a1) at (1.1,0.2) {Agent};
+  \node[ag] (a2) at (3.0,1.2) {Agent};
+  \node[ag] (a3) at (5.0,0.6) {Agent};
+  \node[ag] (a4) at (6.9,1.6) {Agent};
+  \node[ag] (a5) at (9.0,1.0) {Agent};
+  \node[ag] (a6) at (7.4,0.0) {Agent};
+  \draw[<->, thick] (a1) -- (a2) node[midway, below right=-2pt, font=\scriptsize, align=left]{inter-agent\\communication};
+  \draw[<->, thick] (a2) -- (a3);
+  \draw[<->, thick] (a3) -- (a4);
+  \draw[<->, thick] (a4) -- (a5);
+  \draw[<->, thick] (a4) -- (a6);
+  \draw[<->, thick] (a3) -- (a6);
+  % access
+  \draw[<->, ultra thick, nborange] (1.4,-0.3) -- (2.3,-2.2);
+  \draw[<->, ultra thick, nborange] (4.8,0.15) -- (4.2,-2.2);
+  \draw[<->, ultra thick, nborange] (7.5,-0.45) -- (7.6,-2.1);
+  \node[font=\scriptsize, align=left] at (9.2,-1.4) {access to the\\environment\\(sphere of influence)};
+\end{tikzpicture}
+\captionof{figure}{Structure of a MAS (slide 12). Agents (green) communicate with each other,
+are grouped in organisations (grey ellipses) and each one can perceive and act on its own
+portion of the shared environment (blue regions, orange arrows). Spheres of influence may
+overlap: two agents may act on the same part of the environment.}
+\label{fig:mas-structure}
+\end{center}
+
+\begin{nbdef}{Characteristics of a MAS (slides 14--17)}
+In a multi-agent system:
+\begin{enumerate}[nosep]
+  \item each agent has \textbf{incomplete information}, or capabilities for solving the
+        problem, thus each agent has a \textbf{limited viewpoint};
+  \item there is \textbf{no global system control};
+  \item data is \textbf{decentralised};
+  \item computation is \textbf{asynchronous}.
+\end{enumerate}
+\end{nbdef}
+
+\begin{nbexample}{a smart-city ride-sharing MAS}
+\notinslides
+Passenger agents (one per user app), driver agents (one per car) and a pricing agent.
+\begin{enumerate}[nosep]
+  \item \emph{Limited viewpoint}: a driver agent knows its own position and route, not the
+        positions of the other cars or the requests of all passengers.
+  \item \emph{No global control}: no central program decides every move; drivers accept or
+        refuse rides.
+  \item \emph{Decentralised data}: each phone stores its own user's preferences and history.
+  \item \emph{Asynchronous computation}: requests and answers arrive at any time; nobody
+        waits for a global ``clock tick''.
+\end{enumerate}
+The same four features describe e-commerce marketplaces, power grids with home batteries,
+fleets of warehouse robots and swarms of drones.
+\end{nbexample}
+
+\begin{nbintuition}[Why ``no global control'' is a feature, not a bug]
+A central controller is a single point of failure and a bottleneck, and in an \emph{open}
+system (agents of different owners, joining and leaving at any time) it simply cannot exist:
+nobody owns all the agents. MAS replace central control by \emph{interaction}: negotiation,
+coordination, competition. This is why agent \emph{communication}
+(Section~\ref{sec:agent-communication}) is a central topic of the course.
+\end{nbintuition}

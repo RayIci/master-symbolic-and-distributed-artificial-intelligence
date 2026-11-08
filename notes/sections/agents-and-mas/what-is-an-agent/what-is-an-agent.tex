@@ -1,0 +1,108 @@
+\subsection{What is an agent?}
+\label{sec:what-is-an-agent}
+\slidesrc{Intro to agents \& MAS: 5--11}
+
+There is no single definition of agent, but two families of definitions are standard.
+
+\subsubsection{The weak definition}
+\slidesrc{Intro to agents \& MAS: 5--8}
+
+\begin{nbdef}{Agent, weak notion (Jennings, Sycara, Wooldridge, 1998)}
+An agent is a hardware or software system that is
+\begin{itemize}[nosep]
+  \item \textbf{situated},
+  \item \textbf{autonomous},
+  \item \textbf{flexible}, which means:
+        \begin{itemize}[nosep]
+          \item \textbf{reactive},
+          \item \textbf{proactive},
+          \item \textbf{social}.
+        \end{itemize}
+\end{itemize}
+\end{nbdef}
+
+The slides only list the words; here is what each one means (from the 1998 paper by
+N.~Jennings, K.~Sycara and M.~Wooldridge, whose photos are on slide 8).
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Property} & \textbf{Meaning} & \textbf{Robot vacuum cleaner} \\
+\midrule
+situated & it lives \emph{in} an environment: it receives sensory input from it and
+  acts to change it & senses walls, dirt and stairs; moves and sucks \\
+autonomous & it acts without the direct intervention of humans or other agents, and has
+  control over its own actions and internal state & nobody drives it: it decides where to
+  go next \\
+reactive & it perceives the environment and responds \emph{in a timely fashion} to the
+  changes that occur in it & a chair is moved: it turns to avoid it \\
+proactive & it does not simply act in response to the environment: it exhibits
+  \emph{goal-directed} behaviour and takes the initiative & when the battery is low, it
+  goes back to the dock on its own initiative \\
+social & it interacts with other agents (and humans) to complete its tasks and to help
+  others & coordinates with the mop robot so they don't clean the same room \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{The properties of the weak definition, explained with one everyday agent.}
+\end{center}
+
+\begin{nbintuition}[The hard part is the balance]
+Being only reactive is easy (a thermostat), being only proactive is easy (a program that
+blindly executes a plan). The difficulty, and the reason why agent architectures exist
+(Section~\ref{sec:agent-architectures}), is to be \emph{both}: pursue goals over time, while
+still reacting quickly when the world changes and the plan no longer makes sense.
+\end{nbintuition}
+
+\begin{nbexample}{is it an agent?}
+\notinslides
+\small
+\begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{System} & \textbf{Verdict} \\
+\midrule
+a pocket calculator & no: not situated in an environment it perceives, no autonomy, no goals of its own \\
+a thermostat & a degenerate agent: situated, autonomous, reactive, but not proactive nor social \\
+a spam filter & situated (in the mail stream), autonomous and reactive; weakly proactive \\
+a negotiating bot on an e-commerce platform & yes: it pursues the goal of buying cheaply (proactive), reacts to offers (reactive) and negotiates with sellers' bots (social) \\
+\bottomrule
+\end{tabularx}
+\end{nbexample}
+
+\subsubsection{The strong definition}
+\slidesrc{Intro to agents \& MAS: 9--11}
+
+Besides the properties of the weak definition, an agent may be conceptualised following an
+\textbf{anthropomorphic} approach (the \textbf{strong} definition): we describe and build it
+using notions that we normally apply to humans.
+
+\begin{nbdef}{Agent, strong notion}
+\begin{itemize}[nosep]
+  \item \textbf{Mentalistic notions} (Y.~Shoham, \emph{Artificial Intelligence} 1993; A.~S.~Rao
+        and M.~P.~Georgeff, KR\&R 1992): the agent has \emph{beliefs}, \emph{desires},
+        \emph{intentions}, \emph{commitments}, \ldots
+  \item \textbf{Emotional notions} (J.~Bates, \emph{Communications of the ACM} 1994):
+        friendliness, trust, distrust; agents must be \emph{believable}.
+\end{itemize}
+\end{nbdef}
+
+\begin{nbexample}{a strong agent: a personal travel assistant}
+\notinslides
+\begin{itemize}[nosep]
+  \item \emph{belief}: ``the 8:15 train to Milan is cancelled'';
+  \item \emph{desire}: ``my user should be in Milan before 11:00'';
+  \item \emph{intention}: ``book the 8:45 train'' (the desire it committed to, with a plan);
+  \item \emph{commitment}: having promised the user to handle the trip, it keeps trying
+        alternatives (a bus, a car-sharing ride) until the trip is booked or impossible.
+\end{itemize}
+Beliefs, desires and intentions are exactly the three components of the \textbf{BDI}
+architecture (Section~\ref{sec:bdi-agentspeak}).
+\end{nbexample}
+
+\begin{nbwhy}[Believable agents]
+Emotional notions matter wherever agents interact with people: virtual characters in video
+games and training simulations, conversational assistants, social robots in elderly care.
+A character that reacts with plausible emotions is ``believable'', and users trust it
+(or distrust it) accordingly.
+\end{nbwhy}

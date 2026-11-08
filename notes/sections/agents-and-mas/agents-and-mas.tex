@@ -1,2 +1,44 @@
 \section{Agents and multi-agent systems}
 \label{sec:agents-and-mas}
+\slidesrc{Intro to agents \& MAS: 1--66}
+
+Part~I defined AI as the study of \emph{intelligent agents}. This chapter makes the word
+\emph{agent} precise, defines \emph{multi-agent systems} (MAS), explains the three ways in
+which MAS are used (to \emph{design} software, to \emph{implement} it, to \emph{simulate}
+the world), and tells the history of the idea, from AI planning and objects to
+intentional systems, modal logic, the Contract Net Protocol and actors.
+
+\input{sections/agents-and-mas/what-is-an-agent/what-is-an-agent}
+\input{sections/agents-and-mas/what-is-a-mas/what-is-a-mas}
+\input{sections/agents-and-mas/uses-of-mas/uses-of-mas}
+\input{sections/agents-and-mas/agents-history/agents-history}
+
+\begin{nbsummary}[Agents and MAS]
+\begin{itemize}[nosep]
+  \item \textbf{Weak definition} (Jennings, Sycara, Wooldridge 1998): an agent is a hardware
+        or software system that is \textbf{situated}, \textbf{autonomous} and
+        \textbf{flexible}, i.e.\ \textbf{reactive}, \textbf{proactive} and \textbf{social}.
+  \item \textbf{Strong definition}: anthropomorphic; \emph{mentalistic} notions (beliefs,
+        desires, intentions, commitments: Shoham 1993, Rao \& Georgeff 1992) and
+        \emph{emotional} notions (believable agents: Bates 1994).
+  \item \textbf{MAS}: each agent has incomplete information/capabilities (limited
+        viewpoint); no global control; decentralised data; asynchronous computation.
+        Agents live in organisations and act on a shared environment.
+  \item Three uses: MAS as a \textbf{software-engineering metaphor} (analysis/design: PDT,
+        INGENIAS); \textbf{agent-based development} (implementation: JADE, Jason; or
+        mainstream tech such as SOC, cloud, IoT, VR/XR); \textbf{agent-based simulation}
+        (ABMS, NetLogo).
+  \item Roots: AI (planning $\to$ reactive (Brooks) $\to$ hybrid $\to$ BDI practical
+        reasoning; Shoham 1993 = agent-oriented programming), OOP, HCI (``digital
+        butlers'').
+  \item \textbf{Agents vs.\ objects}: objects control their state, agents also control
+        their \emph{behaviour} (``objects do it for free, agents do it for money'') and
+        integrate reactive, proactive and social behaviour.
+  \item \textbf{Intentional stance} (Dennett): predict behaviour by attributing beliefs,
+        desires, rationality. Specified with \textbf{modal logics} ($\Box$ necessity,
+        $\Diamond$ possibility, $\Diamond p \liff \neg\Box\neg p$).
+  \item \textbf{Contract Net} (1983): manager announces task, contractors bid, manager
+        awards to the best bid. \textbf{Actors} (1973): create, send, become; asynchronous
+        message passing.
+\end{itemize}
+\end{nbsummary}
