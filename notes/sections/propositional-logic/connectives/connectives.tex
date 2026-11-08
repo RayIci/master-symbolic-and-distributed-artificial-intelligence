@@ -1,0 +1,224 @@
+\subsection{Propositions and connectives}
+\label{sec:connectives}
+\slidesrc{Propositional logic: 4--18}
+
+\subsubsection{Propositions}
+\slidesrc{Propositional logic: 4--6}
+
+Propositional logic is the simplest, and most abstract, logic we can study. Its building
+blocks are propositions.
+
+\begin{nbdef}{Proposition (slide 4)}
+A \textbf{proposition} is a statement that can be either true or false; it must be one or
+the other, and it cannot be both.
+\end{nbdef}
+
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Propositions} & \textbf{Not propositions} \\
+\midrule
+the reactor is on & are you going out somewhere? \quad\textcolor{nbgray}{(a question)} \\
+the wing-flaps are up & $2+3$ \quad\textcolor{nbgray}{(a number, not a statement)} \\
+John Major is prime minister & close the door! \quad\textcolor{nbgray}{(an order; added)} \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Examples from slide 4. (John Major was the UK prime minister when the
+slides were written; the sentence is still a proposition today: it is simply false.)}
+\end{center}
+
+\begin{nbfact}{The ``it is true that'' test (slide 5)}
+To check whether a statement is a proposition, prefix it with \emph{``It is true that
+\ldots''} and see whether the result makes grammatical sense. ``It is true that the reactor
+is on'' makes sense; ``It is true that are you going out somewhere?'' does not.
+\end{nbfact}
+
+\begin{nbdef}{Atomic proposition (slide 5)}
+An \textbf{atomic proposition} is one whose truth or falsity does not depend on the truth
+or falsity of any other proposition. Intuitively, atomic propositions are the
+\emph{smallest} propositions: they cannot be split into smaller propositions. All the
+propositions above are atomic.
+\end{nbdef}
+
+Instead of writing propositions in full, we abbreviate them with \textbf{propositional
+variables}: by convention lower-case letters $p, q, r, \ldots$. When we do so we must say
+what each letter means (``let $p$ be \emph{John Major is prime minister}''). An
+alternative is to use self-explaining names such as $\mathit{reactor\_is\_on}$, so that the
+meaning of the variable is obvious. (Prolog and AgentSpeak use exactly this second style:
+\code{reactor\_on}, \code{door\_open}.)
+
+\subsubsection{The connectives}
+\slidesrc{Propositional logic: 7--17}
+
+Atomic propositions alone are ``pretty boring''. \textbf{Connectives} combine propositions
+into bigger, \emph{compound} propositions. Different books use different symbols; these
+notes use the first column, the slides use a mix of all of them.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\textbf{Symbol} & \textbf{Read} & \textbf{Name} & \textbf{Other notations} & \textbf{Arity} \\
+\midrule
+$\land$ & and & conjunction & $\&$ \ \ $.$ & binary \\
+$\lor$ & or & disjunction & $|$ \ \ $+$ & binary \\
+$\neg$ & not & negation & $\sim$ & unary \\
+$\limp$ & implies, if\ldots then & implication (conditional) & $\Rightarrow$ \ \ $\supset$ & binary \\
+$\liff$ & if and only if (iff) & biconditional & $\Leftrightarrow$ \ \ $\equiv$ & binary \\
+\bottomrule
+\end{tabular}
+\captionof{table}{The connectives (slide 7). The propositional-logic slides write $\Rightarrow$
+and $\Leftrightarrow$; the proof-theory slides write $\&$, $\sim$ and $\rightarrow$. They
+all mean the same thing.}
+\end{center}
+
+How do we define the meaning of a connective? With a \textbf{truth table}: a table listing
+the value of the compound formula for \emph{every possible combination} of values of its
+components.
+
+\begin{nbfact}{Number of rows of a truth table (slide 9)}
+If a formula contains $n$ different atomic propositions, its truth table has $2^n$ rows,
+because each proposition can take one of 2 values (T or F) independently of the others:
+$\underbrace{2 \times 2 \times \cdots \times 2}_{n \text{ times}} = 2^n$.
+For example $n = 2 \Rightarrow 4$ rows, $n = 3 \Rightarrow 8$ rows, $n = 10 \Rightarrow 1024$ rows.
+\end{nbfact}
+
+\paragraph{The five truth tables.} Here are the definitions of the slides, all in one table
+(write T for true and F for false):
+
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{cc|c|c|c|c|c}
+$p$ & $q$ & $\neg p$ & $p \land q$ & $p \lor q$ & $p \limp q$ & $p \liff q$ \\
+\hline
+F & F & T & F & F & \cellcolor{nborange!20}T & T \\
+F & T & T & F & T & \cellcolor{nborange!20}T & F \\
+T & F & F & F & T & \cellcolor{nbred!20}F & F \\
+T & T & F & T & T & T & T \\
+\end{tabular}
+\captionof{table}{Truth tables of all connectives (slides 9, 11, 13, 16, 17). Orange: the two
+rows where $p \limp q$ is true ``by default'' because $p$ is false. Red: the \emph{only} row
+where an implication is false.}
+\end{center}
+
+In words:
+\begin{itemize}
+  \item \textbf{And} (slides 8--9): $p \land q$ is true iff \emph{both} $p$ and $q$ are true.
+  \item \textbf{Or} (slides 10--11): $p \lor q$ is true iff $p$ is true, or $q$ is true, or
+        both. This is the \textbf{inclusive} or.
+  \item \textbf{Implies} (slides 12--14): $p \limp q$ is true iff \emph{either $p$ is false
+        or $q$ is true}. In $p \limp q$, $p$ is the \textbf{antecedent} and $q$ the
+        \textbf{consequent}.
+  \item \textbf{Iff} (slides 15--16): $p \liff q$ is true iff $p$ and $q$ are both true or
+        both false (they have the same value).
+  \item \textbf{Not} (slide 17): $\neg p$ is true iff $p$ is false. It is the only
+        \emph{unary} connective (one argument); the others are \emph{binary}.
+\end{itemize}
+
+\begin{nbwarning}[Inclusive vs.\ exclusive ``or'']
+In everyday language ``tea or coffee?'' usually means \emph{one of the two, not both}
+(exclusive or). The logical $\lor$ is \textbf{inclusive}: $p \lor q$ is true also when both
+are true. The exclusive or (XOR) can be written $(p \lor q) \land \neg(p \land q)$, or
+$\neg(p \liff q)$.
+\end{nbwarning}
+
+\paragraph{Understanding implication.} The slides warn that $\limp$ is the hardest
+connective to understand, and yet extremely important. The rule of thumb of slide 14:
+\emph{$p \limp q$ means ``if $p$ is true, then $q$ is true''. If $p$ is false, we don't care
+about $q$, and by default $p \limp q$ evaluates to T.}
+
+\begin{nbintuition}[Implication as a promise]
+\notinslides
+A parent says: ``\emph{If you pass the exam ($p$), I will buy you a bike ($q$)}''.
+When has the parent \emph{broken the promise}?
+\begin{center}
+\small
+\begin{tabular}{@{}ccl c@{}}
+\toprule
+pass ($p$) & bike ($q$) & what happened & promise kept? ($p\limp q$) \\
+\midrule
+F & F & failed, no bike & T (no reason to complain) \\
+F & T & failed, bike anyway & T (generous, but not a lie) \\
+T & F & passed, no bike & \textbf{F (the promise is broken!)} \\
+T & T & passed, got the bike & T \\
+\bottomrule
+\end{tabular}
+\end{center}
+The promise is only broken in one case: the condition happened and the result did not.
+When the condition did not happen, the promise was simply never ``tested'', so it cannot be
+false; in two-valued logic, ``not false'' means true.
+\end{nbintuition}
+
+\begin{nbwarning}[Implication is not causality]
+$p \limp q$ only says ``it is not the case that $p$ is true and $q$ false''. It does not
+say that $p$ \emph{causes} $q$. ``If $2+2=5$ then the Moon is made of cheese'' is
+\emph{true} (false antecedent). ``If Rome is in Italy then $2+2=4$'' is \emph{true}
+too, although the two facts have nothing to do with each other. This is called
+\textbf{material implication}.
+\end{nbwarning}
+
+\begin{nbwhy}
+Every \code{if} in a program, every rule in a firewall or a smart-home app is an
+implication. Smart-home rule: $\mathit{motion} \land \mathit{night} \limp \mathit{light\_on}$.
+During the day the rule is ``not tested'' and the light can be on or off without
+violating it, exactly as the truth table says. A \emph{logic-based agent}
+(Section~\ref{sec:bdi-agentspeak}) is little more than a collection of such rules plus a
+reasoning engine.
+\end{nbwhy}
+
+\subsubsection{Building complex formulas}
+\slidesrc{Propositional logic: 18}
+
+Connectives can be nested as deeply as we want, and parentheses disambiguate. If $p, q, r,
+s, t$ are atomic propositions, then these are formulae:
+\[
+p \land q \limp r \qquad p \land (q \limp r) \qquad (p \land (q \limp r)) \lor s \qquad
+((p \land (q \limp r)) \lor s) \land t
+\]
+whereas none of these is a formula:
+\[
+p \land \qquad\qquad p \land q) \qquad\qquad p\neg
+\]
+($p\land$ misses the right operand; $p \land q)$ has an unbalanced parenthesis; in
+$p\neg$ the negation is on the wrong side).
+
+\begin{nbdef}{Well-formed formulas of propositional logic}
+\notinslides
+The set of formulas is defined \emph{recursively}:
+\begin{enumerate}[nosep]
+  \item every atomic proposition ($p, q, r, \ldots$) is a formula;
+  \item if $\varphi$ is a formula, then $\neg\varphi$ is a formula;
+  \item if $\varphi$ and $\psi$ are formulas, then $(\varphi \land \psi)$,
+        $(\varphi \lor \psi)$, $(\varphi \limp \psi)$, $(\varphi \liff \psi)$ are formulas;
+  \item nothing else is a formula.
+\end{enumerate}
+\end{nbdef}
+
+\begin{nbfact}{Precedence (how to read a formula without all its parentheses)}
+\notinslides
+From the strongest (binds first) to the weakest:
+$\neg$, then $\land$, then $\lor$, then $\limp$, then $\liff$.
+So $p \land q \limp r$ means $(p \land q) \limp r$, and $\neg p \lor q$ means
+$(\neg p) \lor q$. Implication associates to the right: $p \limp q \limp r$ means
+$p \limp (q \limp r)$. When in doubt, write the parentheses.
+\end{nbfact}
+
+\begin{nbexample}{the structure (parse tree) of a formula}
+The formula $((p \land (q \limp r)) \lor s) \land t$ from slide 18 has this tree: the
+\textbf{main connective} (the last one applied) is at the root.
+\begin{center}
+\begin{forest}
+for tree={draw, rounded corners, font=\small, l sep=4mm, s sep=5mm, edge={thick}}
+[$\land$, fill=nbblue!15
+  [$\lor$, fill=nbblue!10
+    [$\land$, fill=nbblue!5
+      [$p$]
+      [$\limp$, fill=nbblue!5 [$q$] [$r$]]]
+    [$s$]]
+  [$t$]]
+\end{forest}
+\captionof{figure}{Parse tree: the leaves are atomic propositions, internal nodes are
+connectives. Truth values are computed bottom-up, from the leaves to the root.}
+\end{center}
+\end{nbexample}

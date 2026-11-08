@@ -1,0 +1,982 @@
+\subsection{Proof theory: natural deduction}
+\label{sec:natural-deduction-prop}
+\slidesrc{Proof theory (prop.): 1--11}
+
+Truth tables check validity by brute force: they look at \emph{all} valuations. With 20
+atomic propositions that is more than a million rows. Humans (and many programs) prove
+things differently: they start from what they know and take small, obviously correct
+steps until they reach the conclusion. This is what a \textbf{proof system} formalises.
+
+\subsubsection{What is a proof?}
+\slidesrc{Proof theory (prop.): 1}
+
+\begin{nbdef}{Proof system, proof, derivation (page 1)}
+A \textbf{proof system} is a set of rules for constructing proofs. A \textbf{proof} is a
+series of sentences, each of which is either a \textbf{premise} or is justified by applying
+one of the rules of the system to \emph{earlier} sentences of the series. A sentence
+justified in this way is said to be \textbf{derived} from the premises.
+\end{nbdef}
+
+The rules are designed with a very important limitation: they only allow you to derive a
+conclusion from premises if the argument is \textbf{deductively valid}, i.e.\ if it is not
+possible for all the premises to be true while the conclusion is false (the notion of
+logical consequence of Section~\ref{sec:tautologies}). This is what makes it legitimate
+to call the series of sentences a proof.
+
+The system used in the course is \textbf{natural deduction}: each rule lets you add a
+sentence that must be true given that certain earlier sentences are true, just like you
+would convince a friend ``in clear, simple steps''. For each connective there are two kinds
+of rules:
+\begin{itemize}[nosep]
+  \item \textbf{Elim} (elimination) rules break apart a sentence containing the connective
+        (from $p \land q$ get $p$);
+  \item \textbf{Intro} (introduction) rules build a sentence containing the connective
+        (from $p$ and $q$ get $p \land q$);
+\end{itemize}
+plus a special rule \textbf{Reit} (reiteration: repeat a sentence you already have). These
+basic rules are enough to prove \emph{any} truth-functionally valid argument. Since some
+proofs become very long, a few \textbf{derived rules} are added later to make proofs shorter
+(they prove nothing new).
+
+\begin{nbfact}{How a proof is written (Fitch format)}
+Sentences are numbered consecutively. The premises come first, and a horizontal line is
+drawn below the last premise. Every following line is a (subsidiary or final) conclusion;
+next to it we write the rule that justifies it and the numbers of the earlier lines it is
+applied to, e.g.\ ``$\land$\,Elim: 1''. Temporary assumptions open a \textbf{subproof},
+drawn further to the right with its own vertical line (see below).
+\end{nbfact}
+
+\begin{nbintuition}[Proofs and truth tables are two roads to the same place]
+A truth table asks: ``in every possible world where the premises hold, does the
+conclusion hold?'' A proof says: ``here is a chain of small steps, each obviously safe,
+from the premises to the conclusion''. For propositional logic the two roads lead to
+exactly the same valid arguments: the proof system is \textbf{sound} (it never proves an
+invalid argument) and \textbf{complete} (every valid argument has a proof).
+\end{nbintuition}
+
+\subsubsection{Basic rules without subproofs}
+\slidesrc{Proof theory (prop.): 1--2}
+
+\begin{nbfact}{Reit, $\land$\,Elim, $\land$\,Intro, $\limp$\,Elim, $\lor$\,Intro}
+\begin{center}
+\renewcommand{\arraystretch}{2.6}
+\begin{tabularx}{\linewidth}{@{}l c X@{}}
+\toprule
+\textbf{Rule} & \textbf{Schema} & \textbf{In words} \\
+\midrule
+Reit & $\dfrac{p}{p}$ & you may repeat any sentence you already have \\
+$\land$\,Elim & $\dfrac{p \land q}{p} \quad \dfrac{p \land q}{q}$ & from a conjunction, write either conjunct (as many times as you like) \\
+$\land$\,Intro & $\dfrac{p \qquad q}{p \land q}$ & join any two sentences you already have with $\land$ \\
+$\limp$\,Elim & $\dfrac{p \limp q \qquad p}{q}$ & from a conditional and its antecedent, write its consequent (\textbf{Modus Ponens}) \\
+$\lor$\,Intro & $\dfrac{p}{p \lor q} \quad \dfrac{p}{q \lor p}$ & from any sentence, write a disjunction containing it, with \emph{any} other sentence, in either order \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Read a schema as ``if you have the sentences above the line, you may write the one below''.
+\end{nbfact}
+
+Why are they safe? $\land$\,Elim: if ``$p$ and $q$'' is true, $p$ is true. $\land$\,Intro:
+if both are true, so is their conjunction. $\limp$\,Elim: the only way $p \limp q$ can be
+true with $p$ true is that $q$ is true (look at the truth table). $\lor$\,Intro: a
+disjunction only needs \emph{one} true disjunct, so adding any other disjunct is harmless.
+
+\begin{nbexample}{Example 1: $\{b \land c,\ j \land k\} \;/\therefore\; c \land k$}
+\begin{fitchproof}
+\hypo{1}{b \land c} \RPrem
+\hypo{2}{j \land k} \RPrem
+\have{3}{c} \RAndE{1}
+\have{4}{k} \RAndE{2}
+\have{5}{c \land k} \RAndI{3,4}
+\end{fitchproof}
+(Premises are listed in braces; ``$/\therefore$'' reads ``therefore''.)
+\end{nbexample}
+
+\begin{nbexample}{Example 2: $\{g,\ h,\ (g \land h) \limp (r \land s)\} \;/\therefore\; s$}
+\begin{fitchproof}
+\hypo{1}{g} \RPrem
+\hypo{2}{h} \RPrem
+\hypo{3}{(g \land h) \limp (r \land s)} \RPrem
+\have{4}{g \land h} \RAndI{1,2}
+\have{5}{r \land s} \RImpE{3,4}
+\have{6}{s} \RAndE{5}
+\end{fitchproof}
+Strategy: the conclusion $s$ is ``inside'' $r \land s$, which is the consequent of line 3.
+To unlock it with $\limp$\,Elim we need the antecedent $g \land h$, which we build first.
+\end{nbexample}
+
+\begin{nbwarning}[Modus Ponens vs.\ Affirming the Consequent]
+$\limp$\,Elim is the valid argument form \textbf{Modus Ponens}: $p \limp q,\ p \;/\therefore\; q$.
+A common error is the similar but \textbf{invalid} pattern \textbf{Affirming the
+Consequent}: $p \limp q,\ q \;/\therefore\; p$. The truth table of
+Section~\ref{sec:tautologies} gives the counterexample ($p$ false, $q$ true).
+``If the battery is dead, the car won't start; the car won't start; so the battery is
+dead'' is wrong: maybe the tank is empty.
+\end{nbwarning}
+
+\begin{nbexample}{Example 3: $\{(a \lor b) \limp c,\ b\} \;/\therefore\; c$}
+\begin{fitchproof}
+\hypo{1}{(a \lor b) \limp c} \RPrem
+\hypo{2}{b} \RPrem
+\have{3}{a \lor b} \ROrI{2}
+\have{4}{c} \RImpE{1,3}
+\end{fitchproof}
+From $b$, $\lor$\,Intro could build $a \lor b$ or $b \lor a$ (or $b \lor z$ for any $z$). We
+choose $a \lor b$ because that is exactly the antecedent we need for line 1.
+\end{nbexample}
+
+\begin{nbexercise}{G1.A}{From English to a proof (page 2--3)}
+Identify the premises and conclusion, translate using the letters given, then build a
+proof.
+\begin{enumerate}[nosep]
+  \item The starter must be malfunctioning. The car won't start, but the lights are
+        working. If the lights work, the battery must be charged. If the car won't start
+        when the battery is charged, there must be a problem with the starter.
+        ($s$ = the starter is functioning properly; $c$ = the car starts; $w$ = the lights
+        are working; $b$ = the battery is charged.)
+  \item If Mia moved out of her parents' house, she must be able to afford to. She can
+        afford it only if she found both a roommate and a job. Since she moved out, she
+        must have found a job. ($m$ = Mia moved out; $a$ = Mia can afford to move out;
+        $r$ = Mia found a roommate; $j$ = Mia found a job.)
+\end{enumerate}
+\end{nbexercise}
+\begin{nbsolution}
+\textbf{1.} The conclusion is the first sentence (``the starter must be malfunctioning'' $=
+\neg s$); ``but'' is logically an ``and''. Premises: $\neg c \land w$, \ $w \limp b$, \
+$(\neg c \land b) \limp \neg s$.
+\begin{fitchproof}
+\hypo{1}{\neg c \land w} \RPrem
+\hypo{2}{w \limp b} \RPrem
+\hypo{3}{(\neg c \land b) \limp \neg s} \RPrem
+\have{4}{\neg c} \RAndE{1}
+\have{5}{w} \RAndE{1}
+\have{6}{b} \RImpE{2,5}
+\have{7}{\neg c \land b} \RAndI{4,6}
+\have{8}{\neg s} \RImpE{3,7}
+\end{fitchproof}
+\textbf{2.} ``$A$ only if $B$'' means $A \limp B$ (if $A$ happens, $B$ must hold). Premises:
+$m \limp a$, \ $a \limp (r \land j)$, \ $m$. Conclusion: $j$.
+\begin{fitchproof}
+\hypo{1}{m \limp a} \RPrem
+\hypo{2}{a \limp (r \land j)} \RPrem
+\hypo{3}{m} \RPrem
+\have{4}{a} \RImpE{1,3}
+\have{5}{r \land j} \RImpE{2,4}
+\have{6}{j} \RAndE{5}
+\end{fitchproof}
+\textbf{Lesson}: ``$A$ only if $B$'' is $A \limp B$, \emph{not} $B \limp A$. ``If'' introduces
+the antecedent, ``only if'' introduces the consequent.
+\end{nbsolution}
+
+\begin{nbexercise}{G1.B}{Derive the conclusion from the premises (page 3)}
+\begin{enumerate}[nosep]
+  \item $a,\ a \limp b,\ (a \land b) \limp c \;/\therefore\; b \land c$
+  \item $g \land h,\ g \limp (d \limp k),\ h \limp d \;/\therefore\; d \land k$
+  \item $a \land b,\ (b \lor c) \limp (d \land e),\ e \limp (b \limp s) \;/\therefore\; s$
+  \item $(m \lor o) \limp k,\ k \limp (l \land r),\ m \;/\therefore\; k \land (r \lor s)$
+\end{enumerate}
+\end{nbexercise}
+\begin{nbsolution}
+\begin{multicols}{2}
+\textbf{1.}
+\begin{fitchproof}
+\hypo{1}{a} \RPrem
+\hypo{2}{a \limp b} \RPrem
+\hypo{3}{(a \land b) \limp c} \RPrem
+\have{4}{b} \RImpE{2,1}
+\have{5}{a \land b} \RAndI{1,4}
+\have{6}{c} \RImpE{3,5}
+\have{7}{b \land c} \RAndI{4,6}
+\end{fitchproof}
+\textbf{2.}
+\begin{fitchproof}
+\hypo{1}{g \land h} \RPrem
+\hypo{2}{g \limp (d \limp k)} \RPrem
+\hypo{3}{h \limp d} \RPrem
+\have{4}{g} \RAndE{1}
+\have{5}{h} \RAndE{1}
+\have{6}{d \limp k} \RImpE{2,4}
+\have{7}{d} \RImpE{3,5}
+\have{8}{k} \RImpE{6,7}
+\have{9}{d \land k} \RAndI{7,8}
+\end{fitchproof}
+\columnbreak
+\textbf{3.}
+\begin{fitchproof}
+\hypo{1}{a \land b} \RPrem
+\hypo{2}{(b \lor c) \limp (d \land e)} \RPrem
+\hypo{3}{e \limp (b \limp s)} \RPrem
+\have{4}{b} \RAndE{1}
+\have{5}{b \lor c} \ROrI{4}
+\have{6}{d \land e} \RImpE{2,5}
+\have{7}{e} \RAndE{6}
+\have{8}{b \limp s} \RImpE{3,7}
+\have{9}{s} \RImpE{8,4}
+\end{fitchproof}
+\textbf{4.}
+\begin{fitchproof}
+\hypo{1}{(m \lor o) \limp k} \RPrem
+\hypo{2}{k \limp (l \land r)} \RPrem
+\hypo{3}{m} \RPrem
+\have{4}{m \lor o} \ROrI{3}
+\have{5}{k} \RImpE{1,4}
+\have{6}{l \land r} \RImpE{2,5}
+\have{7}{r} \RAndE{6}
+\have{8}{r \lor s} \ROrI{7}
+\have{9}{k \land (r \lor s)} \RAndI{5,8}
+\end{fitchproof}
+\end{multicols}
+\textbf{Lesson}: work \emph{backwards} from the conclusion. In 4, $k \land (r \lor s)$ needs
+$k$ and $r \lor s$; $r \lor s$ needs only $r$ ($\lor$\,Intro); $r$ is inside $l \land r$;
+and so on, until you reach the premises.
+\end{nbsolution}
+
+\subsubsection{Rules with subproofs}
+\slidesrc{Proof theory (prop.): 3--5}
+
+The remaining Intro and Elim rules need a new ingredient: we temporarily \textbf{assume}
+something that was not given as a premise, see what follows, and then give the assumption
+up. The part of a proof in which we hold a temporary assumption is a \textbf{subproof},
+drawn to the right of a new vertical line (its first line, the assumption, is underlined).
+
+\begin{nbfact}{The subproof restriction (page 10)}
+A rule may only be applied to sentences that appear (1) \textbf{earlier} in the proof and
+(2) \textbf{outside any subproof that has already ended}. Once a subproof ends, its lines may
+depend on an assumption we no longer hold, so they cannot be used individually any more;
+the only way to use a finished subproof is as a whole, with one of the four rules below.
+Subproofs can be nested, but an inner subproof must end before the outer one.
+\end{nbfact}
+
+\begin{nbfact}{$\neg$\,Intro, $\neg$\,Elim, $\limp$\,Intro, $\lor$\,Elim}
+\begin{center}
+\begin{tabular}{@{}p{6.2cm}@{\hspace{0.8cm}}p{6.2cm}@{}}
+\begin{fitchproof}
+\open
+\hypo{a}{p} \RAss
+\have{b}{\vdots}
+\have{c}{q}
+\have{d}{\neg q}
+\close
+\have{e}{\neg p} \RNotI{}
+\end{fitchproof}
+&
+\begin{fitchproof}
+\open
+\hypo{a}{\neg p} \RAss
+\have{b}{\vdots}
+\have{c}{q}
+\have{d}{\neg q}
+\close
+\have{e}{p} \RNotE{}
+\end{fitchproof}
+\\[-4pt]
+\small $\neg$\,Intro (proof by contradiction) & \small $\neg$\,Elim \\[10pt]
+\begin{fitchproof}
+\open
+\hypo{a}{p} \RAss
+\have{b}{\vdots}
+\have{c}{q}
+\close
+\have{e}{p \limp q} \RImpI{}
+\end{fitchproof}
+&
+\begin{fitchproof}
+\hypo{z}{p \lor q}
+\open
+\hypo{a}{p} \RAss
+\have{b}{r}
+\close
+\open
+\hypo{c}{q} \RAss
+\have{d}{r}
+\close
+\have{e}{r} \ROrE{}
+\end{fitchproof}
+\\[-4pt]
+\small $\limp$\,Intro (conditional proof) & \small $\lor$\,Elim (proof by cases)
+\end{tabular}
+\end{center}
+\begin{itemize}[nosep]
+  \item \textbf{$\neg$\,Intro}: if an assumption leads to a sentence \emph{and} its negation
+        (a contradiction), the assumption cannot be true: close the subproof and write its
+        negation.
+  \item \textbf{$\neg$\,Elim}: exactly like $\neg$\,Intro, but the assumption is a negation
+        $\neg p$; from the contradiction, conclude $p$.
+  \item \textbf{$\limp$\,Intro}: assume the antecedent $p$; if you derive $q$, close the
+        subproof and write $p \limp q$.
+  \item \textbf{$\lor$\,Elim}: from $p \lor q$, open two subproofs, one assuming $p$ and one
+        assuming $q$; anything $r$ derived in \emph{both} can be written outside them.
+\end{itemize}
+Citation style: the assumption line through the contradictory pair, e.g.\
+``$\neg$\,Intro: 3--(4,5)''; for $\lor$\,Elim, the disjunction and both subproofs,
+e.g.\ ``$\lor$\,Elim: 1, 4--6, 7--9''.
+\end{nbfact}
+
+\begin{nbintuition}[Everyday versions of these rules]
+\begin{itemize}[nosep]
+  \item \emph{$\neg$\,Intro, reductio ad absurdum}: ``Suppose the butler did it. Then he was
+        in the kitchen at 9. But he was seen in the garden at 9. Contradiction: the butler
+        did not do it.''
+  \item \emph{$\limp$\,Intro, conditional proof}: ``Suppose I take the 8:00 train. Then I
+        arrive at 9:30, so I am in time for the meeting. Hence: if I take the 8:00 train,
+        I am in time.'' You never claimed to take the train.
+  \item \emph{$\lor$\,Elim, proof by cases}: ``Either it rains or it is sunny. If it rains I
+        take the bus; if it is sunny I take the bus (too hot to walk). So I take the bus.''
+\end{itemize}
+\end{nbintuition}
+
+\begin{nbexample}{Example 4 ($\neg$\,Intro): $\{\neg(g \land h),\ h\} \;/\therefore\; \neg g$}
+``It's not the case that both Gary and Harvey will be promoted. Harvey is getting a
+promotion. So Gary won't be promoted.''
+\begin{fitchproof}
+\hypo{1}{\neg(g \land h)} \RPrem
+\hypo{2}{h} \RPrem
+\open
+\hypo{3}{g} \RAss
+\have{4}{g \land h} \RAndI{2,3}
+\have{5}{\neg(g \land h)} \RReit{1}
+\close
+\have{6}{\neg g} \RNotI{3--(4,5)}
+\end{fitchproof}
+Suppose Gary will be promoted (3). Then both will be promoted (4). But we were told they
+will not both be promoted (5). So the assumption is false (6). Note the use of Reit: the
+rule requires the contradictory pair \emph{inside} the subproof, so we copy line 1 in.
+\end{nbexample}
+
+\begin{nbwarning}[Wording in the slides]
+In the slides the assumption lines of subproofs are labelled ``Premise''. They are
+\emph{temporary} premises (assumptions) that are discharged when the subproof ends, unlike
+the real premises at the top. In these notes they are labelled ``Assumption''.
+\end{nbwarning}
+
+\begin{nbexample}{Example 5 ($\neg$\,Elim): $\{\neg a \limp n,\ \neg(n \lor e)\} \;/\therefore\; a$}
+``If Alicia doesn't get the job, Nina will. But there is no way Nina or Eloise will get the
+job. So Alicia will get it.''
+\begin{fitchproof}
+\hypo{1}{\neg a \limp n} \RPrem
+\hypo{2}{\neg(n \lor e)} \RPrem
+\open
+\hypo{3}{\neg a} \RAss
+\have{4}{n} \RImpE{1,3}
+\have{5}{n \lor e} \ROrI{4}
+\have{6}{\neg(n \lor e)} \RReit{2}
+\close
+\have{7}{a} \RNotE{3--(5,6)}
+\end{fitchproof}
+\end{nbexample}
+
+\begin{nbexample}{Example 6 ($\limp$\,Intro): $\{a \limp p,\ p \limp (m \land r),\ m \limp q\} \;/\therefore\; a \limp q$}
+``If Alberto gets his way, the policy will be approved. In that case, Marta and Roger will
+be angry. Marta will quit if she is angry. So if Alberto gets his way, Marta will quit.''
+\begin{fitchproof}
+\hypo{1}{a \limp p} \RPrem
+\hypo{2}{p \limp (m \land r)} \RPrem
+\hypo{3}{m \limp q} \RPrem
+\open
+\hypo{4}{a} \RAss
+\have{5}{p} \RImpE{1,4}
+\have{6}{m \land r} \RImpE{2,5}
+\have{7}{m} \RAndE{6}
+\have{8}{q} \RImpE{3,7}
+\close
+\have{9}{a \limp q} \RImpI{4--8}
+\end{fitchproof}
+\end{nbexample}
+
+\begin{nbexample}{Example 7 (nested subproofs): $\{b \limp \neg(c \land d),\ a \limp (b \limp d)\} \;/\therefore\; (a \land b) \limp \neg c$}
+\begin{fitchproof}
+\hypo{1}{b \limp \neg(c \land d)} \RPrem
+\hypo{2}{a \limp (b \limp d)} \RPrem
+\open
+\hypo{3}{a \land b} \RAss
+\have{4}{a} \RAndE{3}
+\have{5}{b \limp d} \RImpE{2,4}
+\have{6}{b} \RAndE{3}
+\have{7}{d} \RImpE{5,6}
+\open
+\hypo{8}{c} \RAss
+\have{9}{c \land d} \RAndI{7,8}
+\have{10}{\neg(c \land d)} \RImpE{1,6}
+\close
+\have{11}{\neg c} \RNotI{8--(9,10)}
+\close
+\have{12}{(a \land b) \limp \neg c} \RImpI{3--11}
+\end{fitchproof}
+To prove an implication, assume its antecedent (3) and aim for the consequent $\neg c$; to
+prove a negation, assume the un-negated sentence (8) and aim for a contradiction. Inside
+the inner subproof we may use lines 1--7, because they are earlier and in subproofs that
+are still open.
+\end{nbexample}
+
+\begin{nbexample}{Example 8 ($\lor$\,Elim): Rosa arrives late}
+``Rosa will get a ride with either Don or Glenn. If Don gives her a ride, she'll be picked up
+late and she'll arrive late. If Glenn gives her a ride, he'll make a stop along the way and
+Rosa will arrive late. So Rosa will arrive late.''
+\begin{fitchproof}
+\hypo{1}{d \lor g} \RPrem
+\hypo{2}{d \limp (p \land a)} \RPrem
+\hypo{3}{g \limp (s \land a)} \RPrem
+\open
+\hypo{4}{d} \RAss
+\have{5}{p \land a} \RImpE{2,4}
+\have{6}{a} \RAndE{5}
+\close
+\open
+\hypo{7}{g} \RAss
+\have{8}{s \land a} \RImpE{3,7}
+\have{9}{a} \RAndE{8}
+\close
+\have{10}{a} \ROrE{1, 4--6, 7--9}
+\end{fitchproof}
+Since Rosa will be late either way, we don't need to know \emph{which} alternative of line
+1 is true. (The slides contain a typo, ``If Don gives May a ride'': it is Rosa.)
+\end{nbexample}
+
+\begin{nbexample}{Example 9 ($\lor$\,Elim): $\{l \limp (h \land u),\ i \limp s,\ l \lor i\} \;/\therefore\; u \lor s$}
+``If Luis is given the job, he'll be happy but Igor will be upset. If the job goes to Igor,
+Luis will be upset. One of them will get the job, so one of them will be upset.''
+\begin{fitchproof}
+\hypo{1}{l \limp (h \land u)} \RPrem
+\hypo{2}{i \limp s} \RPrem
+\hypo{3}{l \lor i} \RPrem
+\open
+\hypo{4}{l} \RAss
+\have{5}{h \land u} \RImpE{1,4}
+\have{6}{u} \RAndE{5}
+\have{7}{u \lor s} \ROrI{6}
+\close
+\open
+\hypo{8}{i} \RAss
+\have{9}{s} \RImpE{2,8}
+\have{10}{u \lor s} \ROrI{9}
+\close
+\have{11}{u \lor s} \ROrE{3, 4--7, 8--10}
+\end{fitchproof}
+The two cases end with \emph{different} facts ($u$, $s$), so we first make both cases end
+with the \emph{same} sentence $u \lor s$ using $\lor$\,Intro.
+\end{nbexample}
+
+\begin{nbexercise}{G2}{Derive the conclusion from the premises, basic rules only (page 6)}
+\begin{multicols}{2}\small
+\begin{enumerate}[nosep]
+  \item $\neg b,\ \neg(\neg a \land \neg b) \;/\therefore\; a$
+  \item $j \limp (k \land m),\ m \limp \neg k \;/\therefore\; \neg j$
+  \item $c \limp (d \land e),\ d \limp \neg h \;/\therefore\; c \limp \neg h$
+  \item $(m \lor r) \limp s,\ s \limp (p \limp q) \;/\therefore\; (r \land p) \limp q$
+  \item $(b \land c) \limp d,\ (d \land g) \limp h,\ b \land g \;/\therefore\; c \limp h$
+  \item $r \limp \neg(p \land q),\ w \limp (r \limp q) \;/\therefore\; w \limp \neg(p \land r)$
+  \item $a \lor n,\ n \limp (e \land s),\ a \limp s \;/\therefore\; s$
+  \item $j \limp (k \lor l),\ (j \land k) \limp m,\ j,\ l \limp (m \land o) \;/\therefore\; m$
+  \item $a \limp (b \lor c),\ d \limp \neg b,\ c \limp \neg(a \land d) \;/\therefore\; a \limp \neg d$
+\end{enumerate}
+\end{multicols}
+\end{nbexercise}
+\begin{nbsolution}
+All nine arguments are valid (checked by truth table). Strategy hints: to prove $\neg X$,
+assume $X$ and find a contradiction ($\neg$\,Intro); to prove $X \limp Y$, assume $X$ and
+derive $Y$ ($\limp$\,Intro); to use $X \lor Y$, reason by cases ($\lor$\,Elim).
+\begin{multicols}{2}
+\textbf{1.}
+\begin{fitchproof}
+\hypo{1}{\neg b} \RPrem
+\hypo{2}{\neg(\neg a \land \neg b)} \RPrem
+\open
+\hypo{3}{\neg a} \RAss
+\have{4}{\neg a \land \neg b} \RAndI{3,1}
+\have{5}{\neg(\neg a \land \neg b)} \RReit{2}
+\close
+\have{6}{a} \RNotE{3--(4,5)}
+\end{fitchproof}
+\textbf{2.}
+\begin{fitchproof}
+\hypo{1}{j \limp (k \land m)} \RPrem
+\hypo{2}{m \limp \neg k} \RPrem
+\open
+\hypo{3}{j} \RAss
+\have{4}{k \land m} \RImpE{1,3}
+\have{5}{k} \RAndE{4}
+\have{6}{m} \RAndE{4}
+\have{7}{\neg k} \RImpE{2,6}
+\close
+\have{8}{\neg j} \RNotI{3--(5,7)}
+\end{fitchproof}
+\textbf{3.}
+\begin{fitchproof}
+\hypo{1}{c \limp (d \land e)} \RPrem
+\hypo{2}{d \limp \neg h} \RPrem
+\open
+\hypo{3}{c} \RAss
+\have{4}{d \land e} \RImpE{1,3}
+\have{5}{d} \RAndE{4}
+\have{6}{\neg h} \RImpE{2,5}
+\close
+\have{7}{c \limp \neg h} \RImpI{3--6}
+\end{fitchproof}
+\columnbreak
+\textbf{4.}
+\begin{fitchproof}
+\hypo{1}{(m \lor r) \limp s} \RPrem
+\hypo{2}{s \limp (p \limp q)} \RPrem
+\open
+\hypo{3}{r \land p} \RAss
+\have{4}{r} \RAndE{3}
+\have{5}{m \lor r} \ROrI{4}
+\have{6}{s} \RImpE{1,5}
+\have{7}{p \limp q} \RImpE{2,6}
+\have{8}{p} \RAndE{3}
+\have{9}{q} \RImpE{7,8}
+\close
+\have{10}{(r \land p) \limp q} \RImpI{3--9}
+\end{fitchproof}
+\textbf{5.}
+\begin{fitchproof}
+\hypo{1}{(b \land c) \limp d} \RPrem
+\hypo{2}{(d \land g) \limp h} \RPrem
+\hypo{3}{b \land g} \RPrem
+\open
+\hypo{4}{c} \RAss
+\have{5}{b} \RAndE{3}
+\have{6}{b \land c} \RAndI{5,4}
+\have{7}{d} \RImpE{1,6}
+\have{8}{g} \RAndE{3}
+\have{9}{d \land g} \RAndI{7,8}
+\have{10}{h} \RImpE{2,9}
+\close
+\have{11}{c \limp h} \RImpI{4--10}
+\end{fitchproof}
+\end{multicols}
+\textbf{6.} Two nested subproofs: $\limp$\,Intro outside, $\neg$\,Intro inside.
+\begin{fitchproof}
+\hypo{1}{r \limp \neg(p \land q)} \RPrem
+\hypo{2}{w \limp (r \limp q)} \RPrem
+\open
+\hypo{3}{w} \RAss
+\have{4}{r \limp q} \RImpE{2,3}
+\open
+\hypo{5}{p \land r} \RAss
+\have{6}{r} \RAndE{5}
+\have{7}{q} \RImpE{4,6}
+\have{8}{p} \RAndE{5}
+\have{9}{p \land q} \RAndI{8,7}
+\have{10}{\neg(p \land q)} \RImpE{1,6}
+\close
+\have{11}{\neg(p \land r)} \RNotI{5--(9,10)}
+\close
+\have{12}{w \limp \neg(p \land r)} \RImpI{3--11}
+\end{fitchproof}
+\begin{multicols}{2}
+\textbf{7.}
+\begin{fitchproof}
+\hypo{1}{a \lor n} \RPrem
+\hypo{2}{n \limp (e \land s)} \RPrem
+\hypo{3}{a \limp s} \RPrem
+\open
+\hypo{4}{a} \RAss
+\have{5}{s} \RImpE{3,4}
+\close
+\open
+\hypo{6}{n} \RAss
+\have{7}{e \land s} \RImpE{2,6}
+\have{8}{s} \RAndE{7}
+\close
+\have{9}{s} \ROrE{1, 4--5, 6--8}
+\end{fitchproof}
+\columnbreak
+\textbf{8.}
+\begin{fitchproof}
+\hypo{1}{j \limp (k \lor l)} \RPrem
+\hypo{2}{(j \land k) \limp m} \RPrem
+\hypo{3}{j} \RPrem
+\hypo{4}{l \limp (m \land o)} \RPrem
+\have{5}{k \lor l} \RImpE{1,3}
+\open
+\hypo{6}{k} \RAss
+\have{7}{j \land k} \RAndI{3,6}
+\have{8}{m} \RImpE{2,7}
+\close
+\open
+\hypo{9}{l} \RAss
+\have{10}{m \land o} \RImpE{4,9}
+\have{11}{m} \RAndE{10}
+\close
+\have{12}{m} \ROrE{5, 6--8, 9--11}
+\end{fitchproof}
+\end{multicols}
+\textbf{9.} The hardest one. Plan: assume $a$, then assume $d$ and look for a contradiction
+between $a \land d$ and $\neg(a \land d)$. To get $\neg(a \land d)$ we need $c$, which must
+come from $b \lor c$ by cases. In the case $b$ we have both $b$ and $\neg b$, and from a
+contradiction anything follows (here $c$, via $\neg$\,Elim).
+\begin{fitchproof}
+\hypo{1}{a \limp (b \lor c)} \RPrem
+\hypo{2}{d \limp \neg b} \RPrem
+\hypo{3}{c \limp \neg(a \land d)} \RPrem
+\open
+\hypo{4}{a} \RAss
+\have{5}{b \lor c} \RImpE{1,4}
+\open
+\hypo{6}{d} \RAss
+\have{7}{\neg b} \RImpE{2,6}
+\have{8}{a \land d} \RAndI{4,6}
+\open
+\hypo{9}{b} \RAss
+\open
+\hypo{10}{\neg c} \RAss
+\have{11}{b} \RReit{9}
+\have{12}{\neg b} \RReit{7}
+\close
+\have{13}{c} \RNotE{10--(11,12)}
+\close
+\open
+\hypo{14}{c} \RAss
+\have{15}{c} \RReit{14}
+\close
+\have{16}{c} \ROrE{5, 9--13, 14--15}
+\have{17}{\neg(a \land d)} \RImpE{3,16}
+\close
+\have{18}{\neg d} \RNotI{6--(8,17)}
+\close
+\have{19}{a \limp \neg d} \RImpI{4--18}
+\end{fitchproof}
+\textbf{Lesson}: lines 9--16 prove the \emph{disjunctive syllogism} ($b \lor c,\ \neg b
+\;/\therefore\; c$) with basic rules only. It is so useful that it becomes a derived rule
+in the next sub-section, and with it this proof shrinks from 19 to 11 lines.
+\end{nbsolution}
+
+\subsubsection{Derived rules}
+\slidesrc{Proof theory (prop.): 6--8, 11}
+
+\textbf{Derived rules} express patterns of argument that we could prove using only the basic
+rules. Anything we prove with them, we could prove without them: they are useful not
+because of \emph{what} they let us prove, but because they let us prove it more quickly.
+
+\begin{nbfact}{The derived rules}
+\begin{center}
+\renewcommand{\arraystretch}{2.6}
+\begin{tabularx}{\linewidth}{@{}l c X@{}}
+\toprule
+\textbf{Rule} & \textbf{Schema} & \textbf{In words} \\
+\midrule
+Modus Tollens & $\dfrac{p \limp q \qquad \neg q}{\neg p}$ & from a conditional and the negation of its consequent, derive the negation of its antecedent \\
+Hypothetical syllogism & $\dfrac{p \limp q \qquad q \limp r}{p \limp r}$ & chain conditionals (any number, in any order) \\
+Disjunctive syllogism & $\dfrac{p \lor q \quad \neg p}{q} \quad \dfrac{p \lor q \quad \neg q}{p}$ & from a disjunction and the negation of one disjunct, derive the other \\
+Double negation ($\neg\neg$) & $\neg\neg p \equiv p$ & drop or add $\neg\neg$, also inside a longer sentence \\
+De Morgan's laws & $\begin{array}{c}\neg(p \land q) \equiv \neg p \lor \neg q \\ \neg(p \lor q) \equiv \neg p \land \neg q\end{array}$ & substitute one form for the other, also inside a longer sentence \\
+\bottomrule
+\end{tabularx}
+\end{center}
+In proofs these rules are abbreviated \textbf{MT} (Modus Tollens), \textbf{HS} (hypothetical
+syllogism), \textbf{DS} (disjunctive syllogism), $\neg\neg$ and \textbf{DeM} (De Morgan).
+Double negation and De Morgan are \textbf{substitution rules}: since the two forms are
+logically equivalent (same truth table column), one may replace the other even as a
+\emph{part} of a bigger sentence. The other rules apply only to whole lines.
+\end{nbfact}
+
+\begin{nbexample}{why Modus Tollens is safe: a proof with basic rules}
+\notinslides
+\begin{fitchproof}
+\hypo{1}{p \limp q} \RPrem
+\hypo{2}{\neg q} \RPrem
+\open
+\hypo{3}{p} \RAss
+\have{4}{q} \RImpE{1,3}
+\have{5}{\neg q} \RReit{2}
+\close
+\have{6}{\neg p} \RNotI{3--(4,5)}
+\end{fitchproof}
+Every use of Modus Tollens can be replaced by these 4 extra lines: that is what ``derived''
+means.
+\end{nbexample}
+
+\begin{nbexample}{Example 10 (Modus Tollens): Raul's newspaper}
+``Raul would have picked up his newspaper if he were home. He must not be home, because he
+did not pick up his paper.'' $\{h \limp n,\ \neg n\} \;/\therefore\; \neg h$
+\begin{fitchproof}
+\hypo{1}{h \limp n} \RPrem
+\hypo{2}{\neg n} \RPrem
+\have{3}{\neg h} \RMT{1,2}
+\end{fitchproof}
+This may remind you of the invalid form \emph{affirming the consequent}; the negations make
+the difference: Modus Tollens is valid.
+\end{nbexample}
+
+\begin{nbexample}{Examples 11--13 (hypothetical and disjunctive syllogism)}
+\begin{multicols}{2}
+\textbf{Ex.~11}
+\begin{fitchproof}
+\hypo{1}{a \limp b} \RPrem
+\hypo{2}{b \limp c} \RPrem
+\hypo{3}{c \limp d} \RPrem
+\hypo{4}{d \limp e} \RPrem
+\have{5}{a \limp e} \RHS{1--4}
+\end{fitchproof}
+\columnbreak
+\textbf{Ex.~12}
+\begin{fitchproof}
+\hypo{1}{(j \land k) \limp m} \RPrem
+\hypo{2}{\neg l} \RPrem
+\hypo{3}{k \lor l} \RPrem
+\open
+\hypo{4}{j} \RAss
+\have{5}{k} \RDS{2,3}
+\have{6}{j \land k} \RAndI{4,5}
+\have{7}{m} \RImpE{1,6}
+\close
+\have{8}{j \limp m} \RImpI{4--7}
+\end{fitchproof}
+\end{multicols}
+\textbf{Ex.~13}
+\begin{fitchproof}
+\hypo{1}{(p \land q) \lor (r \land s)} \RPrem
+\hypo{2}{p \limp \neg(q \lor u)} \RPrem
+\open
+\hypo{3}{p \land q} \RAss
+\have{4}{p} \RAndE{3}
+\have{5}{q} \RAndE{3}
+\have{6}{q \lor u} \ROrI{5}
+\have{7}{\neg(q \lor u)} \RImpE{2,4}
+\close
+\have{8}{\neg(p \land q)} \RNotI{3--(6,7)}
+\have{9}{r \land s} \RDS{1,8}
+\have{10}{s} \RAndE{9}
+\end{fitchproof}
+
+In Example 12 the slides list $j$ as a fourth premise, but it is really the assumption of
+the subproof (it is discharged by $\limp$\,Intro in line 8).
+\end{nbexample}
+
+\begin{nbexample}{Example 14 (double negation): Ned is sick}
+``If Ned wasn't sick or on vacation, he'd be at work. He's not at work and not on vacation,
+so he must be sick.'' $\{\neg(s \lor o) \limp w,\ \neg w \land \neg o\} \;/\therefore\; s$
+\begin{fitchproof}
+\hypo{1}{\neg(s \lor o) \limp w} \RPrem
+\hypo{2}{\neg w \land \neg o} \RPrem
+\have{3}{\neg w} \RAndE{2}
+\have{4}{\neg\neg(s \lor o)} \RMT{1,3}
+\have{5}{s \lor o} \RDN{4}
+\have{6}{\neg o} \RAndE{2}
+\have{7}{s} \RDS{5,6}
+\end{fitchproof}
+Modus Tollens negates the antecedent $\neg(s \lor o)$, producing $\neg\neg(s \lor o)$;
+double negation removes the two $\neg$.
+\end{nbexample}
+
+\begin{nbexample}{Example 15 (De Morgan): Javier is sick}
+``If Javier wasn't sick or on vacation, he'd be at work. He's neither at work nor on
+vacation, so he must be sick.'' $\{\neg(s \lor o) \limp w,\ \neg(w \lor o)\} \;/\therefore\; s$
+\begin{fitchproof}
+\hypo{1}{\neg(s \lor o) \limp w} \RPrem
+\hypo{2}{\neg(w \lor o)} \RPrem
+\have{3}{\neg w \land \neg o} \RDM{2}
+\have{4}{\neg w} \RAndE{3}
+\have{5}{\neg\neg(s \lor o)} \RMT{1,4}
+\have{6}{s \lor o} \RDN{5}
+\have{7}{\neg o} \RAndE{3}
+\have{8}{s} \RDS{6,7}
+\end{fitchproof}
+\end{nbexample}
+
+\begin{nbwarning}[Typos in Examples 14--16 of the slides]
+In Example 15 the slides justify lines 4 and 7 with ``$\land$\,Elim: 2'', but line 2 is
+$\neg(w \lor o)$, not a conjunction: the conjunction is line 3 (obtained by De Morgan), so
+the correct citation is ``$\land$\,Elim: 3'' (as written above). In Example 14 the premise
+set is printed as $\{\neg(s\lor o) \supset w,\ \neg w\}$, while the proof uses
+$\neg w \land \neg o$ (and $\supset$ is just another symbol for $\limp$). In Example 16,
+``Modus Tollens: 4.5'' means lines 4,5.
+\end{nbwarning}
+
+\begin{nbexample}{Examples 16--17 (De Morgan inside longer proofs)}
+\textbf{Ex.~16}: ``Ed couldn't have passed history. If he had passed history or sociology,
+he would have graduated. If he'd graduated, he would have gone to the ceremony, but he
+didn't.'' $\{(h \lor s) \limp g,\ (g \limp c) \land \neg c\} \;/\therefore\; \neg h$
+\begin{multicols}{2}
+\begin{fitchproof}
+\hypo{1}{(h \lor s) \limp g} \RPrem
+\hypo{2}{(g \limp c) \land \neg c} \RPrem
+\have{3}{g \limp c} \RAndE{2}
+\have{4}{(h \lor s) \limp c} \RHS{1,3}
+\have{5}{\neg c} \RAndE{2}
+\have{6}{\neg(h \lor s)} \RMT{4,5}
+\have{7}{\neg h \land \neg s} \RDM{6}
+\have{8}{\neg h} \RAndE{7}
+\end{fitchproof}
+\columnbreak
+\textbf{Ex.~17}
+\begin{fitchproof}
+\hypo{1}{a \limp (b \land c)} \RPrem
+\hypo{2}{c \limp d} \RPrem
+\open
+\hypo{3}{\neg d} \RAss
+\have{4}{\neg c} \RMT{2,3}
+\have{5}{\neg b \lor \neg c} \ROrI{4}
+\have{6}{\neg(b \land c)} \RDM{5}
+\have{7}{\neg a} \RMT{1,6}
+\close
+\have{8}{\neg d \limp \neg a} \RImpI{3--7}
+\end{fitchproof}
+\end{multicols}
+\end{nbexample}
+
+\begin{nbexercise}{G3}{Derive the conclusion, derived rules allowed (page 9)}
+\begin{multicols}{2}\small
+\begin{enumerate}[nosep]
+  \item $(a \land b) \limp c,\ \neg c \land \neg d \;/\therefore\; \neg a \lor \neg b$
+  \item $\neg(j \land k) \limp m,\ j,\ \neg(l \lor m) \;/\therefore\; \neg k$
+  \item $d \limp c,\ c \limp \neg g,\ g \lor h \;/\therefore\; d \limp h$
+  \item $j \limp k,\ \neg l \limp \neg(k \lor m) \;/\therefore\; j \limp l$
+  \item $\neg b \limp \neg c,\ \neg(a \lor b),\ (\neg a \land \neg c) \limp d \;/\therefore\; d$
+  \item $\neg g \limp (h \lor e),\ \neg h \land \neg e,\ g \lor m \;/\therefore\; m$
+  \item $\neg(a \lor b) \limp c,\ \neg(b \lor c) \;/\therefore\; \neg a$
+  \item $r \limp s,\ g \limp h,\ (s \lor u) \limp g \;/\therefore\; r \limp h$
+  \item $o \limp j,\ j \limp (k \lor m),\ \neg(j \land m) \;/\therefore\; o \limp k$
+\end{enumerate}
+\end{multicols}
+\end{nbexercise}
+\begin{nbsolution}
+\textbf{Watch out: exercises 2, 6 and 7 are not valid as printed in the slides.} A truth
+table check finds, for each of them, a valuation that makes all premises true and the
+conclusion false, so \emph{no} correct proof can exist:
+\begin{itemize}[nosep]
+  \item \textbf{2}: $j = k = \true$, $l = m = \false$. The premises actually prove $k$ (not
+        $\neg k$): the conclusion was probably meant to be $k$.
+  \item \textbf{6}: $g = \true$, $h = e = m = \false$. The premises prove $g$, and $g \lor m$
+        then says nothing about $m$. With the third premise $\neg g \lor m$ (``$g \limp m$'')
+        the argument becomes valid.
+  \item \textbf{7}: $a = \true$, $b = c = \false$. The premises prove $a$ (not $\neg a$).
+\end{itemize}
+Below, the valid versions are proved.
+\begin{multicols}{2}
+\textbf{1.}
+\begin{fitchproof}
+\hypo{1}{(a \land b) \limp c} \RPrem
+\hypo{2}{\neg c \land \neg d} \RPrem
+\have{3}{\neg c} \RAndE{2}
+\have{4}{\neg(a \land b)} \RMT{1,3}
+\have{5}{\neg a \lor \neg b} \RDM{4}
+\end{fitchproof}
+\textbf{2} (conclusion corrected to $k$).
+\begin{fitchproof}
+\hypo{1}{\neg(j \land k) \limp m} \RPrem
+\hypo{2}{j} \RPrem
+\hypo{3}{\neg(l \lor m)} \RPrem
+\have{4}{\neg l \land \neg m} \RDM{3}
+\have{5}{\neg m} \RAndE{4}
+\have{6}{\neg\neg(j \land k)} \RMT{1,5}
+\have{7}{j \land k} \RDN{6}
+\have{8}{k} \RAndE{7}
+\end{fitchproof}
+\textbf{3.}
+\begin{fitchproof}
+\hypo{1}{d \limp c} \RPrem
+\hypo{2}{c \limp \neg g} \RPrem
+\hypo{3}{g \lor h} \RPrem
+\open
+\hypo{4}{d} \RAss
+\have{5}{d \limp \neg g} \RHS{1,2}
+\have{6}{\neg g} \RImpE{5,4}
+\have{7}{h} \RDS{3,6}
+\close
+\have{8}{d \limp h} \RImpI{4--7}
+\end{fitchproof}
+\columnbreak
+\textbf{4.}
+\begin{fitchproof}
+\hypo{1}{j \limp k} \RPrem
+\hypo{2}{\neg l \limp \neg(k \lor m)} \RPrem
+\open
+\hypo{3}{j} \RAss
+\have{4}{k} \RImpE{1,3}
+\have{5}{k \lor m} \ROrI{4}
+\have{6}{\neg\neg(k \lor m)} \RDN{5}
+\have{7}{\neg\neg l} \RMT{2,6}
+\have{8}{l} \RDN{7}
+\close
+\have{9}{j \limp l} \RImpI{3--8}
+\end{fitchproof}
+\textbf{5.}
+\begin{fitchproof}
+\hypo{1}{\neg b \limp \neg c} \RPrem
+\hypo{2}{\neg(a \lor b)} \RPrem
+\hypo{3}{(\neg a \land \neg c) \limp d} \RPrem
+\have{4}{\neg a \land \neg b} \RDM{2}
+\have{5}{\neg a} \RAndE{4}
+\have{6}{\neg b} \RAndE{4}
+\have{7}{\neg c} \RImpE{1,6}
+\have{8}{\neg a \land \neg c} \RAndI{5,7}
+\have{9}{d} \RImpE{3,8}
+\end{fitchproof}
+\end{multicols}
+\begin{multicols}{2}
+\textbf{6} (third premise corrected to $\neg g \lor m$).
+\begin{fitchproof}
+\hypo{1}{\neg g \limp (h \lor e)} \RPrem
+\hypo{2}{\neg h \land \neg e} \RPrem
+\hypo{3}{\neg g \lor m} \RPrem
+\have{4}{\neg(h \lor e)} \RDM{2}
+\have{5}{\neg\neg g} \RMT{1,4}
+\have{6}{m} \RDS{3,5}
+\end{fitchproof}
+\textbf{7} (conclusion corrected to $a$).
+\begin{fitchproof}
+\hypo{1}{\neg(a \lor b) \limp c} \RPrem
+\hypo{2}{\neg(b \lor c)} \RPrem
+\have{3}{\neg b \land \neg c} \RDM{2}
+\have{4}{\neg c} \RAndE{3}
+\have{5}{\neg\neg(a \lor b)} \RMT{1,4}
+\have{6}{a \lor b} \RDN{5}
+\have{7}{\neg b} \RAndE{3}
+\have{8}{a} \RDS{6,7}
+\end{fitchproof}
+\columnbreak
+\textbf{8.}
+\begin{fitchproof}
+\hypo{1}{r \limp s} \RPrem
+\hypo{2}{g \limp h} \RPrem
+\hypo{3}{(s \lor u) \limp g} \RPrem
+\open
+\hypo{4}{r} \RAss
+\have{5}{s} \RImpE{1,4}
+\have{6}{s \lor u} \ROrI{5}
+\have{7}{g} \RImpE{3,6}
+\have{8}{h} \RImpE{2,7}
+\close
+\have{9}{r \limp h} \RImpI{4--8}
+\end{fitchproof}
+\textbf{9.}
+\begin{fitchproof}
+\hypo{1}{o \limp j} \RPrem
+\hypo{2}{j \limp (k \lor m)} \RPrem
+\hypo{3}{\neg(j \land m)} \RPrem
+\open
+\hypo{4}{o} \RAss
+\have{5}{j} \RImpE{1,4}
+\have{6}{k \lor m} \RImpE{2,5}
+\have{7}{\neg j \lor \neg m} \RDM{3}
+\have{8}{\neg\neg j} \RDN{5}
+\have{9}{\neg m} \RDS{7,8}
+\have{10}{k} \RDS{6,9}
+\close
+\have{11}{o \limp k} \RImpI{4--10}
+\end{fitchproof}
+\end{multicols}
+In exercise 6 (line 5), Modus Tollens gives $\neg\neg g$, which is exactly the negation of
+the first disjunct $\neg g$ of line 3, so disjunctive syllogism applies directly.
+\textbf{Lesson}: before trying to prove something, a quick truth-table check (or a
+counterexample) can save you a lot of time; proof rules can only prove valid arguments.
+\end{nbsolution}
+
+\begin{nbsummary}[The proof rules at a glance (pages 10--11)]
+\small
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\textbf{General restriction} & a rule applies only to sentences that are earlier and
+outside any subproof that has already ended \\
+Reit & repeat any sentence you already have \\
+$\land$\,Elim / $\land$\,Intro & take a conjunct / join two sentences with $\land$ \\
+$\limp$\,Elim (Modus Ponens) & from $p \limp q$ and $p$, write $q$ \\
+$\lor$\,Intro & from $p$, write $p \lor q$ or $q \lor p$ (any $q$) \\
+$\neg$\,Intro / $\neg$\,Elim & assumption $p$ (resp.\ $\neg p$) leads to $q$ and $\neg q$:
+write $\neg p$ (resp.\ $p$) \\
+$\limp$\,Intro & subproof from $p$ to $q$: write $p \limp q$ \\
+$\lor$\,Elim & from $p \lor q$ and subproofs $p \leadsto r$, $q \leadsto r$: write $r$ \\
+\textit{Derived} & Modus Tollens, hypothetical syllogism, disjunctive syllogism, $\neg\neg$,
+De Morgan
+\end{tabularx}
+\end{nbsummary}

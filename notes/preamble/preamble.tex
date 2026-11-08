@@ -130,6 +130,8 @@
 \usepackage{bussproofs}        % natural-deduction / sequent proof trees
 \usepackage{forest}            % search trees, SLD trees, parse trees
 \usepackage{multicol}
+\setlength{\columnsep}{1.4em}
+\usepackage[height=3.3ex, topheight=2.7ex, depth=1.1ex, justsep=1.2em]{fitch} % Fitch-style natural-deduction proofs (fitchproof)
 
 % source note under a (sub)section heading: \slidesrc{Propositional logic: 5--8; FOL: 3}
 \newcommand{\slidesrc}[1]{\par\noindent{\footnotesize\color{nbgray}[Slides\,$\cdot$\,#1]}\par\smallskip}
@@ -165,3 +167,23 @@
 \newcommand{\wbphoto}[2][0.75\linewidth]{%
   \par\begin{center}\includegraphics[width=#1]{#2}\\[2pt]
   {\footnotesize\color{nbgray}Original photo of the whiteboard}\end{center}}
+
+% natural-deduction rule names (as in the slides), for \have{n}{...}\RAndE{1}
+\newcommand{\RReit}{\by{Reit}}
+\newcommand{\RAndE}{\by{$\land$\,Elim}}
+\newcommand{\RAndI}{\by{$\land$\,Intro}}
+\newcommand{\RImpE}{\by{$\limp$\,Elim}}
+\newcommand{\RImpI}{\by{$\limp$\,Intro}}
+\newcommand{\ROrI}{\by{$\lor$\,Intro}}
+\newcommand{\ROrE}{\by{$\lor$\,Elim}}
+\newcommand{\RNotI}{\by{$\neg$\,Intro}}
+\newcommand{\RNotE}{\by{$\neg$\,Elim}}
+\newcommand{\RMT}{\by{MT}}
+\newcommand{\RHS}{\by{HS}}
+\newcommand{\RDS}{\by{DS}}
+\newcommand{\RDN}{\by{$\neg\neg$}}
+\newcommand{\RDM}{\by{DeM}}
+\newcommand{\RPrem}{\by{Premise}{}}
+\newcommand{\RAss}{\by{Assumption}{}}
+% "Rule: 1,2" like the slides; no colon when there are no line references
+\renewcommand{\ndjustformat}[2]{#1\if\relax\detokenize{#2}\relax\else: #2\fi}

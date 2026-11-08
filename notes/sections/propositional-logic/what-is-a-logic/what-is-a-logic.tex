@@ -1,0 +1,55 @@
+\subsection{What is a logic?}
+\label{sec:what-is-a-logic}
+\slidesrc{Propositional logic: 1--3}
+
+When most people say ``logic'' they mean either \emph{propositional logic} or
+\emph{first-order predicate logic}. In fact the word is much broader: philosophers,
+computer scientists and mathematicians have studied literally hundreds of logics (temporal
+logics, modal logics, logics of belief, \ldots). What do they have in common?
+
+\begin{nbdef}{Logic (slide 2)}
+Any formal system can be considered a logic if it has:
+\begin{itemize}[nosep]
+  \item a well-defined \textbf{syntax}: it defines the syntactically acceptable objects of
+        the language, called \textbf{well-formed formulae} (wff), or simply
+        \textbf{formulae};
+  \item a well-defined \textbf{semantics}: it associates each formula with a
+        \textbf{meaning};
+  \item a well-defined \textbf{proof theory}: it is concerned with \textbf{manipulating}
+        formulae according to certain rules.
+\end{itemize}
+\end{nbdef}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  b/.style={draw, rounded corners, thick, align=center, text width=4.1cm, minimum height=1.8cm}]
+  \node[b, draw=nbblue, fill=nbblue!6] (syn) at (0,0)
+    {\textbf{Syntax}\\[2pt] which strings are formulas?\\[2pt]\footnotesize
+     $p \land (q \limp r)$ \textcolor{nbgreen}{yes}\quad $p \land \limp$ \textcolor{nbred}{no}};
+  \node[b, draw=nbgreen, fill=nbgreen!6] (sem) at (5,0)
+    {\textbf{Semantics}\\[2pt] what does a formula mean? when is it true?\\[2pt]\footnotesize truth tables, valuations};
+  \node[b, draw=nbpurple, fill=nbpurple!6] (pro) at (10,0)
+    {\textbf{Proof theory}\\[2pt] how do we derive formulas by rules?\\[2pt]\footnotesize natural deduction};
+  \draw[->, thick] (syn) -- (sem);
+  \draw[->, thick] (syn.south) to[bend right=18] (pro.south);
+\end{tikzpicture}
+\captionof{figure}{The three ingredients of every logic. Semantics and proof theory are two
+independent ways of talking about formulas: one with \emph{truth}, one with \emph{rules}.
+A good proof theory derives exactly the formulas that are semantically valid.}
+\end{center}
+
+\begin{nbintuition}[A programming-language analogy]
+Think of a programming language. Its \emph{syntax} says which programs compile
+(\code{x = 3 +;} does not). Its \emph{semantics} says what a compiling program does when it
+runs. A \emph{proof theory} is like a set of safe refactoring rules: you can transform the
+code step by step without ever running it, and the rules guarantee that the meaning is
+preserved. Logic works the same way, with formulas instead of programs and truth instead
+of behaviour.
+\end{nbintuition}
+
+\begin{nbwhy}
+Every symbolic AI system makes these three choices. A Prolog program (Part~IV) has a syntax
+(facts and rules), a semantics (what is logically implied by the program) and a proof
+procedure (SLD resolution) that the interpreter runs. A BDI agent (Part~V) stores its
+beliefs as logical formulas and uses the same machinery to decide which plans apply.
+\end{nbwhy}

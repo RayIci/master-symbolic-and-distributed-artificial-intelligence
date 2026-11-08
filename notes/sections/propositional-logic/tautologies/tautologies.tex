@@ -1,0 +1,164 @@
+\subsection{Valuations, tautologies and consistency}
+\label{sec:tautologies}
+\slidesrc{Propositional logic: 19--21}
+
+\subsubsection{Valuations: giving a truth value to a formula}
+\slidesrc{Propositional logic: 19--20}
+
+Given a formula, can you tell if it is true or not? \textbf{No}: you usually need to know
+the truth values of its atomic propositions first. Is $p \lor q$ true? It depends on $p$
+and $q$.
+
+\begin{nbdef}{Valuation (slide 19)}
+A \textbf{valuation} is a function $v$ that assigns a truth value (T or F) to each atomic
+(primitive) proposition. In a programming language it would be a function
+\code{Val(p: AtomicProp): BOOLEAN}. Given a valuation, we can compute for \emph{any}
+formula whether it is true or false, by applying the truth tables bottom-up.
+\end{nbdef}
+
+\begin{nbexample}{evaluating $(p \lor q) \limp r$ (slide 20)}
+Let $v(p) = \false$, $v(q) = \true$, $v(r) = \false$. Then
+\begin{align*}
+v\big((p \lor q) \limp r\big)
+  &= (v(p) \lor v(q)) \limp v(r) && \reason{replace each letter by its value} \\
+  &= (\false \lor \true) \limp \false && \\
+  &= \true \limp \false && \reason{$\false \lor \true = \true$ (table of $\lor$)} \\
+  &= \false && \reason{$\true \limp \false = \false$ (table of $\limp$)}
+\end{align*}
+So under this valuation the formula is \textbf{false}: the antecedent $p \lor q$ holds but
+the consequent $r$ does not, which is the only way to falsify an implication.
+\end{nbexample}
+
+\begin{nbfact}{Rows = valuations}
+Each row of a truth table corresponds to exactly one valuation of the atomic propositions
+of the formula. A truth table therefore shows the value of the formula under
+\emph{all} possible valuations ($2^n$ of them).
+\end{nbfact}
+
+\subsubsection{Tautologies, consistency, inconsistency}
+\slidesrc{Propositional logic: 21}
+
+Some formulas have interesting properties that do not depend on the particular valuation.
+
+\begin{nbdef}{Tautology, consistent, inconsistent (slide 21)}
+\begin{enumerate}[nosep]
+  \item A formula is a \textbf{tautology} iff it is true under \emph{every} valuation.
+  \item A formula is \textbf{consistent} iff it is true under \emph{at least one}
+        valuation (also called \emph{satisfiable}).
+  \item A formula is \textbf{inconsistent} iff it is \emph{not} made true under any
+        valuation (also called \emph{contradiction} or \emph{unsatisfiable}).
+\end{enumerate}
+Since each row of a truth table is a valuation, truth tables decide these properties: look
+at the last column. All T $\Rightarrow$ tautology; at least one T $\Rightarrow$ consistent;
+no T $\Rightarrow$ inconsistent.
+\end{nbdef}
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \draw[thick, nbgreen, fill=nbgreen!8] (0,0) ellipse (4.2cm and 1.5cm);
+  \draw[thick, nbblue, fill=nbblue!10] (1.5,0) ellipse (1.9cm and 0.95cm);
+  \node[nbgreen!70!black, align=center] at (-1.9,0.15) {\textbf{consistent}\\(true in $\ge 1$ row)\\$p \lor q$,\ \ $p \land \neg q$};
+  \node[nbblue, align=center] at (1.5,0) {\textbf{tautologies}\\(true in all rows)\\$p \lor \neg p$};
+  \draw[thick, nbred, fill=nbred!8] (6.4,0) ellipse (1.7cm and 0.95cm);
+  \node[nbred, align=center] at (6.4,0) {\textbf{inconsistent}\\(true in no row)\\$p \land \neg p$};
+\end{tikzpicture}
+\captionof{figure}{Every formula is either consistent or inconsistent. Tautologies are a
+special case of consistent formulas. The negation of a tautology is inconsistent and vice
+versa.}
+\end{center}
+
+\begin{nbexample}{one formula of each kind}
+\begin{center}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{c|c|c|c}
+$p$ & $p \lor \neg p$ & $p \land \neg p$ & $p \limp \neg p$ \\
+\hline
+F & T & F & T \\
+T & T & F & F \\
+\hline
+ & \textcolor{nbblue}{tautology} & \textcolor{nbred}{inconsistent} & \textcolor{nbgreen!70!black}{consistent, not a tautology}
+\end{tabular}
+\end{center}
+$p \lor \neg p$ (``it rains or it does not rain'') is always true: it carries no
+information about the world. $p \land \neg p$ can never be true.
+\end{nbexample}
+
+\begin{nbexample}{modus ponens is a tautology, affirming the consequent is not}
+\notinslides
+Consider the two formulas $A = (p \land (p \limp q)) \limp q$ and
+$B = (q \land (p \limp q)) \limp p$. Full truth table, one column per sub-formula:
+\begin{center}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{cc|c|cc|cc}
+$p$ & $q$ & $p \limp q$ & $p \land (p\limp q)$ & $A$ & $q \land (p \limp q)$ & $B$ \\
+\hline
+F & F & T & F & T & F & T \\
+F & T & T & F & T & T & \cellcolor{nbred!20}F \\
+T & F & F & F & T & F & T \\
+T & T & T & T & T & T & T \\
+\end{tabular}
+\end{center}
+$A$ is a \textbf{tautology}: whenever $p$ and $p \limp q$ are both true, $q$ is true. This
+is the reasoning pattern \emph{modus ponens} (Section~\ref{sec:natural-deduction-prop}).
+$B$ is \textbf{not}: in row 2 ($p$ false, $q$ true) both $q$ and $p \limp q$ are true but
+$p$ is false. Concretely: ``if it rains, the street is wet; the street is wet; so it
+rains'' is wrong, because someone may have washed the street.
+\end{nbexample}
+
+\subsubsection{Logical equivalence and logical consequence}
+\notinslides
+
+Two more notions, which the slides use implicitly (slide 16 and the proof-theory slides),
+are worth stating precisely.
+
+\begin{nbdef}{Logical equivalence}
+Two formulas $\varphi$ and $\psi$ are \textbf{logically equivalent}, written
+$\varphi \equiv \psi$, iff they have the same truth value under \emph{every} valuation,
+i.e.\ iff $\varphi \liff \psi$ is a \textbf{tautology}.
+\end{nbdef}
+
+\begin{nbwarning}[About slide 16]
+Slide 16 says: ``If $p \liff q$ is true, then $p$ and $q$ are said to be logically
+equivalent''. Read it carefully: what is meant is that $p \liff q$ is true under
+\emph{every} valuation (a tautology). If $p \liff q$ is true under \emph{one} valuation,
+$p$ and $q$ merely happen to have the same value there. Example: $p$ = ``it is Monday'' and
+$q$ = ``it rains'' may both be true today, so $p \liff q$ is true today, but they are
+certainly not logically equivalent.
+\end{nbwarning}
+
+\begin{nbdef}{Logical consequence (valid argument)}
+A formula $\psi$ is a \textbf{logical consequence} of the premises
+$\varphi_1, \ldots, \varphi_n$, written $\varphi_1, \ldots, \varphi_n \entails \psi$, iff
+\emph{every valuation that makes all the premises true also makes $\psi$ true}. Equivalently:
+there is no valuation with all premises true and $\psi$ false; equivalently,
+$(\varphi_1 \land \cdots \land \varphi_n) \limp \psi$ is a tautology. An argument whose
+conclusion is a logical consequence of its premises is called \textbf{(deductively)
+valid}.
+\end{nbdef}
+
+\begin{nbexample}{a few useful equivalences, checked by truth table}
+\begin{center}
+\renewcommand{\arraystretch}{1.1}
+\begin{tabular}{cc|cc|cc|cc}
+$p$ & $q$ & $p \limp q$ & $\neg p \lor q$ & $\neg q \limp \neg p$ & & $\neg(p \land q)$ & $\neg p \lor \neg q$ \\
+\hline
+F & F & T & T & T & & T & T \\
+F & T & T & T & T & & T & T \\
+T & F & F & F & F & & T & T \\
+T & T & T & T & T & & F & F \\
+\end{tabular}
+\end{center}
+Equal columns $\Rightarrow$ equivalent formulas:
+$p \limp q \equiv \neg p \lor q \equiv \neg q \limp \neg p$ (the last one is the
+\emph{contrapositive}), and $\neg(p \land q) \equiv \neg p \lor \neg q$ (one of De Morgan's
+laws, used again in Section~\ref{sec:natural-deduction-prop}).
+\end{nbexample}
+
+\begin{nbwhy}[Truth tables in real software]
+Deciding whether a formula is consistent (``is there a valuation that makes it true?'') is
+the famous \textbf{SAT problem}. A truth table needs $2^n$ rows, which explodes quickly
+(the combinatorial explosion of Section~\ref{sec:ai-history}); modern \textbf{SAT solvers}
+use clever search instead and routinely handle formulas with millions of variables. They
+are used to verify hardware circuits, find bugs in software, schedule exams and timetables,
+and solve puzzles such as Sudoku (``cell (1,1) contains 5'' is an atomic proposition).
+\end{nbwhy}

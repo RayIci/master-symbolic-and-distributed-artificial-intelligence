@@ -1,2 +1,48 @@
 \section{Propositional logic}
 \label{sec:propositional-logic}
+\slidesrc{Propositional logic: 1--21; Proof theory (prop.): 1--11}
+
+Symbolic AI represents knowledge with \emph{symbols} and reasons with \emph{rules}. The
+mathematical tool that makes this precise is \textbf{logic}. This chapter studies the
+simplest logic, \textbf{propositional logic}, in three steps that will repeat for every
+logic of the course:
+\begin{enumerate}[nosep]
+  \item \textbf{syntax}: which strings of symbols are legal formulas;
+  \item \textbf{semantics}: what a formula means, i.e.\ when it is true (truth tables,
+        valuations, tautologies);
+  \item \textbf{proof theory}: how to derive new formulas from old ones by applying rules
+        mechanically (natural deduction).
+\end{enumerate}
+The next chapter (first-order logic) repeats the same three steps for a richer language,
+and Prolog (Part~IV) is a programming language built on a fragment of it.
+
+\input{sections/propositional-logic/what-is-a-logic/what-is-a-logic}
+\input{sections/propositional-logic/connectives/connectives}
+\input{sections/propositional-logic/tautologies/tautologies}
+\input{sections/propositional-logic/natural-deduction-prop/natural-deduction-prop}
+
+\begin{nbsummary}[Propositional logic]
+\begin{itemize}[nosep]
+  \item A \textbf{logic} = syntax (well-formed formulas) + semantics (meaning, truth) +
+        proof theory (rules to manipulate formulas).
+  \item \textbf{Proposition}: a statement that is either true or false, never both.
+        \textbf{Atomic} if its truth does not depend on other propositions.
+  \item Connectives and their truth conditions:
+        $p \land q$ true iff both true; $p \lor q$ true iff at least one true;
+        $\neg p$ true iff $p$ false; $p \limp q$ \textbf{false only when $p$ is true and
+        $q$ is false}; $p \liff q$ true iff $p$ and $q$ have the same value.
+  \item $n$ atomic propositions $\Rightarrow$ $2^n$ rows in the truth table.
+  \item \textbf{Valuation}: assigns T/F to each atomic proposition; each row of a truth
+        table is a valuation.
+  \item \textbf{Tautology}: true under every valuation. \textbf{Consistent}
+        (satisfiable): true under at least one. \textbf{Inconsistent}: true under none.
+  \item \textbf{Natural deduction}: Intro and Elim rule for each connective, plus Reit.
+        $\neg$Intro, $\neg$Elim, $\limp$Intro and $\lor$Elim need \textbf{subproofs}
+        (temporary assumptions); lines inside a closed subproof cannot be reused.
+  \item $\limp$Elim = \textbf{Modus Ponens} ($p\limp q, p \;/\; q$). Invalid look-alike:
+        \textbf{affirming the consequent} ($p\limp q, q \;/\; p$).
+  \item Derived rules: Modus Tollens ($p\limp q, \neg q \;/\; \neg p$), hypothetical
+        syllogism, disjunctive syllogism, double negation, De Morgan
+        ($\neg(p\land q) \equiv \neg p\lor\neg q$, $\neg(p\lor q)\equiv\neg p\land\neg q$).
+\end{itemize}
+\end{nbsummary}
