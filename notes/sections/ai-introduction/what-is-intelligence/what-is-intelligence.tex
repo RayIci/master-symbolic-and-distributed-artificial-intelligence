@@ -1,0 +1,173 @@
+\subsection{What is intelligence? What is AI?}
+\label{sec:what-is-intelligence}
+\slidesrc{Thinking machines: 4--12}
+
+To build \emph{artificial} intelligence we should first agree on what intelligence is.
+There is no single accepted answer; the slides show several complementary views.
+
+\subsubsection{The word and a classic definition}
+\slidesrc{Thinking machines: 4--6}
+
+The word comes from Latin \emph{intellig\u{e}re}: ``to understand'', literally
+``to read inside'' (\emph{intus legere}) or ``to read between'' (\emph{inter legere}),
+that is, to read beyond the surface of things.
+
+\begin{nbdef}{Intelligence (Mainstream Science on Intelligence, 1994)}
+Intelligence is a very general mental capability that, among other things, involves the
+ability to \textbf{reason}, \textbf{plan}, \textbf{solve problems}, \textbf{think abstractly},
+\textbf{comprehend complex ideas}, \textbf{learn quickly} and \textbf{learn from experience}.
+It is not merely book-learning, a narrow academic skill, or test-taking smarts. Rather, it
+reflects a broader and deeper capability for comprehending our surroundings:
+``catching on'', ``making sense'' of things, or ``figuring out'' what to do.
+\end{nbdef}
+
+The definition was published in the \emph{Wall Street Journal} in December 1994 and signed
+by 52 scientists. The professor remarks that the statement also contains claims she does not
+feel comfortable with: it is a reference point, not an undisputed truth.
+The seven abilities in bold (highlighted in red on slide~6) are worth remembering: each of
+them has become a branch of AI.
+
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Ability in the definition} & \textbf{AI field that tries to reproduce it} \\
+\midrule
+reason                          & logic, automated reasoning, Prolog (this course) \\
+plan                            & automated planning (e.g.\ the STRIPS planner of Shakey) \\
+solve problems                  & search algorithms, constraint solving \\
+think abstractly                & knowledge representation, ontologies \\
+comprehend complex ideas        & natural language understanding \\
+learn quickly / from experience & machine learning, reinforcement learning \\
+\bottomrule
+\end{tabular}
+\captionof{table}{The abilities in the 1994 definition and the AI research areas that study them.}
+\end{center}
+
+\subsubsection{Many kinds of intelligence}
+\slidesrc{Thinking machines: 7--8}
+
+Intelligence is not a single number. Two influential theories:
+
+\begin{nbdef}{Multiple intelligences (H.~Gardner, \emph{Frames of Mind}, 1983)}
+Gardner proposed that humans have several distinct intelligences:
+\begin{multicols}{2}
+\begin{enumerate}[nosep]
+  \item musical-rhythmic and harmonic;
+  \item visual-spatial;
+  \item verbal-linguistic;
+  \item logical-mathematical;
+  \item bodily-kinesthetic;
+  \item interpersonal (understanding others);
+  \item intrapersonal (understanding oneself);
+  \item naturalistic (recognising and classifying nature);
+  \item existential (asking deep questions about life).
+\end{enumerate}
+\end{multicols}
+\end{nbdef}
+
+\begin{nbdef}{Emotional intelligence (D.~Goleman, 1995)}
+Emotional intelligence (EI) is the capability of individuals to recognise their own emotions
+and those of others, discern between different feelings and label them appropriately, use
+emotional information to guide thinking and behaviour, and manage and/or adjust emotions
+to adapt to environments or achieve one's goal(s).
+\end{nbdef}
+
+\begin{nbintuition}[Why does an AI course care?]
+If intelligence has many faces, then ``artificial intelligence'' can also mean many
+different things. A chess program shows logical-mathematical intelligence; a robot that
+walks on rough ground shows bodily-kinesthetic intelligence; a chatbot that adapts its tone
+to an angry customer imitates a bit of emotional and interpersonal intelligence. A
+\emph{multi-agent system} (the main topic of this course) needs \emph{interpersonal}
+(social) intelligence: agents must understand and negotiate with each other.
+\end{nbintuition}
+
+\subsubsection{Thinking, fast and slow: System 1 and System 2}
+\label{sec:system1-system2}
+\slidesrc{Thinking machines: 9--11}
+
+In the book \emph{Thinking, Fast and Slow} (2011), the psychologist and Nobel prize winner
+Daniel Kahneman describes the mind as two cooperating ``systems''.
+
+\begin{nbdef}{System 1 and System 2}
+\begin{itemize}[nosep]
+  \item \textbf{System 1}: fast, automatic, frequent, emotional, stereotypic, unconscious.
+  \item \textbf{System 2}: slow, effortful, infrequent, logical, calculating, conscious.
+\end{itemize}
+\end{nbdef}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}XX@{}}
+\toprule
+\textbf{System 1 can\ldots{}} (in order of complexity) & \textbf{System 2 is needed to\ldots{}} \\
+\midrule
+determine that an object is farther than another & prepare for the start of a sprint \\
+localise the source of a sound & direct your attention to the clowns at the circus \\
+complete the phrase ``war and \ldots'' & look for the woman with grey hair \\
+show disgust at a gruesome image & try to recognise a sound \\
+solve $2+2=?$ & sustain a faster-than-normal walking rate \\
+read text on a billboard & judge if a behaviour is appropriate in a social setting \\
+drive a car on an empty road & count the number of A's in a text \\
+think of a good chess move (if you are a chess master) & give someone your phone number \\
+understand simple sentences & park into a tight parking space \\
+ & compare the price/quality ratio of two washing machines \\
+ & determine the validity of a complex logical reasoning \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{Kahneman's examples (slides 10--11). Notice that the same task can move
+from System~2 to System~1 with practice: a chess master ``sees'' a good move.}
+\end{center}
+
+\begin{nbexample}{the bat and the ball}
+\notinslides
+A bat and a ball cost 1.10 euro in total. The bat costs 1 euro more than the ball. How much
+does the ball cost? System~1 shouts ``10 cents!''. System~2, if you wake it up, checks:
+if the ball costs $x$, the bat costs $x+1$, so
+\begin{align*}
+x + (x + 1) &= 1.10 \\
+2x &= 0.10 \\
+x &= 0.05 .
+\end{align*}
+The ball costs 5 cents (check: $0.05 + 1.05 = 1.10$). Fast intuition is cheap but can be
+wrong; slow reasoning is expensive but verifiable. Keep this in mind: it is exactly the
+difference between \emph{sub-symbolic} and \emph{symbolic} AI
+(Section~\ref{sec:symbolic-vs-subsymbolic}).
+\end{nbexample}
+
+\subsubsection{Artificial intelligence and intelligent agents}
+\label{sec:ai-definition}
+\slidesrc{Thinking machines: 12}
+
+\begin{nbdef}{Artificial intelligence}
+Artificial intelligence (AI) is intelligence demonstrated by machines, unlike the natural
+intelligence displayed by humans and animals. The leading AI textbook, \emph{Artificial
+Intelligence: A Modern Approach} (S.~Russell and P.~Norvig, 4th edition), defines the field
+as the study of \textbf{intelligent agents}: any device that \textbf{perceives} its
+environment and \textbf{takes actions} that maximise its chance of successfully achieving
+its \textbf{goals}.
+\end{nbdef}
+
+This definition is the bridge to the whole course: AI is not defined by \emph{how} the
+device works inside (neural network, logic rules, \ldots) but by its behaviour as an
+\textbf{agent}, a loop of perceiving and acting towards goals.
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, node distance=1.2cm,
+  box/.style={draw, rounded corners, thick, minimum width=2.6cm, minimum height=1cm, align=center}]
+  \node[box, draw=nbblue, fill=nbblue!8] (agent) {\textbf{Agent}\\[-1pt]\footnotesize goals};
+  \node[box, draw=nbgreen, fill=nbgreen!8, right=3.2cm of agent] (env) {\textbf{Environment}};
+  \draw[->, thick, nbgreen!70!black] (env.north west) to[bend right=25] node[above, font=\small]{percepts (sensors)} (agent.north east);
+  \draw[->, thick, nbred] (agent.south east) to[bend right=25] node[below, font=\small]{actions (actuators)} (env.south west);
+\end{tikzpicture}
+\captionof{figure}{An intelligent agent: it perceives the environment and acts on it to reach its
+goals. Part~III of these notes is entirely about this picture.}
+\end{center}
+
+\begin{nbwhy}
+Everyday intelligent agents: a robot vacuum cleaner (perceives obstacles and dirt, acts by
+moving and sucking, goal: a clean floor); a smart thermostat (perceives temperature and your
+habits, acts on the boiler, goal: comfort at minimum cost); a trading bot (perceives prices,
+acts by buying/selling, goal: profit); a navigation app (perceives traffic, acts by
+suggesting a route, goal: get you there fast).
+\end{nbwhy}

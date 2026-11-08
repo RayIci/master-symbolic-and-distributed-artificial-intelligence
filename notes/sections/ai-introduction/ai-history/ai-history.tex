@@ -1,0 +1,272 @@
+\subsection{A short history of AI}
+\label{sec:ai-history}
+\slidesrc{Thinking machines: 13--67}
+
+The slides build a timeline one event at a time (slides 16--67). The complete timeline is
+redrawn in Figure~\ref{fig:ai-timeline}; the sub-sections below explain each step.
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  ev/.style={anchor=north west, text width=10.6cm, align=left, inner sep=2pt},
+  yr/.style={anchor=north east, font=\small\bfseries, inner sep=2pt}]
+  \coordinate (e0) at (0.3,0);
+  \foreach \i/\year/\txt/\c in {
+    1/1950/{Alan Turing proposes the ``Turing test'' to determine a machine's human-like ability}/nbblue,
+    2/1956/{The term ``Artificial Intelligence'' is coined at the Dartmouth workshop}/nbblue,
+    3/1966--72/{Stanford Research Institute builds Shakey, the first robot that reasons about its own actions}/nbgreen,
+    4/1970--72/{Colmerauer designs Prolog; first Prolog system by Colmerauer and Roussel}/nbgreen,
+    5/1974--80/{First ``AI winter'': the Lighthill report (1973) cuts funding}/nbred,
+    6/1980/{Symbolics Lisp machines are commercialised: AI renaissance (expert systems)}/nbgreen,
+    7/1987--93/{Second ``AI winter'': collapse of the Lisp machine market}/nbred,
+    8/1997/{IBM Deep Blue defeats world chess champion Garry Kasparov}/nbgreen,
+    9/2008/{Google speech-to-search iPhone app}/nborange,
+    10/2011/{IBM Watson defeats Ken Jennings at the quiz show Jeopardy!}/nborange,
+    11/2011--12/{Apple introduces Siri, an intelligent personal assistant}/nborange,
+    12/2012/{Google Brain learns to identify cats on YouTube (75\% accuracy) without being told what a cat is}/nborange,
+    13/2013/{China's Tianhe-2 doubles the world's top supercomputing speed (33.86 petaflops)}/nbgray,
+    14/2014/{Facebook develops DeepFace, face recognition with near-human accuracy}/nborange,
+    15/2015/{Google open-sources the TensorFlow machine learning library}/nborange,
+    16/2016/{Google DeepMind's AlphaGo defeats Lee Sedol at Go}/nborange,
+    17/2016/{China's Sunway TaihuLight triples the top supercomputing speed (93 petaflops)}/nbgray,
+    18/2016/{Uber pilots a self-driving car programme in Pittsburgh, PA}/nborange,
+    19/2019--now/{AlphaStar, AlphaFold, generative AI, agentic AI (Section~\ref{sec:recent-achievements})}/nbpurple}
+  {
+    \pgfmathtruncatemacro{\prev}{\i-1}
+    \node[ev] (e\i) at ([yshift=-3pt]e\prev.south west) {\txt};
+    \node[yr, text=\c] at ([xshift=-0.55cm]e\i.north west) {\year};
+    \fill[\c] ([xshift=-0.3cm, yshift=-7pt]e\i.north west) circle (3.2pt);
+  }
+  \begin{scope}[on background layer]
+    \draw[very thick, nbblue!50] (0,0) -- (0,0 |- e19.south);
+  \end{scope}
+\end{tikzpicture}
+\captionof{figure}{The AI timeline of the slides (slide 67, extended). Colours:
+\textcolor{nbblue}{foundations}, \textcolor{nbgreen}{symbolic AI successes},
+\textcolor{nbred}{AI winters}, \textcolor{nborange}{data-driven / neural successes},
+\textcolor{nbgray}{computing power}, \textcolor{nbpurple}{today}. Notice the shift: until the
+1990s the big results are symbolic (reasoning, planning, chess search); after 2008 they are
+mostly learned from data.}
+\label{fig:ai-timeline}
+\end{center}
+
+\subsubsection{Before computers}
+\slidesrc{Thinking machines: 13--15}
+
+The slides show three portraits, without text. Here is why each person is on the
+``before'' list (the explanations are added):
+\begin{itemize}[nosep]
+  \item \textbf{Aristotle} (384--322 BC) invented the first system of formal logic, the
+        \emph{syllogism}: ``All men are mortal; Socrates is a man; therefore Socrates is
+        mortal''. The very same example will come back in first-order logic
+        (Whiteboard~\ref{wb:modus-ponens}) and in Prolog.
+  \item \textbf{Gottfried Wilhelm von Leibniz} (1646--1716) dreamed of a universal symbolic
+        language (\emph{characteristica universalis}) and a ``calculus of reasoning''
+        (\emph{calculus ratiocinator}), so that disputes could be settled by saying
+        ``let us calculate!''. He also studied binary arithmetic and built a mechanical
+        calculator. This is the dream of symbolic AI: reasoning as computation.
+  \item \textbf{Mary Shelley} (1797--1851) wrote \emph{Frankenstein} (1818), the story of an
+        artificial being created by a scientist, and of the consequences of creating it:
+        the first great story about the risks of artificial creatures
+        (see Section~\ref{sec:risks-and-regulation}).
+\end{itemize}
+
+\subsubsection{1950: the Turing test}
+\slidesrc{Thinking machines: 16--23}
+
+In 1950 Alan Turing published the paper \emph{Computing Machinery and Intelligence} in the
+philosophy journal \emph{Mind}. Instead of answering the vague question ``Can machines
+think?'', he replaced it with a game that can actually be played, the
+\textbf{imitation game}, now called the \textbf{Turing test}.
+
+\begin{nbdef}{Turing test}
+A human interrogator chats (in writing) with two hidden partners: a human and an AI system.
+By asking questions, the interrogator must decide which one is the machine. If the
+interrogator cannot reliably tell them apart, the machine passes the test.
+\end{nbdef}
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, font=\small,
+  who/.style={draw, rounded corners, thick, minimum width=2.4cm, minimum height=0.8cm, align=center}]
+  \node[who, draw=nbblue, fill=nbblue!8] (int) at (0,0) {Human\\interrogator};
+  \draw[ultra thick, nbgray] (2.2,-1.6) -- (2.2,1.6) node[above, font=\scriptsize]{wall};
+  \node[who, draw=nbgreen, fill=nbgreen!8] (h) at (5,0.85) {Human (A or B?)};
+  \node[who, draw=nbred, fill=nbred!8] (m) at (5,-0.85) {AI system (A or B?)};
+  \draw[<->, thick] (int.east) -- (2.2,0) node[right, font=\Large]{?};
+  \draw[<->, thick] (2.5,0) -- (h.west);
+  \draw[<->, thick] (2.5,0) -- (m.west);
+\end{tikzpicture}
+\captionof{figure}{The imitation game (slide 22): the interrogator only sees written answers and
+must guess which partner is the machine.}
+\end{center}
+
+\begin{nbintuition}[Behaviour instead of definitions]
+Turing's trick is to judge intelligence by \emph{observable behaviour}, not by what happens
+inside. The agent definition of AI (Section~\ref{sec:ai-definition}) has the same spirit.
+The slides add a comic (``Turing test 2208'') where the human fails: ``the machine realised
+immediately that it was me being the dumb human''. Today large language models make the
+classic Turing test much less decisive than it looked in 1950.
+\end{nbintuition}
+
+\paragraph{An open parenthesis (slides 19--21).} What does it exactly mean to ``think'', to
+``perceive'', to be ``conscious of being alive''? The slides link to the neuroscientist
+Anil Seth (TED talk \emph{Your brain hallucinates your conscious reality}): according to him,
+perception is a \emph{controlled hallucination}, the brain's best guess about the causes of
+its sensory signals, constantly corrected by the senses. If we cannot define these words
+precisely for humans, judging them in machines is even harder. (Closed parenthesis.)
+
+\subsubsection{1956: the Dartmouth workshop and the founding fathers}
+\slidesrc{Thinking machines: 24--33}
+
+In summer 1956 a workshop at Dartmouth College (USA) coined the term
+\textbf{``Artificial Intelligence''}. Its proposal contained the founding conjecture of the
+field:
+
+\begin{center}
+\begin{minipage}{0.88\linewidth}
+\itshape ``Every aspect of learning or any other feature of intelligence can in principle be
+so precisely described that a machine can be made to simulate it.''
+\end{minipage}
+\end{center}
+
+The slides list the participants (the ``founding fathers of AI'') and, step by step, what
+each of them is remembered for:
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\textbf{Person} & \textbf{Known for} \\
+\midrule
+John McCarthy & the \emph{Advice Taker} (a program reasoning with logical sentences, which
+                inspired Prolog), the Lisp language, ALGOL \\
+Marvin Minsky & artificial neural networks, the \emph{society of mind} (the mind as a
+                society of simple interacting agents: an ancestor of multi-agent systems!) \\
+Claude Shannon & information theory, cryptography, natural language processing \\
+Ray Solomonoff & machine learning, prediction, Bayesian frameworks \\
+Allen Newell \& Herbert Simon & the \emph{Logic Theory Machine} (proved theorems of
+                \emph{Principia Mathematica}) and the \emph{General Problem Solver} \\
+Arthur Samuel & search, alpha-beta pruning, machine learning (a checkers program that
+                learned to play better than its author) \\
+\midrule
+Oliver Selfridge & Pandemonium theory (pattern recognition by many competing ``demons'') \\
+Nathaniel Rochester & IBM, designer of the IBM 701 computer \\
+Trenchard More & natural deduction (the proof system of Section~\ref{sec:natural-deduction-prop}) \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{The founding fathers of AI and their contributions (slides 26--33).}
+\end{center}
+
+\begin{nbintuition}[Symbolic and sub-symbolic, from day one]
+Already at Dartmouth both souls of AI were present: logic and symbols (McCarthy, Newell and
+Simon, More) and learning and neural networks (Minsky, Solomonoff, Samuel). The rest of the
+history is a pendulum between the two.
+\end{nbintuition}
+
+\subsubsection{1966--1972: Shakey the robot}
+\slidesrc{Thinking machines: 34--36}
+
+\textbf{Shakey} was the first general-purpose mobile robot able to \emph{reason about its own
+actions}. Other robots had to be instructed on each individual step; Shakey could analyse a
+command and break it down into basic chunks by itself. The project combined robotics,
+computer vision and natural language processing, and was the first to meld \emph{logical
+reasoning} and \emph{physical action}. It was developed at the AI Center of the Stanford
+Research Institute (now SRI International) from about 1966 to 1972 (project manager Charles
+Rosen), programmed mainly in LISP, and its planning component was the \textbf{STRIPS}
+planner. As the first logical, \textbf{goal-based agent}, Shakey lived in a limited world
+(a few rooms with boxes).
+
+\begin{nbexample}{what ``breaking a command into chunks'' means}
+\notinslides
+Command: ``push the box from room A to room B''. A planner like STRIPS knows actions with
+preconditions and effects, e.g.\ \code{goto(Place)}, \code{push(Box, From, To)}, and finds
+the sequence: \code{goto(room\_A)} $\to$ \code{goto(box)} $\to$
+\code{push(box, room\_A, door)} $\to$ \code{push(box, door, room\_B)}. Your navigation app
+and a warehouse robot do the same kind of planning today. Shakey is a deliberative agent
+in the sense of Section~\ref{sec:agent-architectures}.
+\end{nbexample}
+
+\subsubsection{1970--1972: Prolog}
+\slidesrc{Thinking machines: 37}
+
+In 1970 Alain Colmerauer designed the \textbf{Prolog} language (from the French
+\emph{programmation en logique}); the first Prolog system was implemented by Colmerauer and Philippe Roussel in 1972
+in Marseille. Prolog is the language of Part~IV of these notes: a program is a set of
+logical facts and rules, and running it means proving a query.
+
+\subsubsection{The AI winters and the Lisp machines}
+\slidesrc{Thinking machines: 38--43}
+
+Early AI promised a lot. When the promises were not kept, funding collapsed: these periods
+are called \textbf{AI winters}.
+
+\begin{itemize}
+  \item \textbf{First AI winter (1974--1980).} The \textbf{Lighthill report} (\emph{Artificial
+        Intelligence: A General Survey}, Sir James Lighthill, 1973, for the British Science
+        Research Council) gave a very pessimistic evaluation: ``in no part of the field have
+        discoveries made so far produced the major impact that was then promised''. It formed
+        the basis for the British government's decision to end support for AI research in
+        all but three universities (Edinburgh, Sussex, Essex). Its main technical criticism:
+        AI had failed to address the \textbf{combinatorial explosion} that appears when
+        problems are taken from toy worlds to real-world domains.
+  \item \textbf{AI renaissance (1980).} Symbolics commercialises \textbf{Lisp machines}:
+        computers with hardware support for Lisp operations (data type testing, CDR coding,
+        incremental garbage collection), running large Lisp programs very efficiently, with
+        operating systems written entirely in Lisp. They powered the boom of
+        \emph{expert systems} (rule-based programs encoding the knowledge of human experts).
+  \item \textbf{Second AI winter (1987--1993).} With the microcomputer revolution, cheap
+        desktop PCs soon ran Lisp programs even faster than Lisp machines, without special
+        hardware. The Lisp machine market collapsed: most makers went out of business by the
+        early 1990s, and AI lost credibility again.
+\end{itemize}
+
+\begin{nbexample}{combinatorial explosion in numbers}
+\notinslides
+Chess has about 35 legal moves per position. Looking $d$ moves ahead means examining about
+$35^d$ positions:
+\[
+35^2 = 1\,225, \qquad 35^4 = 1\,500\,625, \qquad 35^6 \approx 1.8 \times 10^{9}, \qquad
+35^{10} \approx 2.8 \times 10^{15}.
+\]
+Each extra level multiplies the work by 35. An algorithm that works on a toy problem can
+become hopeless on a slightly bigger one: this is what the Lighthill report meant. Deep Blue
+(1997) beat it on chess with special hardware plus pruning (alpha-beta, Samuel's legacy).
+\end{nbexample}
+
+\subsubsection{1997--2016: from chess to Go, the data-driven era}
+\slidesrc{Thinking machines: 44--67}
+
+\begin{itemize}[nosep]
+  \item \textbf{1997}: IBM \textbf{Deep Blue} defeats the world chess champion Garry
+        Kasparov (symbolic AI: search plus hand-written evaluation).
+  \item \textbf{2008}: Google releases a \textbf{speech-to-search} iPhone app: you speak, the
+        recording is sent to Google's servers, and the results come back in seconds.
+  \item \textbf{2011}: IBM \textbf{Watson} defeats the champion Ken Jennings at the quiz show
+        \emph{Jeopardy!} (natural language question answering).
+  \item \textbf{2011/2012}: Apple introduces \textbf{Siri}, an intelligent personal assistant.
+  \item \textbf{2012}: after seeing 10 million images from YouTube videos in three days, the
+        16{,}000-computer network of \textbf{Google Brain} (one billion connections) began to
+        recognise cats, even though it had never been taught what a cat looked like
+        (unsupervised learning, 75\% accuracy).
+  \item \textbf{2013}: China's Tianhe-2 doubles the world's top supercomputing speed (33.86
+        petaflops); \textbf{2016}: Sunway TaihuLight triples it (93 petaflops). Raw computing
+        power is one of the reasons for the success of deep learning.
+  \item \textbf{2014}: Facebook's \textbf{DeepFace} identifies human faces in images: a
+        nine-layer neural network with over 120 million connection weights, trained on four
+        million images uploaded by Facebook users, said to be 97\% accurate (vs.\ 85\% for
+        the FBI's Next Generation Identification system). It uses a 3D model to virtually
+        rotate faces so that they look at the camera.
+  \item \textbf{2015}: Google open-sources \textbf{TensorFlow}, a library for numerical
+        computation with data flow graphs, now widely used for machine learning.
+  \item \textbf{2016}: Google DeepMind's \textbf{AlphaGo} defeats Lee Sedol at Go, a game
+        whose search space is far too large for Deep Blue-style brute force.
+  \item \textbf{2016}: Uber pilots a \textbf{self-driving car} programme in Pittsburgh, PA.
+\end{itemize}
+
+\begin{nbwarning}[Two kinds of ``winning'']
+Deep Blue and AlphaGo both beat a world champion, but in very different ways. Deep Blue
+\emph{searched} millions of positions per second with rules written by humans (System~2
+style, symbolic). AlphaGo \emph{learned} an intuition for good moves from millions of games
+with neural networks, combined with a search (System~1 + System~2). Do not file both under
+``AI wins at games'' without noting the difference: it is the theme of
+Section~\ref{sec:symbolic-vs-subsymbolic}.
+\end{nbwarning}

@@ -1,0 +1,49 @@
+\section{Introduction to Artificial Intelligence}
+\label{sec:ai-introduction}
+\slidesrc{Thinking machines: 1--97}
+
+Before studying logic, Prolog and agents, the course opens with a big-picture tour: what
+\emph{intelligence} is, how \emph{artificial} intelligence (AI) was born and grew, what it can
+do today, why people are worried about it, and where this course sits in the AI landscape.
+This chapter covers:
+\begin{enumerate}[nosep]
+  \item what intelligence is (several definitions, Kahneman's System~1 and System~2);
+  \item what artificial intelligence is, and why it is defined through \emph{agents};
+  \item a short history of AI, from Aristotle to self-driving cars;
+  \item recent achievements (AlphaStar, AlphaFold, generative and agentic AI);
+  \item the risks, and the principles and rules written to control them;
+  \item symbolic vs.\ sub-symbolic AI, and why this course is about the \emph{symbolic}
+        and \emph{distributed} side.
+\end{enumerate}
+
+\input{sections/ai-introduction/about-the-course/about-the-course}
+\input{sections/ai-introduction/what-is-intelligence/what-is-intelligence}
+\input{sections/ai-introduction/ai-history/ai-history}
+\input{sections/ai-introduction/recent-achievements/recent-achievements}
+\input{sections/ai-introduction/risks-and-regulation/risks-and-regulation}
+\input{sections/ai-introduction/symbolic-vs-subsymbolic/symbolic-vs-subsymbolic}
+
+\begin{nbsummary}[Introduction to AI]
+\begin{itemize}[nosep]
+  \item \textbf{Intelligence}: general capability to reason, plan, solve problems, think
+        abstractly, comprehend complex ideas, learn quickly and learn from experience. Many
+        kinds exist (Gardner's 9 intelligences, emotional intelligence).
+  \item \textbf{System 1} = fast, automatic, intuitive; \textbf{System 2} = slow, effortful,
+        logical (Kahneman, 2011). Parallel in AI: System~1 $\approx$ machine learning,
+        System~2 $\approx$ symbolic AI (logic, planning, search).
+  \item \textbf{AI} (Russell \& Norvig): the study of \emph{intelligent agents}, devices
+        that perceive their environment and act to maximise the chance of achieving their goals.
+  \item \textbf{Key dates}: 1950 Turing test; 1956 Dartmouth workshop (the term ``AI'');
+        1966--72 Shakey; 1970--72 Prolog; 1974--80 and 1987--93 AI winters; 1997 Deep Blue;
+        2011 Watson; 2012 Google Brain cats; 2016 AlphaGo; 2019 AlphaStar; 2020+ AlphaFold,
+        generative AI; now agentic AI.
+  \item \textbf{Risks}: biased decisions (State v.\ Loomis), privacy (ChatGPT blocked in
+        Italy), safety and security of autonomous agents. \textbf{Responses}: Asilomar
+        principles (2017), EU Ethics guidelines for trustworthy AI (2019).
+  \item \textbf{Sub-symbolic AI} = numerical representation + machine learning + distributed
+        representation. \textbf{Symbolic AI} (GOFAI) = knowledge representation + logical
+        reasoning + problem-solving algorithms. \textbf{Neurosymbolic AI} combines them.
+  \item \textbf{SDAI} = the symbolic component of neurosymbolic AI, used inside distributed
+        systems of autonomous agents: a \textbf{multi-agent system (MAS)}.
+\end{itemize}
+\end{nbsummary}

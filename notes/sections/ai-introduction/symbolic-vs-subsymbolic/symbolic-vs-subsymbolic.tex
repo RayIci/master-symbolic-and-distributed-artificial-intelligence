@@ -1,0 +1,149 @@
+\subsection{Symbolic vs.\ sub-symbolic AI, and what this course is about}
+\label{sec:symbolic-vs-subsymbolic}
+\slidesrc{Thinking machines: 88--97}
+
+The deck ends by going ``back to the first slides'': Kahneman's two systems
+(Section~\ref{sec:system1-system2}) give the key to read the whole history of AI.
+
+\subsubsection{Two families of AI}
+\slidesrc{Thinking machines: 89--90}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, >=Stealth,
+  c/.style={circle, fill=#1, text=white, minimum size=1.55cm, align=center, inner sep=1pt}]
+  % sub-symbolic
+  \node[font=\small\bfseries] at (3.1,2.75) {Sub-symbolic AI};
+  \node[c=nborange] (n1) at (0,0) {Numerical\\represen-\\tation};
+  \node[c=nborange] (n2) at (2.05,0) {Machine\\learning};
+  \node[c=nborange] (n3) at (4.1,0) {Distributed\\represen-\\tation};
+  \node[font=\large\bfseries, inner sep=0pt] at (1.025,0) {+};
+  \node[font=\large\bfseries, inner sep=0pt] at (3.075,0) {+};
+  \node[font=\large\bfseries, inner sep=0pt] at (5.125,0) {=};
+  \node[c=nborange!70!black] at (6.15,0) {The sub-\\symbolic\\approach};
+  % symbolic
+  \begin{scope}[xshift=10.1cm]
+  \node[font=\small\bfseries] at (0,2.75) {Symbolic AI (GOFAI)};
+  \node[c=nbblue!70!black] (s) at (0,-0.6) {The\\symbolic\\approach};
+  \node[c=nbblue] (k) at (0,1.0-1.6+2.2) {Knowledge\\represen-\\tation};
+  \node[c=nbblue] (p) at (-1.55,-1.95) {Problem-\\solving\\algorithms};
+  \node[c=nbblue] (l) at (1.55,-1.95) {Logical\\reasoning};
+  \draw[->, very thick, nbgray] (s) -- (k);
+  \draw[->, very thick, nbgray] (s) -- (p);
+  \draw[->, very thick, nbgray] (s) -- (l);
+  \end{scope}
+\end{tikzpicture}
+\captionof{figure}{The two families of AI (slides 89--90). Sub-symbolic AI: knowledge is
+numbers spread over many parameters, learned from data. Symbolic AI: knowledge is explicit
+symbols, manipulated by reasoning and search.}
+\end{center}
+
+\begin{nbdef}{Sub-symbolic AI}
+AI where knowledge is encoded as \textbf{numbers} (e.g.\ the weights of a neural network),
+\textbf{learned} from data (machine learning), and \textbf{distributed}: no single number
+means ``cat'' or ``stop sign''; the meaning is spread over millions of parameters.
+\end{nbdef}
+
+\begin{nbdef}{Symbolic AI (``Good Old-Fashioned AI'', GOFAI)}
+AI where knowledge is written explicitly as \textbf{symbols} that humans can read (facts,
+rules, logical formulas, plans), and intelligence is obtained by \textbf{knowledge
+representation}, \textbf{logical reasoning} and \textbf{problem-solving algorithms}
+(search, planning).
+\end{nbdef}
+
+\begin{nbexample}{the same knowledge, two ways}
+Knowledge: ``Socrates is a human; all humans are mortal''.
+\begin{itemize}[nosep]
+  \item \emph{Symbolic}: two lines of Prolog (Part~IV),
+        \code{human(socrates).} and \code{mortal(X) :- human(X).}
+        Asking \code{?- mortal(socrates).} gives \code{true}, and the system can show the
+        proof: rule + fact.
+  \item \emph{Sub-symbolic}: a language model has read millions of sentences about
+        Socrates and mortality; asked ``is Socrates mortal?'' it answers ``yes'' because
+        this is the most likely continuation. The ``knowledge'' is somewhere in billions of
+        weights and cannot be pointed at.
+\end{itemize}
+\end{nbexample}
+
+\subsubsection{Thinking fast and slow in AI}
+\slidesrc{Thinking machines: 88, 91}
+
+The paper \emph{Thinking Fast and Slow in AI} (G.~Booch, F.~Rossi and others, AAAI 2021)
+draws a loose parallel between Kahneman's two systems and the two main lines of work in AI:
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+ & \textbf{System 1 $\approx$ machine learning} & \textbf{System 2 $\approx$ symbolic AI} \\
+\midrule
+Style & data-driven, fast, intuitive & knowledge-driven, slow, deliberate \\
+Good at & perception from sensory data (seeing, reading, hearing); building (possibly
+  imprecise and biased) models from data & complex problems: logic, search, optimisation,
+  planning, with explicit knowledge, symbols and high-level concepts \\
+Weak at & common-sense reasoning, basic notions of causality, explanations & noisy
+  perception, learning from raw data, scaling to huge open-ended domains \\
+Example & recognise a pedestrian in a camera image & decide that the car must yield
+  because traffic rules say so \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{The parallel of slide 91 (``Thinking Fast and Slow in AI''), with examples.}
+\end{center}
+
+As in humans, the two sets of capabilities are \textbf{symbiotic}: this supports
+\textbf{hybrid, neurosymbolic} approaches to AI.
+
+\begin{nbdef}{Neurosymbolic AI}
+\textbf{Neurosymbolic AI} combines neural networks (sub-symbolic learning) with symbolic
+representations and reasoning, to obtain systems that are more versatile and more
+dependable than either alone (slides 92--95: articles in \emph{Communications of the ACM}
+2022, IBM Research, the book \emph{Neuro-Symbolic Artificial Intelligence: The State of the
+Art}, and the journal \emph{Neurosymbolic Artificial Intelligence}, founded in 2023).
+\end{nbdef}
+
+\begin{nbexample}{a neurosymbolic self-driving car}
+\notinslides
+\begin{center}
+\begin{tikzpicture}[>=Stealth, font=\small, node distance=0.6cm,
+  b/.style={draw, rounded corners, thick, align=center, minimum height=0.9cm, text width=2.7cm}]
+  \node[b, draw=nbgray] (cam) {camera image};
+  \node[b, draw=nborange, fill=nborange!8, right=of cam] (nn) {\textbf{neural network}\\(System 1)};
+  \node[b, draw=nbblue, fill=nbblue!8, below=0.9cm of nn] (rules) {\textbf{traffic rules}\\(System 2, symbolic)};
+  \node[b, draw=nbgreen, right=of rules] (act) {action: brake};
+  \draw[->, thick] (cam) -- (nn);
+  \draw[->, thick] (nn) -- node[right, font=\scriptsize, align=left]{facts: \code{pedestrian(p1)},\\\code{on\_crossing(p1)}} (rules);
+  \draw[->, thick] (rules) -- (act);
+\end{tikzpicture}
+\end{center}
+The neural part turns pixels into \emph{symbols} (``there is a pedestrian on the zebra
+crossing''); the symbolic part applies explicit, auditable rules
+(``if a pedestrian is on a crossing, then yield''). If the car brakes, we can explain why.
+\end{nbexample}
+
+\subsubsection{What SDAI is about}
+\slidesrc{Thinking machines: 96--97}
+
+\begin{nbfact}{The course in one paragraph (slide 96)}
+The Symbolic and Distributed AI course is about the \textbf{symbolic component of
+neurosymbolic AI}. It exploits symbolic AI in the context of \textbf{distributed AI
+systems}, where (symbolic, but not only) intelligent software \textbf{agents} distributed
+across different machines operate \textbf{autonomously}, to \textbf{coordinate/collaborate}
+in order to achieve some common goal, or to \textbf{compete} to access shared resources. A
+system consisting of these distributed agents, as well as their environment and the
+organisations they are part of, is named \textbf{multi-agent system} (MAS).
+\end{nbfact}
+
+\begin{center}
+\begin{tikzpicture}[>=Stealth, font=\small,
+  b/.style={draw, rounded corners, thick, align=center, text width=3.4cm, minimum height=1cm}]
+  \node[b, draw=nbblue, fill=nbblue!8] (sym) at (0,0) {\textbf{Symbolic AI}\\logic (Part II)\\Prolog (Part IV)};
+  \node[b, draw=nbteal, fill=nbteal!8] (dis) at (7,0) {\textbf{Distributed AI}\\agents, MAS (Part III)};
+  \node[b, draw=nbpurple, fill=nbpurple!8, text width=5.6cm] (mas) at (3.5,-2.2)
+    {\textbf{Symbolic agents in a MAS}\\BDI agents, AgentSpeak/Jason, communication,
+     JADE, simulation (Part V)};
+  \draw[->, thick] (sym) -- (mas);
+  \draw[->, thick] (dis) -- (mas);
+\end{tikzpicture}
+\captionof{figure}{How the parts of these notes fit together.}
+\end{center}
+
+Welcome on board, and let's have fun with S\&DAI!

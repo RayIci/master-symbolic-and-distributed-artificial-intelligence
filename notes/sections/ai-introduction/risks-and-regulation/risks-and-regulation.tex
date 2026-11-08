@@ -1,0 +1,77 @@
+\subsection{But\ldots{} risks, and the answers to them}
+\label{sec:risks-and-regulation}
+\slidesrc{Thinking machines: 80--87}
+
+The slides now switch tone (``But\ldots''): AI systems already take or support decisions
+that affect people, and things can go wrong.
+
+\subsubsection{Things that went wrong, or might}
+\slidesrc{Thinking machines: 80--84}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Case} & \textbf{What happened} & \textbf{The underlying risk} \\
+\midrule
+State v.\ Loomis (2016--17) & The Wisconsin Supreme Court allowed judges to use an
+  algorithmic risk-assessment score (predicting the risk of re-offending) in sentencing,
+  but required a written warning about its limits. The defendant could not inspect how the
+  proprietary algorithm worked. & opaque decisions about people's freedom; possible bias;
+  no way to contest the reasoning \\
+``Smart courts'' in China (2019) & Courts adopt AI assistants (e.g.\ Shanghai's
+  ``System 206'') to check evidence and support judges. & automation of justice; who is
+  accountable? \\
+ChatGPT banned in Italy (2023) & The Italian data protection authority temporarily
+  blocked ChatGPT over privacy concerns (personal data used for training, no age checks). &
+  privacy and data protection \\
+AI leaders at the UN Security Council & The heads of OpenAI (Sam Altman) and Anthropic
+  (Dario Amodei) gave separate briefings on AI safety to the UN Security Council. &
+  global safety and security \\
+Incidents with AI agents (slide 84) & News reports about security incidents involving AI
+  platforms and AI agents that were misused or hijacked. & autonomous agents acting in the
+  real world can be attacked or misbehave \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{The cautionary examples of slides 80--84.}
+\end{center}
+
+\begin{nbintuition}[Why symbolic AI helps here]
+In State v.\ Loomis the core problem is that nobody could \emph{see} why the system gave a
+certain score. A symbolic system (a set of logical rules, a Prolog program, a BDI agent
+with explicit plans) can \emph{explain} its conclusions: ``I concluded $X$ because of rule
+$R$ applied to facts $F_1$ and $F_2$''. Explainability, verifiability and accountability
+are among the strongest arguments for the symbolic side of AI.
+\end{nbintuition}
+
+\subsubsection{And hence: principles and guidelines}
+\slidesrc{Thinking machines: 85--87}
+
+\begin{itemize}
+  \item \textbf{Asilomar AI Principles} (Future of Life Institute, 2017): 23 principles
+        developed at the 2017 Asilomar conference, grouped into research issues, ethics and
+        values (e.g.\ safety, transparency, responsibility, human control, privacy), and
+        longer-term issues.
+  \item \textbf{Ethics Guidelines for Trustworthy AI} (European Commission, High-Level
+        Expert Group on AI, 8 April 2019). Trustworthy AI must be \emph{lawful},
+        \emph{ethical} and \emph{robust}, and should meet seven key requirements (listed
+        below, not in the slides).
+  \item \textbf{Calls to slow down} (New York Times, September 2026): top AI leaders, among
+        them the head of Anthropic, argued that capabilities are advancing so quickly that
+        greater safety controls are needed across the industry.
+\end{itemize}
+
+\begin{nbfact}{The seven requirements for trustworthy AI (EU, 2019)}
+\notinslides
+\begin{enumerate}[nosep]
+  \item human agency and oversight;
+  \item technical robustness and safety;
+  \item privacy and data governance;
+  \item transparency (including explainability);
+  \item diversity, non-discrimination and fairness;
+  \item societal and environmental well-being;
+  \item accountability.
+\end{enumerate}
+These guidelines were followed by the EU \emph{AI Act} (in force since 2024), which
+regulates AI systems according to their level of risk.
+\end{nbfact}

@@ -1,0 +1,51 @@
+\documentclass[12pt]{article}
+
+\usepackage[a4paper, total={6in, 9in}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage[parfill]{parskip}
+\usepackage{minted}            % code listings; needs latexmk -shell-escape
+\setminted{breaklines=true, fontsize=\small, linenos=true, frame=lines, framesep=2mm}
+
+\input{preamble/preamble}      % boxes, colours, macros, plot style, solutions toggle
+\renewcommand{\nbwhytitle}{Why this matters in practice}
+% \showsolutionsfalse          % uncomment to hide all exercise solutions
+
+\title{Symbolic and Distributed Artificial Intelligence\\[4pt]\large Course Notes}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+\tcblistof[\section*]{whiteboards}{List of whiteboards}
+\noindent\small The professor wrote these on the whiteboard during the lectures. They are
+exam material: each one is redrawn in a clean form, and the original photo is shown next to it.
+\normalsize
+\newpage
+
+% one line per section, in reading order (lecture order)
+\part{Introduction}
+\input{sections/ai-introduction/ai-introduction}
+
+\part{Logic}
+\input{sections/propositional-logic/propositional-logic}
+\input{sections/first-order-logic/first-order-logic}
+
+\part{Agents and Multi-Agent Systems}
+\input{sections/agents-and-mas/agents-and-mas}
+\input{sections/agent-architectures/agent-architectures}
+\input{sections/engineering-mas/engineering-mas}
+
+\part{Prolog}
+\input{sections/prolog/prolog}
+
+\part{Cognitive Agents, Communication and Platforms}
+\input{sections/bdi-agentspeak/bdi-agentspeak}
+\input{sections/agent-communication/agent-communication}
+\input{sections/jade/jade}
+\input{sections/abms/abms}
+
+\end{document}

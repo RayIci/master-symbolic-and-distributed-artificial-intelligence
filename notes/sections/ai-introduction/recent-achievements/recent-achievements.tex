@@ -1,0 +1,109 @@
+\subsection{Some more recent achievements}
+\label{sec:recent-achievements}
+\slidesrc{Thinking machines: 68--79}
+
+After 2016 the pace accelerated. The slides show a selection of results; for each one,
+here is what it is and why it matters.
+
+\subsubsection{Games, medicine and emergent behaviour}
+\slidesrc{Thinking machines: 68--71}
+
+\begin{itemize}
+  \item \textbf{AlphaStar} (DeepMind, 2019). StarCraft~II is a real-time strategy video game:
+        many units, partial information (you do not see the whole map), real-time decisions.
+        AlphaStar won its historic series against professional players (announced on
+        January 24, 2019, after matches recorded in December 2018; e.g.\ 5--0 against the pro
+        player MaNa).
+  \item \textbf{Lung cancer screening} (\emph{Nature Medicine}, May 2019). A
+        three-dimensional deep learning model analyses low-dose chest CT scans end to end and
+        detects lung cancer with performance comparable to, or better than, expert
+        radiologists.
+  \item \textbf{Emergent tool use from multi-agent autocurricula} (OpenAI, ICLR 2020). Agents
+        play \emph{hide-and-seek} in a simulated world with movable boxes and ramps. Nobody
+        tells them how to use the objects; just by competing, the teams discover a sequence
+        of strategies: hiders build shelters with boxes, seekers use ramps to jump in,
+        hiders then lock the ramps away, seekers ``surf'' on boxes, and so on.
+\end{itemize}
+
+\begin{nbwhy}[A multi-agent system in action]
+The hide-and-seek experiment is a \emph{multi-agent system}: several autonomous agents,
+in a shared environment, competing (hiders vs.\ seekers) and cooperating (inside a team).
+Complex behaviour \emph{emerges} from simple goals and interaction, with no central
+controller. Keep this example in mind for Part~III (agents and MAS) and for agent-based
+simulation (Section~\ref{sec:abms}).
+\end{nbwhy}
+
+\subsubsection{Self-driving cars: the SAE levels of driving automation}
+\slidesrc{Thinking machines: 72--74}
+
+How ``autonomous'' is an autonomous car? The SAE J3016 standard defines six levels.
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{@{}c >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Level} & \textbf{What the human must do} & \textbf{What the features do} & \textbf{Examples} \\
+\midrule
+\rowcolor{nbblue!6} 0 & You \textbf{are driving}, even if features are on; constantly supervise & warnings and momentary assistance & automatic emergency braking, blind-spot warning, lane departure warning \\
+\rowcolor{nbblue!6} 1 & same as level 0 & steering \textbf{or} brake/acceleration support & lane centering \textbf{or} adaptive cruise control \\
+\rowcolor{nbblue!6} 2 & same as level 0 & steering \textbf{and} brake/acceleration support & lane centering \textbf{and} adaptive cruise control together \\
+\rowcolor{nbgreen!8} 3 & You are \textbf{not driving} while features are engaged, but you must take over when the system requests it & drives the vehicle under limited conditions & traffic jam chauffeur \\
+\rowcolor{nbgreen!8} 4 & You are not driving; you will never be required to take over & drives under limited conditions, never needs you & local driverless taxi; pedals and steering wheel may not be installed \\
+\rowcolor{nbgreen!8} 5 & You are not driving & drives everywhere, in all conditions & as level 4, but anywhere \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{SAE levels of driving automation (slide 72). Blue rows: \emph{driver support}
+features (the human drives). Green rows: \emph{automated driving} features (the system
+drives).}
+\end{center}
+
+The slides note (2024 news) that a \textbf{Level~3} car can now be bought in the US: the
+Mercedes-Benz system works only on a small selection of roads, at limited speed and only in
+some states, and its wide adoption will require regulators to catch up.
+
+\begin{nbintuition}[Levels of autonomy, again later]
+The question ``how much can the system decide by itself, and when must a human step in?''
+is the question of \textbf{autonomy}, the defining property of agents
+(Section~\ref{sec:agents-and-mas}). The jump from level 2 to level 3 is exactly the moment
+in which responsibility moves from the human to the agent.
+\end{nbintuition}
+
+\subsubsection{Generative AI, protein folding and agentic AI}
+\slidesrc{Thinking machines: 75--79}
+
+On slide 75 the professor asked ChatGPT itself: ``which are the three most impressive
+achievements in the AI research field in the last three years (short answer)''. The answer:
+\begin{enumerate}[nosep]
+  \item \textbf{Generative AI}: models such as GPT-4 and DALL-E generate coherent text,
+        images and creative content.
+  \item \textbf{AI in protein folding}: DeepMind's AlphaFold accurately predicts protein
+        structures, solving a 50-year-old problem in biology.
+  \item \textbf{AI alignment and safety research}: progress in interpretability, alignment
+        and safety (e.g.\ by OpenAI and Anthropic) to control the behaviour of advanced AI.
+\end{enumerate}
+
+\begin{nbdef}{Protein folding problem}
+A protein is a chain of amino acids. The \textbf{protein folding problem} is the question of
+how a protein's amino acid sequence dictates its three-dimensional atomic structure. It
+first emerged around 1960, with the first atomic-resolution protein structures.
+\end{nbdef}
+
+\textbf{AlphaFold2} (DeepMind) predicts the 3D structure of proteins from their amino acid
+sequence with near-experimental accuracy; more than 200 million predicted structures have
+been released. Knowing a protein's shape tells biologists how it works, which speeds up
+drug discovery and protein design (2023 review; PNAS 2024, ``AlphaFold two years on'').
+
+Finally, slide 79: \textbf{agentic AI}, presented as ``the next evolution of artificial
+intelligence''. An agentic AI system does not just answer one question: given a goal, it
+plans, calls tools (search engines, APIs, other programs), observes the results and acts
+again, autonomously, over many steps.
+
+\begin{nbwhy}[Old ideas, new engines]
+Agentic AI is the 2020s name for an idea this course has studied for decades:
+\textbf{autonomous agents} that perceive, decide and act towards goals, and
+\textbf{multi-agent systems} in which several of them coordinate. The difference is the
+engine: a large language model instead of (or together with) explicit beliefs, goals and
+plans. Understanding classic agents (BDI, communication protocols, platforms) is what makes
+it possible to engineer agentic AI systems that are reliable.
+\end{nbwhy}
