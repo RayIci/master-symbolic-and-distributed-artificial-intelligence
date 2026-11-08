@@ -1,0 +1,119 @@
+\subsection{Deliberative and hybrid architectures}
+\label{sec:deliberative-hybrid}
+\slidesrc{Agent architectures: 37--41}
+
+\subsubsection{Deliberative architectures}
+\slidesrc{Agent architectures: 37--39}
+
+\begin{nbdef}{Deliberative agent architecture (slide 37)}
+\begin{itemize}[nosep]
+  \item an \textbf{explicit symbolic model of the world};
+  \item decisions are made via \textbf{logical reasoning}, based on pattern matching and
+        symbolic manipulation;
+  \item the \textbf{sense--plan--act} problem-solving paradigm of classical AI planning
+        systems.
+\end{itemize}
+\end{nbdef}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  m/.style={draw, thick, rounded corners, minimum width=2.0cm, minimum height=0.9cm, fill=#1, align=center}]
+  \draw[thick, rounded corners] (0,0) rectangle (8,2.2);
+  \node[font=\small\bfseries] at (4,1.95) {Agent};
+  \node[draw, thick, fill=nbgreen!15, minimum width=0.7cm, minimum height=2.0cm] (S) at (-0.8,1.1) {\rotatebox{90}{Sensors}};
+  \node[draw, thick, fill=nbred!15, minimum width=0.7cm, minimum height=2.0cm] (E) at (8.8,1.1) {\rotatebox{90}{Effectors}};
+  \node[m=nbblue!10] (W) at (1.5,0.95) {World\\model};
+  \node[m=nbpurple!10] (P) at (4,0.95) {Planner};
+  \node[m=nborange!12] (X) at (6.5,0.95) {Plan\\executor};
+  \draw[->, thick] (S.east) -- (W);
+  \draw[->, thick] (W) -- (P);
+  \draw[->, thick] (P) -- (X);
+  \draw[->, thick] (X) -- (E.west);
+\end{tikzpicture}
+\captionof{figure}{Basic deliberative architecture (slide 38): sense (update the world model),
+plan, act. Shakey with its STRIPS planner (Section~\ref{sec:ai-history}) is the classic
+example.}
+\end{center}
+
+\begin{nbfact}{Problems of the deliberative approach (slide 39)}
+\begin{itemize}[nosep]
+  \item \textbf{Dynamic world}: the symbolic world model must be updated, and the world
+        changes \emph{while} planning is being done.
+  \item \textbf{Representation language}: it must be expressive enough to be useful in any
+        domain, but limited enough to be computationally tractable (recall FOL's
+        undecidability, Section~\ref{sec:decidability}).
+  \item \textbf{Classical planning} looks for complete, optimal solutions: high
+        computational cost, whereas sometimes a sub-optimal, low-cost, fast reaction is
+        effective.
+\end{itemize}
+\end{nbfact}
+
+\begin{nbexample}{when the plan is already wrong}
+\notinslides
+A delivery robot plans the shortest route through a hospital corridor (2 seconds of
+planning). Meanwhile a bed is pushed into the corridor. The plan was optimal for a world that
+no longer exists. A purely deliberative robot either drives into the bed or must stop and
+re-plan every time anything moves. This is the motivation for hybrid architectures.
+\end{nbexample}
+
+\subsubsection{Hybrid architectures}
+\slidesrc{Agent architectures: 40--41}
+
+Many researchers have argued that neither a completely deliberative nor a completely
+reactive approach is suitable for building agents. They suggest \textbf{hybrid systems},
+which marry the classical and the alternative approach. The obvious way is to build an
+agent out of two (or more) subsystems:
+\begin{itemize}[nosep]
+  \item a \textbf{deliberative} one, containing a symbolic world model, which develops plans
+        and makes decisions in the way proposed by symbolic AI;
+  \item a \textbf{reactive} one, capable of reacting quickly to events without complex
+        reasoning.
+\end{itemize}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  m/.style={draw, thick, rounded corners, minimum width=1.9cm, minimum height=0.8cm, fill=#1, align=center},
+  r/.style={draw, rounded corners, minimum width=1.3cm, minimum height=0.5cm, fill=#1}]
+  \draw[thick, rounded corners] (0,0) rectangle (8,4.6);
+  \node[font=\small\bfseries] at (4,4.35) {Agent};
+  \node[draw, thick, fill=nbgreen!15, minimum width=0.7cm, minimum height=4.4cm] (S) at (-0.8,2.3) {\rotatebox{90}{Sensors}};
+  \node[draw, thick, fill=nbred!15, minimum width=0.7cm, minimum height=4.4cm] (E) at (8.8,2.3) {\rotatebox{90}{Effectors}};
+  % reactive
+  \draw[thick, dashed, nborange, rounded corners] (0.3,2.45) rectangle (7.7,4.05);
+  \node[font=\scriptsize, nborange] at (4,3.85) {reactive component};
+  \node[r=nbblue!10] (s1) at (2,3.3) {State$_1$}; \node[r=nborange!12] (a1) at (6,3.3) {Action$_1$};
+  \node[r=nbblue!10] (s2) at (2,2.8) {State$_n$}; \node[r=nborange!12] (a2) at (6,2.8) {Action$_n$};
+  \draw[->] (s1) -- (a1); \draw[->] (s2) -- (a2);
+  % deliberative
+  \draw[thick, dashed, nbpurple, rounded corners] (0.3,0.25) rectangle (7.7,1.9);
+  \node[font=\scriptsize, nbpurple] at (4,0.45) {deliberative component};
+  \node[m=nbblue!10] (W) at (1.6,1.15) {World\\model};
+  \node[m=nbpurple!10] (P) at (4,1.15) {Planner};
+  \node[m=nborange!12] (X) at (6.4,1.15) {Plan\\executor};
+  \draw[->, thick] (W) -- (P); \draw[->, thick] (P) -- (X);
+  \draw[->, thick] (S.east |- 3.05,3.05) -- (0.3,3.05);
+  \draw[->, thick] (S.east |- 1.15,1.15) -- (W);
+  \draw[->, thick] (7.7,3.05) -- (E.west |- 3.05,3.05);
+  \draw[->, thick] (X) -- (E.west |- 1.15,1.15);
+  \draw[->, thick, nbgray] (3.0,2.45) -- node[left, font=\scriptsize]{observations} (3.0,1.9);
+  \draw[<-, thick, nbgray] (5.0,2.45) -- node[right, font=\scriptsize]{modifications} (5.0,1.9);
+\end{tikzpicture}
+\captionof{figure}{Hybrid agent architecture (slide 41). The reactive layer handles urgent
+situations immediately; the deliberative layer plans; the two exchange observations and
+modifications (e.g.\ the planner can install new reactive rules, the reactive layer reports
+what it did).}
+\end{center}
+
+Hybrid architectures are usually \textbf{layered}: well-known examples are
+\textbf{TouringMachines} (Ferguson, 1992) and \textbf{InteRRaP} (M\"uller and Pischel,
+1994), see Section~\ref{sec:agents-history}; TouringMachines reappear in the EMAS keynote
+(Section~\ref{sec:engineering-mas}).
+
+\begin{nbwhy}[Hybrid architectures in a self-driving car]
+\notinslides
+The emergency-braking module is reactive: ``obstacle closer than 5\,m $\Rightarrow$ brake'',
+in milliseconds, no reasoning. The route planner is deliberative: it uses a map and traffic
+information and re-plans when a road is closed. A middle layer turns the plan into
+manoeuvres. Without the reactive layer the car is unsafe; without the deliberative layer it
+never gets anywhere useful.
+\end{nbwhy}

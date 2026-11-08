@@ -1,0 +1,117 @@
+\subsection{What is an agent architecture?}
+\label{sec:architectures-overview}
+\slidesrc{Agent architectures: 11--14}
+
+\begin{nbdef}{Agent architecture (slide 11)}
+An \textbf{architecture} proposes a particular methodology for building an autonomous agent:
+\begin{itemize}[nosep]
+  \item how the construction of the agent can be decomposed into the construction of a set
+        of \textbf{component modules};
+  \item how these modules should be made to \textbf{interact}.
+\end{itemize}
+These two aspects define how the \emph{sensor data} and the \emph{current internal state}
+of the agent determine the \emph{actions} (effector outputs) and the \emph{future internal
+state} of the agent.
+\end{nbdef}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  fn/.style={draw, thick, circle, minimum size=0.9cm, fill=nbblue!10},
+  st/.style={draw, thick, minimum width=0.8cm, minimum height=0.9cm, fill=nborange!12}]
+  \draw[thick, nbgray, rounded corners] (0.6,-1.4) rectangle (7.4,1.5);
+  \node[font=\scriptsize, nbgray] at (6.9,-1.2) {agent};
+  \node (in) at (-0.8,0) {perception $p$};
+  \node[fn] (f) at (2,0) {$f$};
+  \node[st] (s) at (4,0) {$s$};
+  \node[fn] (g) at (6,0) {$g$};
+  \node (out) at (8.8,0) {action $a$};
+  \draw[->, thick] (in) -- (f);
+  \draw[->, thick] (f) -- (s);
+  \draw[->, thick] (s) -- (g);
+  \draw[->, thick] (g) -- (out);
+  \draw[->, thick] (1.0,0) |- (6,1.05) -- (g.north);
+  \draw[->, thick] (4.7,0) |- (2,-0.95) -- (f.south);
+  \fill (1.0,0) circle (1.6pt); \fill (4.7,0) circle (1.6pt);
+\end{tikzpicture}
+\captionof{figure}{From perception to action (slide 12): $f$ = state update function, $s$ =
+internal state, $g$ = output function. The new state depends on the old state and the
+percept; the action depends on the state and the percept.}
+\end{center}
+
+In formulas, at each step $t$:
+\begin{align*}
+s_t &= f(s_{t-1},\, p_t) && \reason{update the internal state with what was perceived} \\
+a_t &= g(s_t,\, p_t) && \reason{choose the action}
+\end{align*}
+
+\begin{nbexample}{a smart thermostat as $f$, $s$, $g$}
+\notinslides
+Percept $p_t$: the measured temperature. State $s_t$: the average of the last three
+temperatures (to ignore a sensor glitch). Output: switch the heater on if the average is
+below 20\,$^\circ$C.
+\begin{center}
+\small
+\begin{tabular}{@{}c c c c l@{}}
+\toprule
+$t$ & $p_t$ & last three & $s_t$ (average) & $a_t = g(s_t, p_t)$ \\
+\midrule
+1 & 19 & 21, 21, 19 & 20.33 & off \\
+2 & 18 & 21, 19, 18 & 19.33 & on \\
+3 & 25 (glitch) & 19, 18, 25 & 20.67 & off \\
+\bottomrule
+\end{tabular}
+\end{center}
+(Initial readings 21, 21.) The internal state is what lets an agent do better than reacting
+to the last percept only; how much state, and how it is used, is exactly what distinguishes
+the architectures below.
+\end{nbexample}
+
+\begin{nbfact}{Main kinds of agent architectures (slide 13)}
+\begin{itemize}[nosep]
+  \item \textbf{Reactive} architectures: focused on fast reactions/responses to changes
+        detected in the environment.
+  \item \textbf{Deliberative} (symbolic) architectures: focused on long-term planning of
+        actions, centred on a set of basic goals.
+  \item \textbf{Hybrid} architectures: combining a reactive side and a deliberative side.
+\end{itemize}
+\end{nbfact}
+
+\begin{nbexample}{reactive vs.\ deliberative: a robot that has to reach a point (slide 14)}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+\textbf{Reactive robot} & \textbf{Deliberative robot} \\
+\midrule
+a sensor in the front of the robot & an explicit representation of the environment (a map) \\
+change movement right/left when the sensor detects an obstacle & a planning procedure finds
+  the minimal route between the current position and the destination \\
+minimal computation, based on current location and destination point & high computational
+  cost; possible dynamic re-planning needed \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\begin{center}
+\begin{tikzpicture}[scale=0.62, font=\scriptsize, >=Stealth]
+  \begin{scope}
+    \draw[nbgray] (0,0) rectangle (6,4);
+    \fill[nbgray!50] (2,1) rectangle (3,4); \fill[nbgray!50] (4,0) rectangle (4.6,2.6);
+    \node[circle, fill=nbblue, inner sep=2pt, label=below:start] (A) at (0.6,0.6) {};
+    \node[star, fill=nbgreen, inner sep=1.5pt, label=above:goal] (B) at (5.4,3.4) {};
+    \draw[->, thick, nborange] (A) -- (1.8,0.6) -- (1.8,0.4) -- (2.2,0.5) -- (3.4,0.4) -- (3.6,1.4) -- (3.8,2.9) -- (4.4,2.8) -- (4.9,3.2) -- (B);
+    \node at (3,-0.6) {reactive: bumps and turns};
+  \end{scope}
+  \begin{scope}[xshift=8cm]
+    \draw[nbgray] (0,0) rectangle (6,4);
+    \fill[nbgray!50] (2,1) rectangle (3,4); \fill[nbgray!50] (4,0) rectangle (4.6,2.6);
+    \node[circle, fill=nbblue, inner sep=2pt, label=below:start] (A) at (0.6,0.6) {};
+    \node[star, fill=nbgreen, inner sep=1.5pt, label=above:goal] (B) at (5.4,3.4) {};
+    \draw[->, thick, nbpurple] (A) -- (3.5,0.5) -- (3.6,3.1) -- (B);
+    \node at (3,-0.6) {deliberative: planned shortest path};
+  \end{scope}
+\end{tikzpicture}
+\captionof{figure}{Same task, two architectures. The reactive robot computes almost nothing
+but wanders; the deliberative one finds the best route but must have a correct map and
+re-plan if a wall moves.}
+\end{center}
+\end{nbexample}

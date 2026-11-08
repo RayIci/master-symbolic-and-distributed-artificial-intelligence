@@ -1,2 +1,47 @@
 \section{Agent architectures}
 \label{sec:agent-architectures}
+\slidesrc{Agent architectures: 1--41}
+
+How is an agent built \emph{inside}? This chapter (slides from a course by URV, Tarragona,
+with comments by prof.\ Mascardi) first looks at what an agent must cope with, namely its
+\emph{environment}, and then at the three main families of \textbf{agent architectures}:
+\begin{enumerate}[nosep]
+  \item \textbf{reactive}: fast stimulus--response rules, no model of the world (Brooks);
+  \item \textbf{deliberative}: an explicit symbolic model of the world and a planner;
+  \item \textbf{hybrid}: a reactive layer and a deliberative layer together.
+\end{enumerate}
+The BDI architecture of Part~V is a practical-reasoning architecture that combines
+deliberation (goals, plans) with reactivity (events), in the spirit of the hybrid approach.
+
+\input{sections/agent-architectures/agents-and-environments/agents-and-environments}
+\input{sections/agent-architectures/architectures-overview/architectures-overview}
+\input{sections/agent-architectures/reactive-architectures/reactive-architectures}
+\input{sections/agent-architectures/deliberative-hybrid/deliberative-hybrid}
+
+\begin{nbsummary}[Agent architectures]
+\begin{itemize}[nosep]
+  \item Environments can be: accessible/inaccessible, deterministic/non-deterministic,
+        episodic/non-episodic, static/dynamic, discrete/continuous. The real world is the
+        hardest case on every axis.
+  \item An \textbf{architecture} = decomposition of the agent into modules + how they
+        interact; it determines how percepts and internal state produce actions and the next
+        state: $s' = f(s, p)$, $a = g(s', p)$.
+  \item \textbf{Reactive}: rules $S \to A$, no world model, tight perception--action
+        coupling, emergent behaviour. Brooks: intelligence without representation and without
+        abstract reasoning; situatedness, embodiment, emergence; \textbf{subsumption}
+        architecture (layers of behaviours competing for control).
+  \item Steels' Mars explorer: 5 prioritised rules (avoid obstacles, drop samples at base,
+        go home up the gradient, pick up samples, move randomly).
+  \item Reactive \textbf{pros}: simple, fast, tractable, good in dynamic unpredictable
+        environments. \textbf{Cons}: short-term view, no long-term planning, hard to
+        learn, no principled engineering method (Whiteboard~\ref{wb:reactive-pros-cons}).
+  \item \textbf{Deliberative}: explicit symbolic world model + planner + plan executor
+        (sense--plan--act); problems: world changes while planning, expressiveness vs.\
+        tractability, high cost.
+  \item \textbf{Hybrid}: reactive component for quick reactions + deliberative component
+        for planning (TouringMachines, InteRRaP).
+  \item Prof.\ Mascardi's remarks: an ant colony is a MAS, not a single-agent
+        architecture; robustness comes from modularity, not from reactivity; elegance is
+        not an engineering property.
+\end{itemize}
+\end{nbsummary}

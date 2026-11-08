@@ -1,0 +1,94 @@
+\subsection{Agents and their environments}
+\label{sec:agents-and-environments}
+\slidesrc{Agent architectures: 1--10}
+
+\subsubsection{Three classic definitions of agent}
+\slidesrc{Agent architectures: 3--5}
+
+The slides recall three classic definitions (the sources are added):
+\begin{enumerate}
+  \item ``An agent is anything that can be viewed as \emph{perceiving its environment
+        through sensors} and \emph{acting upon that environment through effectors}.''
+        \hfill (Russell and Norvig)
+  \item ``Autonomous agents are computational systems that inhabit some complex dynamic
+        environment, sense and act autonomously in this environment, and by doing so realize
+        a set of goals or tasks for which they are designed.'' \hfill (P.~Maes)
+  \item ``An autonomous agent is a system situated within and a part of an environment that
+        senses that environment and acts on it, over time, in pursuit of its own agenda and
+        so as to affect what it senses in the future.'' \hfill (Franklin and Graesser)
+\end{enumerate}
+All three share the \textbf{basic abstract view} of slide 4: a loop between agent and
+environment, through sensors (input) and effectors (output); the same picture as
+Section~\ref{sec:ai-definition}. The third definition adds an important nuance:
+the agent's actions change what it will \emph{perceive in the future}.
+
+\begin{nbdef}{Reactivity (slide 5)}
+An agent has to be able to \textbf{react}, i.e.\ adapt its behaviour, in an appropriate way
+to the dynamic changes in its environment: other computational agents, human
+agents/users, external information sources (e.g.\ sensors), physical objects (e.g.\
+robots), the Internet, \ldots{} Reactivity is one of several properties an intelligent agent
+should have (Section~\ref{sec:what-is-an-agent}).
+\end{nbdef}
+
+\subsubsection{Kinds of environments}
+\slidesrc{Agent architectures: 6--10}
+
+The difficulty of building an agent depends heavily on the environment it lives in. Five
+dimensions classify environments; in each pair, the first is the \emph{easy} one.
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X@{}}
+\toprule
+\textbf{Dimension} & \textbf{Easy case} & \textbf{Hard case} \\
+\midrule
+accessible vs.\ inaccessible & the agent can obtain \emph{complete, accurate, up-to-date}
+  information about the environment's state & most moderately complex environments
+  (the physical world, the Internet) are inaccessible \\
+deterministic vs.\ non-deterministic & any action has a \emph{single guaranteed effect}: no
+  uncertainty about the resulting state & the physical world is, for all intents and
+  purposes, non-deterministic \\
+episodic vs.\ non-episodic & performance depends on discrete \emph{episodes} with no link
+  between them: the agent decides based only on the current episode & the agent must reason
+  about how current actions affect future episodes \\
+static vs.\ dynamic & remains unchanged except by the agent's own actions & other processes
+  operate on it and change it beyond the agent's control; the physical world is highly
+  dynamic \\
+discrete vs.\ continuous & a fixed, finite number of actions and percepts & the real
+  world is continuous \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{Kinds of environments (slides 6--10). The more an environment is on the
+left, the simpler it is to build agents for it.}
+\end{center}
+
+\begin{nbexercise}{E.1}{Practical exercise, step 1: think about the kind of environment (slide 10)}
+Classify these environments along the five dimensions:
+(a) a chess program (with a clock); (b) an e-mail spam filter; (c) a self-driving taxi;
+(d) a robot vacuum cleaner; (e) an online poker bot.
+\end{nbexercise}
+\begin{nbsolution}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+ & \textbf{access.} & \textbf{determ.} & \textbf{episodic} & \textbf{static} & \textbf{discrete} \\
+\midrule
+(a) chess with clock & yes & yes & no & semi$^\ast$ & yes \\
+(b) spam filter & no & no & yes & no & yes \\
+(c) self-driving taxi & no & no & no & no & no \\
+(d) robot vacuum & no & no & no & no & no \\
+(e) poker bot & no & no & no$^{\ast\ast}$ & no & yes \\
+\bottomrule
+\end{tabular}
+
+\normalsize
+Explanations: chess is fully observable and every move has a certain effect; the board
+does not change while you think, but the clock does ($^\ast$semi-dynamic). A spam filter
+classifies each e-mail independently (episodic), but it cannot see the sender's intentions
+(inaccessible). The taxi is the hardest case on every dimension, like the vacuum robot (the
+cat moves, the floor is continuous). Poker hides the opponents' cards (inaccessible), the
+deck is shuffled (non-deterministic), and ($^{\ast\ast}$) hands are episodes, but the
+opponents' model of you carries over from hand to hand. \textbf{Lesson}: almost every
+real application is on the ``hard'' side, which is why architectures matter.
+\end{nbsolution}

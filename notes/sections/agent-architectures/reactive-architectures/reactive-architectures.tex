@@ -1,0 +1,280 @@
+\subsection{Reactive architectures}
+\label{sec:reactive-architectures}
+\slidesrc{Agent architectures: 15--36}
+
+\subsubsection{Basic ideas}
+\slidesrc{Agent architectures: 15--23}
+
+\begin{nbdef}{Reactive agent (slide 15)}
+Reactive agents have \emph{at most a very simple internal representation of the world},
+but provide a \textbf{tight coupling of perception and action}. They follow the
+\textbf{behaviour-based paradigm}: intelligence is a product of the \textbf{interaction}
+between an agent and its environment.
+\end{nbdef}
+
+\paragraph{The ant colony (slides 16--18).} A single ant has very little intelligence,
+computing power or reasoning abilities; the union of many ants and their interaction forms
+a highly complex, structured and efficient system. The slides add pictures of other
+\emph{swarms}: bees, flocks of starlings, schools of fish and rays, migrating birds, and a
+\emph{Swarm Intelligence} magazine cover with insect-like robots.
+
+\begin{nbwarning}[Prof.\ Mascardi's remark on slide 16]
+``As stressed during the class, an ant colony is an example of \textbf{multiagent system},
+not of a single agent architecture: I disagree with the contents of this slide.''
+The ant colony shows \emph{emergent} behaviour of many simple agents (the topic of
+Section~\ref{sec:abms}). An \emph{architecture} describes how \emph{one} agent is built inside.
+Keep the two levels separate in the exam.
+\end{nbwarning}
+
+\begin{nbfact}{Main characteristics of reactive architectures (slides 19--21)}
+\begin{enumerate}
+  \item \textbf{Emergent functionality}: simple agents, simple interaction; complex
+        behaviour patterns appear as a result of the dynamic interactions; the global
+        behaviour is \emph{not specified a priori} (e.g.\ the movement of robots depends on
+        the obstacles they meet).
+  \item \textbf{Task decomposition}: agents are composed of autonomous modules, each
+        managing a given task (sensing, control, computation); minimal, low-level
+        communication between modules; \emph{no global world model}; \emph{no
+        planning/controller agent}.
+  \item \textbf{Raw data}: basic data from sensors, no complex symbolic management of data
+        as in classical AI; refusal of the \textbf{physical symbol system hypothesis}, the
+        basic pillar of symbolic AI: ``intelligent behaviour can only be obtained in
+        symbol-processing systems''.
+\end{enumerate}
+\end{nbfact}
+
+\begin{nbdef}{Reactive behaviour (slide 22)}
+Each behaviour continually maps perceptual input to action output. Reactive behaviour is a
+set of \textbf{action rules}
+\[ \mathit{action} : S \to A \]
+where $S$ is the set of states of the environment and $A$ the set of primitive actions the
+agent can perform. Example (a thermostat):
+\[
+\mathit{action}(s) =
+\begin{cases}
+\text{heater off} & \text{if the temperature is OK in state } s \\
+\text{heater on} & \text{otherwise}
+\end{cases}
+\]
+\end{nbdef}
+
+Compared with Section~\ref{sec:architectures-overview}, a purely reactive agent has
+\emph{no internal state}: $a_t = g(p_t)$, the action depends only on the current percept.
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  r/.style={draw, rounded corners, minimum width=1.4cm, minimum height=0.55cm, fill=#1}]
+  \draw[thick, rounded corners] (0,0) rectangle (8,3.6);
+  \node[font=\small\bfseries] at (4,3.3) {Agent: stimulus--response behaviours};
+  \node[draw, thick, fill=nbgreen!15, minimum width=0.7cm, minimum height=3.2cm, align=center] (S) at (-0.8,1.8) {\rotatebox{90}{Sensors}};
+  \node[draw, thick, fill=nbred!15, minimum width=0.7cm, minimum height=3.2cm] (E) at (8.8,1.8) {\rotatebox{90}{Effectors}};
+  \foreach \y/\i in {2.6/1, 1.8/2, 0.6/n}{
+    \node[r=nbblue!10] (s\i) at (2.2,\y) {State$_\i$};
+    \node[r=nborange!12] (a\i) at (5.8,\y) {Action$_\i$};
+    \draw[->, thick] (s\i) -- (a\i);
+  }
+  \node at (2.2,1.2) {$\vdots$}; \node at (5.8,1.2) {$\vdots$};
+  \draw[->, thick] (S.east) -- (0,1.8);
+  \draw[->, thick] (8,1.8) -- (E.west);
+\end{tikzpicture}
+\captionof{figure}{Basic schema of a reactive architecture (slide 23): a table of
+situation$\to$action rules between sensors and effectors, no world model, no planner.}
+\end{center}
+
+\subsubsection{Rodney Brooks and the subsumption architecture}
+\slidesrc{Agent architectures: 24--30}
+
+Rodney Brooks (director of the MIT Computer Science and Artificial Intelligence Lab,
+1997--2007, and co-founder of iRobot, the maker of the Roomba vacuum cleaner) is the main
+critic of symbolic AI from the reactive side.
+
+\begin{nbfact}{Brooks' three theses (slide 25)}
+\begin{enumerate}[nosep]
+  \item Intelligent behaviour can be generated \textbf{without explicit representations} of
+        the kind that symbolic AI proposes.
+  \item Intelligent behaviour can be generated \textbf{without explicit abstract reasoning}
+        of the kind that symbolic AI proposes (reduced computation on sensor-like data).
+  \item Intelligence is an \textbf{emergent property} of certain complex systems.
+\end{enumerate}
+\end{nbfact}
+
+\begin{nbfact}{Brooks' key ideas (slides 26--27)}
+\begin{itemize}[nosep]
+  \item \textbf{Situatedness}: ``real'' intelligence is situated in the world. ``The world
+        is its best model'': it is always up-to-date, whereas a model is an abstraction, a
+        simplification that considers some characteristics and disregards others.
+  \item \textbf{Embodiment}: ``real'' intelligence requires a physical body, and cannot be
+        found in disembodied systems such as theorem provers or expert systems (physical
+        robots).
+  \item \textbf{Intelligence and emergence}: intelligent behaviour arises from the agent's
+        interaction with its environment; intelligence is ``in the eye of the beholder'',
+        not an innate, isolated property.
+\end{itemize}
+\end{nbfact}
+
+\begin{nbdef}{Subsumption architecture (slides 28--29)}
+A \textbf{subsumption architecture} is a hierarchy of task-accomplishing
+\textbf{behaviours}. Each behaviour is a rather simple rule-like structure. Behaviours
+\emph{compete} to exercise control over the agent, since several may be applicable at the
+same time. Behaviours are organised in \textbf{layers}:
+\begin{itemize}[nosep]
+  \item lower layers represent more primitive kinds of behaviour (e.g.\ avoiding obstacles);
+  \item higher layers represent more complex behaviours (e.g.\ identifying an object);
+  \item lower layers have \textbf{precedence} over layers further up the hierarchy.
+\end{itemize}
+The resulting systems are, in terms of computation, extremely simple; yet some of the
+robots do tasks that would be impressive if accomplished by symbolic AI systems.
+\end{nbdef}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  l/.style={draw, thick, rounded corners, minimum width=5.4cm, minimum height=0.6cm, fill=#1}]
+  \node[l=nbpurple!10] (l3) at (4,3.0) {level 3: plan changes to the world};
+  \node[l=nbpurple!10] (l2) at (4,2.1) {level 2: explore};
+  \node[l=nbpurple!10] (l1) at (4,1.2) {level 1: wander};
+  \node[l=nbblue!12] (l0) at (4,0.3) {level 0: avoid obstacles};
+  \node (sen) at (-0.7,0.3) {Sensors};
+  \node (act) at (8.9,0.3) {Actuators};
+  \draw[->, thick] (sen) -- (l0);
+  \draw[->, thick] (l0) -- (act);
+  \foreach \l in {l1,l2,l3}{ \draw[->, thick, nbgray] (0.7,0.3) |- (\l.west); \draw[->, thick, nbgray] (\l.east) -| (7.3,0.3); }
+  \node[font=\scriptsize, align=center, nborange] at (9.0,2.1) {higher levels\\subsume (suppress)\\lower outputs};
+\end{tikzpicture}
+\captionof{figure}{Brooks' layered control system (``However\ldots'', slide 30, from Brooks'
+original paper). Each level is a complete behaviour working directly from sensors to
+actuators; new levels are added on top of working ones.}
+\end{center}
+
+\begin{nbwarning}[``However\ldots'' (slide 30): who has precedence?]
+Slide 29 says that \emph{lower} layers have precedence. Slide 30 (``However\ldots'') shows the
+figure of Brooks' original paper, whose caption says that control is layered ``with
+\emph{higher} level layers subsuming the roles of lower level layers when they wish to take
+control''. Both views exist:
+\begin{itemize}[nosep]
+  \item in Brooks' original robots, a higher layer can \emph{suppress} the output of a lower
+        one (that is what ``subsume'' means): e.g.\ ``explore'' overrides ``wander'';
+  \item in the rule-based presentations (Wooldridge's textbook, Steels' explorer below),
+        the lowest-level behaviour, such as obstacle avoidance, has the \emph{highest
+        priority}, because safety comes first.
+\end{itemize}
+In both, each layer is a complete behaviour and the composition of layers produces the
+overall behaviour without a central planner.
+\end{nbwarning}
+
+\subsubsection{Steels' Mars explorer}
+\slidesrc{Agent architectures: 31--33}
+
+Luc Steels' Mars explorer system, using the subsumption architecture, achieves near-optimal
+cooperative performance in a simulated ``rock gathering on Mars'' domain: \emph{explore a
+distant planet and collect samples of a precious rock. The location of the samples is not
+known in advance, but they tend to be clustered.} The mother-ship emits a radio signal that
+gets weaker with distance, so ``travel up the gradient'' (towards a stronger signal) leads
+back to the base.
+
+\begin{nbfact}{The rules of an individual explorer (slides 32--33), in priority order}
+\begin{center}
+\begin{tabular}{@{}c l@{}}
+(1) & \textbf{if} detect an obstacle \textbf{then} change direction \\
+(2) & \textbf{if} carrying samples \textbf{and} at the base \textbf{then} drop samples \\
+(3) & \textbf{if} carrying samples \textbf{and not} at the base \textbf{then} travel up gradient \\
+(4) & \textbf{if} detect a sample \textbf{then} pick sample up \\
+(5) & \textbf{if} true \textbf{then} move randomly
+\end{tabular}
+\end{center}
+Obstacle avoidance (1) is the lowest-level behaviour, hence the one with the highest
+priority. Rule (5) always applies, so it fires only when nothing better is applicable.
+At each step the agent fires the \emph{first} rule (smallest number) whose condition holds.
+\end{nbfact}
+
+\begin{nbexample}{a trace of one explorer}
+\notinslides
+\small
+\begin{tabularx}{\linewidth}{@{}c X c l@{}}
+\toprule
+\textbf{Step} & \textbf{Situation} & \textbf{Applicable rules} & \textbf{Fired} \\
+\midrule
+1 & empty terrain, carrying nothing & (5) & (5) move randomly \\
+2 & a rock sample in front & (4), (5) & (4) pick up \\
+3 & carrying a sample, far from base & (3), (5) & (3) up gradient \\
+4 & carrying, a crater ahead & (1), (3), (5) & (1) change direction \\
+5 & carrying, path clear & (3), (5) & (3) up gradient \\
+6 & carrying, at the base & (2), (5) & (2) drop samples \\
+7 & carrying nothing, at the base & (5) & (5) move randomly \\
+\bottomrule
+\end{tabularx}
+The behaviour ``collect rocks and bring them home'' was never written anywhere: it emerges
+from five local rules and the environment. (In the full system, \emph{cooperative} rules make
+agents drop radioactive ``crumbs'' on the way back, so that other agents find the clusters;
+this is how near-optimal cooperation emerges.)
+\end{nbexample}
+
+\subsubsection{Advantages and limitations}
+\slidesrc{Agent architectures: 34--36}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}X X@{}}
+\toprule
+\textbf{Advantages (slide 34)} & \textbf{Limitations (slides 35--36)} \\
+\midrule
+\textbf{simplicity} of individual agents &
+  agents without environment models must have sufficient information available from the
+  \emph{local} environment \\
+\textbf{flexibility, adaptability}: ideal in very dynamic and unpredictable environments &
+  decisions based on the local environment: how to take \emph{non-local} information into
+  account? ``short-term'' view \\
+\textbf{computational tractability}: no complex planning/reasoning procedures, no
+  continuous model update &
+  no long-term planning capabilities; limited applicability (games, simulations, basic
+  insect-like robots) \\
+\textbf{robustness} against failure: no central planning component (e.g.\ ant colony) &
+  difficult to make reactive agents that \emph{learn} (dynamic evolution of rules?) \\
+\textbf{elegance} &
+  behaviour emerges from interactions plus environment: hard to \emph{engineer} specific
+  agents (no principled methodology); hard with many behaviours (dynamics too complex to
+  understand) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{nbwarning}[Prof.\ Mascardi's remarks on slide 34]
+\begin{itemize}[nosep]
+  \item On \emph{robustness}: ``I disagree: an ant colony is a MAS, not a single agent: a
+        reactive architecture is as robust (or not robust) as any other modular software
+        system.''
+  \item On \emph{elegance}: ``I disagree: elegance is not a scientific, engineering
+        property.''
+\end{itemize}
+\end{nbwarning}
+
+\begin{nbwhiteboard}[label=wb:reactive-pros-cons]{Reactive architectures: pros and cons}{written during the agent architectures lecture}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}X|>{\raggedright\arraybackslash}X@{}}
+\multicolumn{1}{c|}{\textbf{\textcolor{nbgreen!70!black}{PROS}}} & \multicolumn{1}{c}{\textbf{\textcolor{nbred}{CONS}}} \\
+\hline
+\rule{0pt}{2.6ex}Assuming a \textbf{dynamic, unpredictable, partially observable}
+  environment, reactive architectures are suitable to \textbf{cope with such changes}. &
+  Reaching \textbf{long-term objectives} with \textbf{no representation of the world} and
+  \textbf{no planning/reasoning} seems harder. \\[4pt]
+\textbf{Simple behaviour} $\Rightarrow$ \textbf{fast computation and reaction} (safer). &
+  Lack of a \textbf{consolidated and generalised engineering method}. \\[4pt]
+Natural fit for \textbf{ABMS} (agent-based modelling and simulation). & \\[4pt]
+\fbox{Simpler / shorter code (?)} \ \ (written in the middle, with a question mark) & \\
+\end{tabularx}
+\end{center}
+\wbphoto{sections/agent-architectures/reactive-architectures/assets/whiteboard-8-1.jpg}
+How to read it: the professor's own summary, more cautious than slide 34.
+\begin{itemize}[nosep]
+  \item The first pro is about the \emph{environment}: it uses the vocabulary of
+        Section~\ref{sec:agents-and-environments} (dynamic, partially observable = inaccessible).
+  \item ``Safer'' because a fast reaction (braking, avoiding) can matter more than an optimal
+        but late plan.
+  \item ABMS is listed among the pros: reactive agents are the typical building block of
+        agent-based simulations (Section~\ref{sec:abms}).
+  \item ``Simpler/shorter code'' is boxed with a \emph{question mark}: individual rules are
+        simple, but a large set of interacting rules is not necessarily simple to write or
+        to understand (compare the second limitation of slide 36).
+  \item The cons match slides 35--36: no long-term view, no principled engineering method.
+\end{itemize}
+\end{nbwhiteboard}
