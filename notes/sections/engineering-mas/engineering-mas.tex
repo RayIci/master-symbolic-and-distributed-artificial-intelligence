@@ -1,2 +1,51 @@
 \section{Engineering multi-agent systems}
 \label{sec:engineering-mas}
+\slidesrc{EMAS keynote: 1--95; AOSE: 1--8}
+
+How do we \emph{engineer} systems made of agents? This chapter follows a keynote given by
+prof.\ Mascardi at the European Agent Systems Summer School (EASSS 2024), complemented by
+the short AOSE deck. It is a map of the field of \textbf{Agent-Oriented Software Engineering}
+(AOSE), also called EMAS (Engineering
+Multi-Agent Systems):
+\begin{enumerate}[nosep]
+  \item a recap of agents and MAS and a fictional case study, the city of \emph{SteaMas};
+  \item why agents are good for software engineering (AOSE);
+  \item seven research directions: architectures, methodologies and notations, programming
+        languages, infrastructures and toolkits, simulation, symbolic/sub-symbolic
+        integration, safe autonomous systems;
+  \item the SteaMas design exercise done in class (three whiteboards);
+  \item conclusions: where are the agents?;
+  \item engineering \emph{safe} MAS: autonomy, verification techniques, runtime verification.
+\end{enumerate}
+
+\input{sections/engineering-mas/emas-overview/emas-overview}
+\input{sections/engineering-mas/aose/aose}
+\input{sections/engineering-mas/research-directions/research-directions}
+\input{sections/engineering-mas/steamas/steamas}
+\input{sections/engineering-mas/conclusions-emas/conclusions-emas}
+\input{sections/engineering-mas/safe-mas/safe-mas}
+
+\begin{nbsummary}[Engineering MAS]
+\begin{itemize}[nosep]
+  \item \textbf{AOSE} = models and techniques to develop complex software as MAS. Why:
+        autonomy fits decentralised systems owned by different stakeholders; flexible
+        interaction fits dynamic, unpredictable scenarios; agency unifies AI results.
+  \item Research directions: (1) architectures (BDI, subsumption, hybrid: TouringMachines,
+        InteRRaP; FIPA platform), (2) methodologies and notations (Gaia, Prometheus,
+        AUML), (3) AOP languages (logic-based, AgentSpeak(L), JadeScript),
+        (4) infrastructures (JADE, JaCaMo, \ldots), (5) ABMS, (6) symbolic +
+        sub-symbolic integration, (7) safe autonomous systems.
+  \item \textbf{Gaia}: analysis (roles, interactions) $\to$ architectural design
+        (organisational structure) $\to$ detailed design (agent and services models);
+        implementation left free.
+  \item \textbf{FIPA Request protocol} (remember it!): request $\to$ refuse \emph{or}
+        agree $\to$ failure / inform-done / inform-result.
+  \item SteaMas whiteboards: methodology questions (roles $\to$ classes $\to$ instances);
+        hierarchical MAS architecture; a role = capabilities (goals, environment portion,
+        interaction protocols, safety plans) + architecture; development: agent tools for
+        non-safety-critical parts, solid tools for the rest, \textbf{runtime verification}.
+  \item Verification: theorem proving and model checking (exhaustive, formal), static
+        analysis, software testing, \textbf{runtime verification} (monitor checks the
+        event trace against a formal specification; online or offline; RML).
+\end{itemize}
+\end{nbsummary}

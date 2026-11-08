@@ -1,0 +1,46 @@
+\subsection{Conclusions: where are all the agents?}
+\label{sec:conclusions-emas}
+\slidesrc{EMAS keynote: 62--70}
+
+In 2007 James Hendler, editor of \emph{IEEE Intelligent Systems}, asked in a letter:
+\textbf{``Where are all the intelligent agents?''} In the 1990s many believed that agents
+would soon be everywhere; ten years later he saw few of them. The answer came in the same
+magazine from Peter McBurney and Michael Luck: \textbf{``The agents are all busy doing
+stuff!''}: agent technology was in use, but under other names, inside products and
+companies, and not labelled ``agent''.
+
+A good example (slides 65--66) is IBM's \textbf{autonomic computing} (\emph{An
+architectural blueprint for autonomic computing}, 2005): self-managing IT systems in which
+an \emph{autonomic manager} controls a managed resource through sensors and effectors with
+the \textbf{MAPE-K} loop. It is an agent architecture in all but name.
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  s/.style={draw, thick, rounded corners, minimum width=1.9cm, minimum height=0.8cm, fill=#1}]
+  \node[s=nbgreen!15] (K) at (0,0) {\textbf{Knowledge}};
+  \node[s=nbblue!10] (A) at (-2.4,1.3) {Analyze};
+  \node[s=nbblue!10] (P) at (2.4,1.3) {Plan};
+  \node[s=nbblue!10] (M) at (-2.4,-1.3) {Monitor};
+  \node[s=nbblue!10] (E) at (2.4,-1.3) {Execute};
+  \draw[->, thick] (M) -- node[left, font=\scriptsize]{symptom} (A);
+  \draw[->, thick] (A) -- node[above, font=\scriptsize]{change request} (P);
+  \draw[->, thick] (P) -- node[right, font=\scriptsize]{change plan} (E);
+  \foreach \n in {A,P,M,E} \draw[<->, nbgray] (\n) -- (K);
+  \node[s=nborange!12] (S) at (-2.4,-2.7) {Sensor};
+  \node[s=nborange!12] (Ef) at (2.4,-2.7) {Effector};
+  \draw[->, thick] (S) -- (M); \draw[->, thick] (E) -- (Ef);
+  \node[draw, thick, dashed, minimum width=6.7cm, minimum height=0.7cm] at (0,-3.8) {managed resource};
+  \draw[->, thick] (-2.4,-3.45) -- (S); \draw[->, thick] (Ef) -- (2.4,-3.45);
+\end{tikzpicture}
+\captionof{figure}{The MAPE-K loop of an autonomic manager (slide 65): monitor, analyse, plan,
+execute over shared knowledge. Compare with the perceive--decide--act loop of an agent.}
+\end{center}
+
+\begin{nbfact}{Take-home message (slides 67--69)}
+Agents \emph{are} all around: sometimes presented with different names, often deployed
+using mainstream technologies and languages. It's ok: recall the Gaia methodology, which
+leaves the implementation stage free. If you take agents and MAS as a
+\textbf{``mindset''}, you will find them everywhere, and you will understand the huge
+potential for their use (recent surveys: agents in healthcare, deep reinforcement learning
+for multi-agent systems, the agent-based Internet of Things).
+\end{nbfact}

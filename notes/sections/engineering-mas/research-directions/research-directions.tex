@@ -1,0 +1,273 @@
+\subsection{Research directions in AOSE}
+\label{sec:research-directions}
+\slidesrc{EMAS keynote: 16--56}
+
+\subsubsection{1. Agent-oriented architectures}
+\slidesrc{EMAS keynote: 16--22}
+
+The three families of Section~\ref{sec:agent-architectures}, with their founding papers.
+The slides illustrate them with SpongeBob pictures; here are the ideas.
+\begin{itemize}
+  \item \textbf{Belief-Desire-Intention} (Rao and Georgeff, ``BDI agents: from theory to
+        practice'', ICMAS 1995; plus Georgeff and Lansky 1986, Rao and Georgeff 1992,
+        Shoham 1993). Slide 17 shows the BDI components: \emph{beliefs} (what the agent
+        knows about the environment), \emph{goals}, \emph{plans} (recipes), a
+        \emph{reasoner} that selects plans and turns them into \emph{intentions}, which act
+        on the environment. Studied in depth in Section~\ref{sec:bdi-agentspeak}.
+  \item \textbf{Subsumption} (Brooks, ``A robust layered control system for a mobile
+        robot'', 1986). Slide 18: behaviours \emph{Avoid}, \emph{Wander}, \emph{Explore}
+        stacked on top of each other, all connected to the environment
+        (Section~\ref{sec:reactive-architectures}).
+  \item \textbf{Hybrid} (Ferguson's TouringMachines, 1992; M\"uller and Pischel's InteRRaP,
+        1993). Slides 19--21 picture a hybrid architecture as a layered cake: several
+        horizontal layers, each with its own job, stacked into one agent
+        (Section~\ref{sec:deliberative-hybrid}).
+\end{itemize}
+
+\begin{nbfact}{FIPA abstract agent platform (slide 22)}
+\textbf{FIPA} (Foundation for Intelligent Physical Agents) was created in Switzerland in 1996
+and accepted as an IEEE standards committee in 2005. It standardises how agents are hosted
+and communicate. A FIPA agent platform contains:
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  m/.style={draw, thick, rounded corners, minimum height=0.8cm, align=center, fill=#1}]
+  \node[m=white] (sw) at (0,3.0) {Software};
+  \draw[thick, fill=nbblue!5, rounded corners] (-3.6,0.3) rectangle (3.6,2.3);
+  \node[font=\scriptsize\bfseries] at (-2.6,2.05) {Agent platform};
+  \node[m=nbgreen!12] (ag) at (-2.3,1.35) {Agent};
+  \node[m=nborange!12] (ams) at (0,1.35) {Agent\\Management\\System};
+  \node[m=nbpurple!10] (df) at (2.3,1.35) {Directory\\Facilitator};
+  \node[m=nbgray!15, minimum width=6.6cm] (mts) at (0,-0.2) {Message Transport System};
+  \draw[thick, fill=nbblue!5, rounded corners] (-3.6,-1.9) rectangle (3.6,-1.0);
+  \node[m=nbgray!15, minimum width=6.6cm, minimum height=0.6cm] (mts2) at (0,-1.45) {Message Transport System (another platform)};
+  \draw[<->, thick] (sw) -- (0,2.3);
+  \draw[<->, thick] (ag) -- (ag |- mts.north);
+  \draw[<->, thick] (ams) -- (ams |- mts.north);
+  \draw[<->, thick] (df) -- (df |- mts.north);
+  \draw[<->, thick] (mts) -- (mts2);
+\end{tikzpicture}
+\end{center}
+\begin{itemize}[nosep]
+  \item \textbf{Agent Management System} (AMS): the ``white pages'': creates and destroys
+        agents, knows every agent's name and address;
+  \item \textbf{Directory Facilitator} (DF): the ``yellow pages'': agents register the
+        \emph{services} they offer and search for providers;
+  \item \textbf{Message Transport System}: delivers messages, also to agents on other
+        platforms.
+\end{itemize}
+JADE (Section~\ref{sec:jade}) is a FIPA-compliant platform with exactly these components.
+\end{nbfact}
+
+\subsubsection{2. AOSE methodologies and notation techniques}
+\slidesrc{EMAS keynote: 23--29}
+
+Many agent-oriented methodologies exist (Henderson-Sellers and Giorgini, eds.,
+\emph{Agent-Oriented Methodologies}, 2005). Slide 24 shows their genealogy: most derive
+from object-oriented methods (OO, RUP, OMT, Fusion, OPEN) or from knowledge engineering
+(MAS-CommonKADS); among them Gaia, Prometheus, Tropos, MaSE, PASSI, INGENIAS, MESSAGE,
+Agent OPEN, ADELFE.
+
+\begin{nbdef}{Gaia (Wooldridge, Jennings, Kinny, 2000)}
+A methodology for agent-oriented \textbf{analysis and design}. It sees a MAS as an
+\emph{organisation} of interacting \emph{roles}, and proceeds through phases:
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize, >=Stealth, node distance=0.4cm,
+  m/.style={draw, thick, rounded corners, minimum width=2.1cm, minimum height=0.65cm, align=center, fill=#1}]
+  \node[draw, ellipse, thick] (req) at (0,0) {Requirements};
+  \node[m=nbblue!10] (env) at (0,-1.1) {Environmental model};
+  \node[m=nbblue!10] (prm) at (-2.7,-2.0) {Preliminary\\role model};
+  \node[m=nbblue!10] (pim) at (2.7,-2.0) {Preliminary\\interaction model};
+  \node[m=nbblue!10] (or) at (0,-2.6) {Organisational\\rules};
+  \node[m=nbpurple!10] (os) at (0,-3.8) {Organisational\\structure};
+  \node[m=nbpurple!10] (rm) at (-2.7,-4.8) {Role model};
+  \node[m=nbpurple!10] (im) at (2.7,-4.8) {Interaction model};
+  \node[m=nborange!12] (am) at (-2.7,-6.1) {Agent model};
+  \node[m=nborange!12] (sm) at (2.7,-6.1) {Services model};
+  \draw[->, thick] (req) -- (env);
+  \draw[->, thick] (env) -- (prm); \draw[->, thick] (env) -- (pim);
+  \draw[->, thick] (prm) -- (or); \draw[->, thick] (pim) -- (or);
+  \draw[->, thick] (or) -- (os);
+  \draw[->, thick] (os) -- (rm); \draw[->, thick] (os) -- (im);
+  \draw[->, thick] (prm) -- (rm); \draw[->, thick] (pim) -- (im);
+  \draw[->, thick] (rm) -- (am); \draw[->, thick] (rm) -- (sm);
+  \draw[->, thick] (im) -- (sm); \draw[->, thick] (im) -- (am);
+  \draw[->, thick] (am) -- ++(0,-0.8); \draw[->, thick] (sm) -- ++(0,-0.8);
+  \foreach \y/\t in {-0.5/{\textbf{Analysis}}, -3.25/{\textbf{Architectural design}}, -5.5/{\textbf{Detailed design}}, -6.95/{\textbf{Implementation (free)}}}{
+    \draw[dashed, nbgray] (-4.4,\y) -- (4.4,\y); \node[anchor=west, nbgray!80!black] at (4.5,\y-0.3) {\t};
+  }
+\end{tikzpicture}
+\end{center}
+Gaia deliberately leaves the \textbf{implementation} stage free: the design can be
+implemented with an agent platform or with mainstream technologies (the point made in
+Section~\ref{sec:uses-of-mas}).
+\end{nbdef}
+
+\paragraph{Notations.} Agents need diagrams that UML does not offer. \textbf{AUML} (Agent
+UML; Odell, Parunak, Bauer, \emph{Extending UML for agents}, 2000) adds, among other things,
+\textbf{protocol diagrams}; \textbf{Prometheus} (Winikoff and Padgham, 2004) has its own
+icons for agents, actions, messages, data, percepts, protocols, capabilities and plans
+(slide 29).
+
+\begin{nbfact}{The FIPA Request interaction protocol (slides 26--27: ``Remember this protocol!'')}
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth, x=1cm, y=-0.72cm]
+  \node[draw, thick, fill=nbblue!8, minimum width=2.4cm] (I) at (0,0) {Initiator};
+  \node[draw, thick, fill=nbgreen!8, minimum width=2.4cm] (P) at (7,0) {Participant};
+  \draw[dashed, nbgray] (0,0.6) -- (0,8.4); \draw[dashed, nbgray] (7,0.6) -- (7,8.4);
+  \draw[->, thick] (0,1.3) -- node[above]{\code{request}} (7,1.3);
+  \draw[->, thick, nbred] (7,2.3) -- node[above]{\code{refuse}} (0,2.3);
+  \node[nbred, font=\scriptsize] at (3.5,2.75) {[refused]};
+  \draw[->, thick, nbgreen!60!black] (7,4.0) -- node[above]{\code{agree}} (0,4.0);
+  \node[nbgreen!60!black, font=\scriptsize] at (3.5,4.45) {[agreed and notification necessary]};
+  \draw[->, thick, nbred] (7,5.5) -- node[above]{\code{failure}} (0,5.5);
+  \draw[->, thick, nbblue] (7,6.6) -- node[above]{\code{inform-done : inform}} (0,6.6);
+  \draw[->, thick, nbblue] (7,7.7) -- node[above]{\code{inform-result : inform}} (0,7.7);
+  \draw[decorate, decoration={brace, amplitude=5pt, mirror}, thick, nbgray] (7.3,2.1) -- node[right=5pt, font=\scriptsize, align=left]{one of\\these two} (7.3,4.0);
+  \draw[decorate, decoration={brace, amplitude=5pt, mirror}, thick, nbgray] (7.3,5.3) -- node[right=5pt, font=\scriptsize, align=left]{if agreed:\\one of\\these three} (7.3,7.9);
+\end{tikzpicture}
+\end{center}
+\begin{enumerate}[nosep]
+  \item The initiator sends a \code{request} (asks the participant to perform an action).
+  \item The participant answers \code{refuse} (protocol ends) or \code{agree}.
+  \item If it agreed, it performs the action and finally sends one of: \code{failure} (it
+        tried but failed), \code{inform-done} (done, nothing to return) or
+        \code{inform-result} (done, here is the result).
+\end{enumerate}
+(The \code{agree} can be skipped if the participant answers immediately with the final
+message.) This protocol is used again in agent communication
+(Section~\ref{sec:agent-communication}) and in JADE.
+\end{nbfact}
+
+\begin{nbexample}{the Request protocol in a pizzeria}
+\notinslides
+Customer agent: \code{request}(``deliver one margherita''). Pizzeria agent: \code{agree}
+(``ok, 30 minutes''). Later: \code{inform-done} (``delivered''); or \code{failure} (``the
+scooter broke down''). If the pizzeria were closed: \code{refuse} (``closed on Mondays'').
+\end{nbexample}
+
+\begin{nbfact}{FIPA ACL message structure (slide 28)}
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Category} \\
+\midrule
+performative & type of communicative act \\
+sender, receiver, reply-to & participant in communication \\
+content & content of message \\
+language, encoding & description of content \\
+\bottomrule
+\end{tabular}
+
+\smallskip
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\textbf{Performative} & \textbf{Meaning} \\
+\midrule
+\code{REQUEST} & the sender asks the receiver to perform some action \\
+\code{AGREE} & the sender agrees to perform the requested action \\
+\code{REFUSE} & the sender refuses to perform the requested action \\
+\code{NOT\_UNDERSTOOD} & someone participating in the conversation didn't understand something \\
+\code{INFORM} & a positive reply because an action is performed, or the answer to some previous question \\
+\code{FAILURE} & a failure in performing the requested action happened after an initial agreement \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Studied in detail in Section~\ref{sec:agent-communication}.
+\end{nbfact}
+
+\subsubsection{3. Agent-oriented programming languages}
+\slidesrc{EMAS keynote: 30--39}
+
+\paragraph{Logic-based agents (slides 31--32).} The ``traditional'' approach to building
+artificial intelligent systems: \textbf{logical formulae} give a symbolic representation of
+the agent's environment and desired behaviour, and \textbf{logical deduction} (theorem
+proving) syntactically manipulates this representation. Slide 31's cartoon thinks the Prolog
+program \code{mortal(X) :- human(X).} \code{human(socrates).} with the query
+\code{?- mortal(socrates).} answered \code{yes} (Whiteboard~\ref{wb:modus-ponens}).
+
+\paragraph{AgentSpeak(L) (slides 33--36).} The BDI architecture is one of the best known and
+most studied architectures for \emph{cognitive} agents; \textbf{AgentSpeak(L)} (A.~S.~Rao,
+``AgentSpeak(L): BDI agents speak out in a logical computable language'', MAAMAW 1996) is a
+logic-based programming language inspired by it:
+\begin{itemize}[nosep]
+  \item \textbf{beliefs} represent the knowledge of the agent;
+  \item \textbf{goals} are beliefs, or conjunctions and disjunctions of beliefs, which must
+        be \emph{achieved} or \emph{tested} in the current state;
+  \item \textbf{plans} contain the \emph{procedural} knowledge of the agent, characterised by
+        a trigger, a context, a body, a maintenance condition, a set of ``success actions''
+        and a set of ``failure actions'';
+  \item \textbf{intentions} are partially instantiated plans.
+\end{itemize}
+Its syntax (slide 35) and semantics (slide 36) are explained in
+Section~\ref{sec:bdi-agentspeak}.
+
+\paragraph{JadeScript (slides 37--39).} The agent-oriented programming language for JADE
+agents (Bergenti, Caire, Monica, Poggi, 2020). A Ping--Pong example: \code{Ping} sends a
+\code{request} for the action \code{Reply}; \code{Pong} answers with an \code{inform} that
+the proposition \code{Received} holds.
+\begin{minted}[linenos=false]{text}
+ontology PingPong
+    action Reply
+    proposition Received
+
+agent Pong
+    uses ontology PingPong
+    on create do
+        log "Agent 'Pong' created."
+        activate WaitAndReply
+
+cyclic behavior WaitAndReply for agent Pong
+    on message request Reply do
+        sender = sender of message
+        log "received 'Reply' request from agent '" + name of sender + "'"
+        inform Received to sender
+
+agent Ping
+    uses ontology PingPong
+    on create do
+        log "Agent 'Ping' created."
+        activate WaitFromPong
+        activate SendRequest
+
+one shot behavior SendRequest for agent Ping
+    on execute do
+        log "sending 'Reply' request..."
+        send message request Reply to "Pong"@
+\end{minted}
+Notice the agent concepts as first-class language keywords: \emph{agent},
+\emph{ontology} (the shared vocabulary), \emph{behavior} (cyclic or one-shot, as in JADE,
+Section~\ref{sec:jade}), \emph{message} with a performative (\code{request},
+\code{inform}).
+
+\subsubsection{4. MAS infrastructures and toolkits}
+\slidesrc{EMAS keynote: 40--46}
+
+Slide 41 lists the papers of the \emph{Agent Toolkits} special track at EUMAS 2024 (VEsNA,
+belief revision in JavaScript, protocol-based MAS, Yggdrasil for hypermedia MAS, SARL,
+Jadescript, JaKta, Jason+BSPL, JaCaMo, Jadex V, learning and explaining in BDI agents): the
+field is alive. Two infrastructures are highlighted:
+\begin{itemize}
+  \item \textbf{JaCaMo} (2007--2020+): a platform combining \textbf{Ja}son (agents),
+        \textbf{Ca}rtAgO (artifacts: the environment) and \textbf{Mo}ise (organisations).
+  \item \textbf{JADE} (book \emph{Developing multi-agent systems with JADE}, 2007) ---
+        ``Remember this framework!'' (slide 45). Section~\ref{sec:jade}.
+\end{itemize}
+
+\subsubsection{5. Agent-based modelling and simulation}
+\slidesrc{EMAS keynote: 47--48}
+
+Pointer to a summer-school tutorial on running agent-based models (e.g.\ NetLogo) on
+high-performance computing facilities. See Section~\ref{sec:abms}.
+
+\subsubsection{6. Integration of symbolic and sub-symbolic approaches}
+\slidesrc{EMAS keynote: 49--56}
+
+The keynote repeats the System~1 / System~2 argument of Section~\ref{sec:symbolic-vs-subsymbolic}
+(Kahneman 2011; Booch et al., \emph{Thinking Fast and Slow in AI}, 2021) and shows that the
+integration of symbolic and sub-symbolic (``neuro-symbolic'') approaches is a large research
+area (Google Scholar searches, slides 54--55). It is not new: slide 56 shows J.~Shavlik,
+\emph{Combining Symbolic and Neural Learning} (Machine Learning, 1994), already reviewing
+hybrids of the two approaches thirty years ago. For agents, the typical combination is a BDI
+agent (symbolic reasoning, explainable plans) using learned components for perception,
+language understanding or plan selection.

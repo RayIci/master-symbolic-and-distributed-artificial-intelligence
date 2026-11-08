@@ -1,0 +1,64 @@
+\subsection{Agent-oriented software engineering}
+\label{sec:aose}
+\slidesrc{AOSE: 1--8}
+\movedfrom{the AOSE deck, shown right after the EMAS keynote}
+
+The short AOSE deck (based on Zambonelli and Omicini, \emph{Challenges and Research
+Directions in Agent-Oriented Software Engineering}, 2004, and Giorgini and
+Henderson-Sellers, \emph{Agent-Oriented Methodologies: An Introduction}, 2005) explains
+\emph{why} agents are interesting for software engineering at all.
+
+\begin{nbfact}{Why agents suit modern software (slides 4--5)}
+The features of agent-based systems are well suited to tackle the complexity of developing
+software in modern scenarios:
+\begin{enumerate}
+  \item the \textbf{autonomy} of application components reflects the intrinsically
+        \emph{decentralised} nature of modern distributed systems, and can be considered the
+        natural extension of the notions of \emph{modularity} and \emph{encapsulation} to
+        systems that are owned by different stakeholders;
+  \item the \textbf{flexible} way in which agents operate and interact (with each other and
+        with the environment) suits the \emph{dynamic and unpredictable} scenarios where
+        software is expected to operate;
+  \item the concept of \textbf{agency} provides a unified view of AI results and
+        achievements, making agents and MAS act as sound and manageable
+        \emph{repositories of intelligent behaviours}.
+\end{enumerate}
+\end{nbfact}
+
+\begin{nbintuition}[Autonomy as ``encapsulation of behaviour'']
+Object orientation encapsulates \emph{state}: nobody outside can change an object's private
+fields. Agent orientation goes one step further and encapsulates \emph{behaviour}: nobody
+outside can force an agent to act; you can only ask (Section~\ref{sec:agents-history}). When
+the components belong to different companies (your bank's agent, a shop's agent, a
+courier's agent), this is not a design choice but a fact of life.
+\end{nbintuition}
+
+\begin{nbdef}{Agent-Oriented Software Engineering (slide 6)}
+With the increasing acceptance of agent-based computing as a novel software engineering
+paradigm, there has been a great deal of research on suitable models and techniques to
+support the development of complex software systems in terms of MAS. This research is
+roughly grouped under the term \textbf{Agent-Oriented Software Engineering} (AOSE).
+\end{nbdef}
+
+\begin{nbfact}{Mainstream research directions in AOSE (AOSE slide 8; EMAS slide 11)}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}c>{\raggedright\arraybackslash}X|c>{\raggedright\arraybackslash}X@{}}
+\toprule
+\multicolumn{2}{c|}{\textbf{AOSE deck (2004 view)}} & \multicolumn{2}{c}{\textbf{EMAS keynote (2024 view)}} \\
+\midrule
+1 & agent-oriented architectures & 1 & agent-oriented architectures \\
+2 & AOSE methodologies & 2 & methodologies and notation techniques \\
+3 & notation techniques & 3 & agent-oriented programming languages \\
+4 & agent-oriented programming languages & 4 & MAS infrastructures and toolkits \\
+5 & agent-based modelling and simulation & 5 & agent-based modelling and simulation \\
+6 & MAS infrastructures & 6 & symbolic and sub-symbolic integration \\
+  & & 7 & engineering safe autonomous systems \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Twenty years later the list is almost the same, plus two new directions: neurosymbolic
+integration and safety.
+\end{nbfact}
+(A section of the original AOSE deck, ``The promise of AOSE for distributed systems
+engineering'', was removed in the shortened version used in class.)

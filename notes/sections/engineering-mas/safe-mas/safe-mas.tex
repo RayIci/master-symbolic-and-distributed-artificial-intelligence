@@ -1,0 +1,162 @@
+\subsection{Engineering safe MAS: formal and runtime verification}
+\label{sec:safe-mas}
+\slidesrc{EMAS keynote: 71--95}
+
+The second part of the keynote (with Davide Ancona) addresses the seventh research
+direction: how can we trust autonomous systems?
+
+\subsubsection{Safe and reliable autonomous systems}
+\slidesrc{EMAS keynote: 72--79}
+
+The paper \emph{Towards a Framework for Certification of Reliable Autonomous Systems}
+(Fisher, Mascardi, Rozier, Schlingloff, Winikoff, Yorke-Smith, JAAMAS 2021) describes the
+progressive transfer of responsibility from humans to machines with four pictures. In each,
+three capabilities appear: \emph{adopting ethical principles / meta-reasoning},
+\emph{following the rules}, \emph{controlling all the system's operations}.
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}c >{\raggedright\arraybackslash}X c c c@{}}
+\toprule
+\textbf{Fig.} & \textbf{Situation} & \textbf{controls operations} & \textbf{follows rules} & \textbf{ethics} \\
+\midrule
+1 & human user has full control of the tool (hammer, printing press, bicycle) & human & human & human \\
+2 & human (partially) delegates the \emph{control of the operations} (a steam engine, a car, a tractor with automation) & software & human & human \\
+3 & human (partially) delegates the \emph{respect of the rules} (a plane, a modern car, a robot with software) & software & software & human \\
+4 & human \emph{replaced} by an autonomous software system & software & software & software \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{Levels of delegation to software (slides 73--76). The higher the level, the
+more the software must be \emph{certified} as reliable.}
+\end{center}
+
+The same idea in the automotive world is the SAE scale of driving automation (slides 77--79),
+already seen in Section~\ref{sec:recent-achievements}: from level~0 (the human drives) to
+level~5 (the system drives everywhere).
+
+\subsubsection{Verification techniques}
+\slidesrc{EMAS keynote: 80}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.3}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{2.3cm}|>{\centering\arraybackslash}X>{\centering\arraybackslash}X>{\centering\arraybackslash}X@{}}
+ & \multicolumn{2}{c}{\textbf{Formal}} & \textbf{Semi-formal} \\
+ & properties \& system model formally specified & properties formally specified; the system is real & properties informally specified; the system is real \\
+\hline
+\textbf{Non-exhaustive, dynamic} & & \cellcolor{nbgreen!15}runtime verification & \cellcolor{nbblue!10}runtime verification, software testing \\
+\textbf{Non-exhaustive, static} & \cellcolor{nborange!12}static analysis & \cellcolor{nborange!12}static analysis & \cellcolor{nborange!12}static analysis \\
+\textbf{Exhaustive, static} & \cellcolor{nbpurple!12}theorem proving, model checking & \cellcolor{nbpurple!12}model checking & \\
+\end{tabularx}
+\captionof{figure}{Formal and semi-formal verification techniques (slide 80, redrawn as a table).
+Exhaustive techniques consider \emph{all} possible behaviours of a \emph{model}; runtime
+verification and testing observe \emph{some} executions of the \emph{real} system.}
+\end{center}
+
+\begin{itemize}[nosep]
+  \item \textbf{Theorem proving}: prove mathematically that the model satisfies the property
+        (Part~II gives the flavour).
+  \item \textbf{Model checking}: explore all states of a finite model automatically.
+  \item \textbf{Static analysis}: inspect the code without running it (types, data flow).
+  \item \textbf{Software testing}: run the system on chosen inputs and compare with the
+        expected outputs.
+  \item \textbf{Runtime verification}: watch the real system while it runs and check its
+        execution against a formal specification.
+\end{itemize}
+
+\subsubsection{Runtime verification}
+\slidesrc{EMAS keynote: 81--86}
+
+Introductory reading (slides 82--83): Leucker and Schallhart, \emph{A Brief Account of
+Runtime Verification} (2009); Bartocci, Falcone, Francalanza, Reger, \emph{Introduction to
+Runtime Verification} (2018); Falcone et al., \emph{A taxonomy for classifying runtime
+verification tools} (2021).
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth]
+  \node[draw, thick, ellipse, fill=nbgray!10, align=center] (spec) at (3.2,2.6) {formal\\specification};
+  \node[font=\scriptsize, align=left, anchor=west] at (4.8,2.6) {intensional definition\\of a set of event traces};
+  \node[draw, thick, rounded corners, fill=nbpurple!15, align=center, minimum width=2.4cm, minimum height=0.9cm] (mon) at (3.2,1.0) {generated\\monitor};
+  \node[draw, thick, rounded corners, fill=nbpurple!8, minimum width=6.0cm, minimum height=1.7cm] (instr) at (3.2,-1.7) {};
+  \node at (3.2,-1.15) {instrumentation};
+  \node[draw, thick, rounded corners, fill=white, minimum width=3.6cm] (prog) at (3.2,-2.05) {program to be verified};
+  \node[draw, thick, minimum width=0.35cm, minimum height=1.8cm, fill=nbblue!10] (tr) at (0,1.2) {};
+  \foreach \y in {0.55,0.85,1.15,1.45,1.75} \draw (-0.17,\y) -- (0.17,\y);
+  \node[font=\scriptsize, align=center] at (0,2.55) {run =\\event trace};
+  \draw[->, thick, nbpurple] (spec) -- (mon);
+  \draw[->, thick, nbblue] (0.3,1.0) -- (mon);
+  \draw[->, thick, nbblue] (1.4,-0.85) -- node[left, font=\scriptsize]{generated events} (1.4,0.1) -- (0,0.1) -- (tr);
+  \draw[->, thick, nbblue] (mon.east) -- node[above, font=\scriptsize]{verdict} (6.6,1.0);
+  \draw[->, thick, nborange] (4.6,0.5) -- node[right, font=\scriptsize]{optional feedback} (4.6,-0.85);
+\end{tikzpicture}
+\captionof{figure}{The runtime verification process (slide 84). The program is instrumented to
+emit events; the sequence of events of a run is the \emph{trace}; a monitor, generated
+automatically from a formal specification, reads the trace and emits a verdict (and possibly
+feedback to the program, e.g.\ to recover from an error).}
+\end{center}
+
+\begin{nbexample}{a monitor for the FIPA Request protocol}
+\notinslides
+Property: ``every \code{request} is answered by \code{agree} or \code{refuse}; after an
+\code{agree}, exactly one of \code{failure}, \code{inform-done}, \code{inform-result}
+follows''. Traces observed between a customer and a pizzeria agent:
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Trace} & \textbf{Verdict} \\
+\midrule
+request, agree, inform-done & \textcolor{nbgreen!60!black}{true} (correct and complete) \\
+request, refuse & \textcolor{nbgreen!60!black}{true} \\
+request, agree & \textcolor{nborange}{inconclusive} so far (waiting for the outcome) \\
+request, inform-done, agree & \textcolor{nbred}{false}: the outcome came before the agreement \\
+\bottomrule
+\end{tabular}
+\end{center}
+The monitor does not need to know how the pizzeria agent is programmed (JADE, Jason,
+Python): it only observes messages. This is the ``system agnosticism'' of the next box.
+\end{nbexample}
+
+\begin{nbfact}{RV bridges the gap between formal verification and testing (slide 85)}
+\begin{itemize}[nosep]
+  \item The notion of \textbf{event trace} abstracts over system executions.
+  \item RV can be adopted \textbf{online} (while the system runs) and \textbf{offline}
+        (on recorded logs).
+  \item \textbf{System agnosticism} better supports reuse and interoperability.
+  \item RV offers more opportunities for \textbf{error recovery}, \textbf{self-adaptation},
+        and issues that go beyond software reliability.
+  \item Often some information is available \textbf{only at runtime}: then RV is an
+        alternative to formal verification.
+  \item The behaviour of an application may depend heavily on its \textbf{environment}: RV
+        adds to formal correctness proofs.
+  \item Where \textbf{security} matters, it is useful to monitor properties even when they
+        have been statically proved or tested.
+\end{itemize}
+\end{nbfact}
+
+\paragraph{RML (slide 86).} The \textbf{Runtime Monitoring Language} (Ancona, Franceschini,
+Ferrando, Mascardi, \emph{Science of Computer Programming}, 2021) is a domain-specific
+language, developed at the University of Genoa, for writing specifications of event traces
+from which monitors are generated; it is system-agnostic and has been used to monitor agent
+interaction protocols.
+
+\subsubsection{Conclusions}
+\slidesrc{EMAS keynote: 87--95}
+
+\begin{nbfact}{Big concepts (slides 88--94)}
+\begin{itemize}[nosep]
+  \item The adoption of AI (and agents and MAS \emph{are} AI systems) raises
+        \textbf{ethical concerns} that must be coped with: see the EU AI Act, the US Congress
+        ``AI Insight'' forum, safety in Industry 4.0, ``safety first''.
+  \item A reliable approach for engineering applications that involve agents in
+        \textbf{safety-critical / ethically critical} domains is needed: formal methods in
+        general, and runtime verification in particular, may help address some of their
+        ethical threats, paving the way to a more \textbf{explainable, trustworthy, socially
+        responsible} AI.
+  \item Engineering safe agents and MAS is only one of the many goals of AOSE, which faces the
+        theoretical and technological challenges of today's complex, distributed,
+        heterogeneous, autonomous systems.
+\end{itemize}
+\end{nbfact}

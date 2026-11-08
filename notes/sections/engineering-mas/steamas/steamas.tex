@@ -1,0 +1,118 @@
+\subsection{Forth into the SteaMas future: designing the MAS}
+\label{sec:steamas}
+\slidesrc{EMAS keynote: 57--61}
+
+Back to Dr.\ Joyce's city (Section~\ref{sec:emas-overview}). The keynote gives ``5
+minutes'' of brainstorming to each requirement; in class the discussion was continued on the
+whiteboard (Whiteboards~\ref{wb:methodology-questions}--\ref{wb:development}).
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.6cm} X@{}}
+\toprule
+\textbf{Requirement} & \textbf{What we need (slides 58--60)} \\
+\midrule
+\#1 citizens and tourists respect civil/ethical \textbf{norms} &
+  \textbf{norms} expressed in some formalism; \textbf{regulators} that verify that the norms
+  are respected; a way to \textbf{communicate} the norms to regulators and mainly to ``end
+  users'' (natural language, pictures); a way to \textbf{observe} what people do
+  (``instrumentation'' of the system to monitor it). \\
+\#2 \textbf{no private traffic}; free, effective public transport &
+  collect \textbf{feedback} from people offline (natural language understanding and
+  generation come into play); Google Maps integration; \textbf{economics}: even if free,
+  transport has a cost, so agents should behave like in a \textbf{market} (rational) and
+  negotiate how to best spend their allocated budget; \textbf{prediction} and
+  prioritisation; cope with \textbf{emotions} and preferences (in the ``not rational''
+  sense); \textbf{transparency} (how we predict traffic, what we can expect). \\
+\#3 a free personal \textbf{drone} for everybody &
+  as for traffic: emotions, geolocalisation, etc. \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{Brainstorming on the three SteaMas requirements.}
+\end{center}
+
+\noindent Slide 61: \emph{Can we ``sell'' the agent technology to Dr.\ Joyce?} --- ``Yes we
+can!'' Every requirement maps onto agent concepts: norms and regulators (normative MAS),
+negotiation (Contract Net, markets), emotions (strong agency), monitoring (runtime
+verification).
+
+\begin{nbwhiteboard}[label=wb:methodology-questions]{Methodology questions}{written during the SteaMas discussion}
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  q/.style={draw, thick, rounded corners, text width=9.2cm, minimum height=0.9cm, align=left, fill=#1}]
+  \node[q=nbblue!8] (q1) at (0,0) {\textbf{\textcircled{1}} Which are the \textbf{ROLES} of agents that the application needs?};
+  \node[q=nbpurple!8] (q2) at (0,-1.3) {\textbf{\textcircled{2}} Which are the \textbf{CLASSES} (as ``aggregation of roles'')?};
+  \node[q=nborange!10] (q3) at (0,-2.6) {\textbf{\textcircled{3}} Which are the \textbf{INSTANCES} of classes?};
+  \draw[->, thick] (q1) -- (q2); \draw[->, thick] (q2) -- (q3);
+  \draw[->, thick, nbred] (q2.west) to[bend right=40] node[left, font=\scriptsize, align=right, text width=2.6cm]{note that point 2 may be \textbf{very dynamic}, with agents playing different roles over time} ([yshift=-0.5cm]q3.south west);
+  \node[font=\small, nbgreen!60!black, anchor=north] at (0,-3.5) {\textbf{Some components might exploit ABMS.}};
+\end{tikzpicture}
+\end{center}
+\wbphoto{sections/engineering-mas/steamas/assets/whiteboard-9-3.jpg}
+\textbf{Reading.} Designing a MAS starts from \emph{roles} (what has to be done), not from
+agents. A \emph{class} of agents aggregates several roles (one agent type can play many
+roles); \emph{instances} are the concrete running agents. In SteaMas: roles such as
+\emph{traffic monitor}, \emph{route planner}, \emph{norm regulator}, \emph{drone pilot};
+a class \emph{TrafficLightAgent} may aggregate \emph{traffic monitor} and \emph{local
+controller}; there will be one instance per traffic light. The mapping from roles to
+classes may change at run time (an agent can take a new role, like a manager/contractor in
+the Contract Net). Some parts (e.g.\ predicting crowds) can be done with agent-based
+simulation (Section~\ref{sec:abms}).
+\end{nbwhiteboard}
+
+\begin{nbwhiteboard}[label=wb:mas-architecture-role]{MAS architecture and role level}{written during the SteaMas discussion}
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  e/.style={draw, thick, ellipse, align=center, minimum height=0.9cm, fill=#1}]
+  \node[e=nbblue!10] (scm) at (0,0) {Smart City\\Manager};
+  \node[e=nbpurple!10] (to) at (-1.6,-1.7) {Traffic\\Optimizer};
+  \node[e=nbpurple!5, dashed] (o1) at (0.6,-1.7) {\ldots};
+  \node[e=nbpurple!5, dashed] (o2) at (2.0,-1.7) {\ldots};
+  \node[e=nborange!12] (tl) at (-2.6,-3.4) {Traffic\\Light};
+  \node[e=nborange!6, dashed] (tl2) at (-0.6,-3.4) {\ldots};
+  \draw[thick] (scm) -- (to); \draw[thick] (scm) -- (o1); \draw[thick] (scm) -- (o2);
+  \draw[thick] (to) -- (tl); \draw[thick] (to) -- (tl2);
+  \node[align=left, font=\scriptsize, anchor=west] at (1.2,-3.2) {Example: sub-hierarchies for\\sub-components.\\No conflict with autonomy.};
+\end{tikzpicture}
+\end{center}
+\textbf{Role level}. By ``role of an agent'' we mean something characterised by:
+\begin{itemize}[nosep]
+  \item[\textbf{(A)}] its \textbf{capabilities}:
+    \begin{itemize}[nosep]
+      \item the \textbf{goals} the agent is able to achieve;
+      \item the \textbf{portion of the environment} it acts on / senses;
+      \item its \textbf{social capabilities} (interaction protocols);
+      \item \textbf{safety plans} in case of failure;
+    \end{itemize}
+  \item[\textbf{(B)}] its \textbf{architecture} (reactive, deliberative, hybrid, BDI, \ldots).
+\end{itemize}
+\wbphoto{sections/engineering-mas/steamas/assets/whiteboard-9-2.jpg}
+\textbf{Reading.} The MAS can be organised as a \emph{hierarchy}: the Smart City Manager
+supervises sub-managers (the Traffic Optimizer, and others, e.g.\ for drones or norms),
+which in turn coordinate their sub-components (traffic lights). This does \emph{not}
+conflict with autonomy: each agent still decides how to achieve its goals; the hierarchy
+only says who coordinates whom. A role is described by \emph{what} it can do (goals, sphere
+of influence on the environment as in Figure~\ref{fig:mas-structure}, protocols such as
+FIPA Request, fallback plans when something fails) and by \emph{how} it is built inside
+(its architecture, Section~\ref{sec:agent-architectures}).
+\end{nbwhiteboard}
+
+\begin{nbwhiteboard}[label=wb:development]{Development: how?}{written during the SteaMas discussion}
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  b/.style={draw, thick, rounded corners, text width=4.3cm, minimum height=1.4cm, align=center, fill=#1}]
+  \node[b=nbpurple!8] (a) at (-2.6,0) {\textbf{Agent-oriented tools}\\(JADE, Jason, etc.)\\for \underline{\textbf{non}} safety-critical components};
+  \node[b=nbblue!8] (s) at (2.6,0) {\textbf{``Solid'' tools}\\(mainstream, certified technologies)\\for the rest};
+  \node[draw, thick, rounded corners, fill=nbgreen!12, text width=8cm, align=center] (rv) at (0,-1.9) {\textbf{\textcolor{nbgreen!50!black}{Runtime verification}}\\monitors that check, while the system runs, that the components behave as specified};
+  \draw[->, thick] (a) -- (rv); \draw[->, thick] (s) -- (rv);
+\end{tikzpicture}
+\end{center}
+\wbphoto{sections/engineering-mas/steamas/assets/whiteboard-9-1.jpg}
+\textbf{Reading.} Agent platforms are research tools (Section~\ref{sec:uses-of-mas}): use
+them where a failure is not dangerous (e.g.\ the tourist recommendation agents), and use
+solid, industrial technologies for the safety-critical parts (e.g.\ the drones' flight
+control, the traffic lights). Either way, add \emph{runtime verification}
+(Section~\ref{sec:safe-mas}) to observe the running system and detect violations of the
+expected behaviour, written in green on the board as the take-home message.
+\end{nbwhiteboard}
