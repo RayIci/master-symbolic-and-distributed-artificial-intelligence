@@ -1,0 +1,103 @@
+\subsection{Agent-based modelling and simulation}
+\label{sec:abms-netlogo}
+\slidesrc{ABMS: 2--4, 18--21}
+
+\begin{nbdef}{Agent-based modelling and simulation (slide 18)}
+\begin{itemize}[nosep]
+  \item \textbf{Agent-based modelling} is a computational methodology that allows scientists
+        to create, analyse and experiment with \textbf{artificial worlds} populated by agents
+        that interact in non-trivial ways and that constitute their own environment.
+  \item An \textbf{agent-based simulation} (ABS) is one in which a collection of agents
+        compete or collaborate, or both, to attain individual goals in pursuit of social or
+        organisational goals.
+  \item A simulation based on software agents can support good science provided that the
+        design of the agents and of the simulation environment are themselves based on good
+        science.
+\end{itemize}
+\end{nbdef}
+
+\begin{nbfact}{Why ABMS? (slide 19)}
+\begin{itemize}[nosep]
+  \item Aspects of the real world we want to examine are \textbf{not physically
+        accessible}; ABMS takes place in an artificial world.
+  \item Experimenting with the real system is \textbf{prohibited} due to undesirable
+        disturbances.
+  \item The \textbf{time scale} of the system's behaviour is too small or too large for
+        observation.
+  \item The original system \textbf{does not exist any more, or does not exist yet}.
+  \item Modelling is a tool for understanding: it \textbf{formalises a hypothesis} that
+        otherwise would have remained very vague.
+\end{itemize}
+\end{nbfact}
+
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\textbf{Reason} & \textbf{Example (added)} \\
+\midrule
+not accessible & the spread of a virus inside a city: we cannot observe every contact \\
+must not be disturbed & testing an evacuation plan by setting a real stadium on fire \\
+wrong time scale & climate and land-use change over a century; molecules in nanoseconds \\
+does not exist (yet / any more) & traffic in a city district not yet built; the fall of an ancient civilisation \\
+formalising a hypothesis & ``segregation can arise even if nobody wants it'' (Schelling, below) \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{The reasons of slide 19 with examples.}
+\end{center}
+
+\paragraph{Applications (slide 20).} Biology, energy, transportation, entertainment, and
+many more (a Google Scholar search on applications of ABMS since 2020 returns thousands of
+papers). The slides cite \textbf{MASSIVE}, a commercial agent-based crowd-simulation software
+used to animate large battle and crowd scenes in films, where each digital character is an
+agent with its own perception and behaviour.
+
+\subsubsection{NetLogo}
+\slidesrc{ABMS: 4, 21}
+
+\textbf{NetLogo} (Northwestern University) is a free programmable modelling environment for
+ABMS. Its world is a grid of \emph{patches}; mobile agents are called \emph{turtles}; an
+\emph{observer} gives orders. It comes with a large \emph{models library} (slide 4: biology,
+chemistry and physics, computer science, earth science, games, mathematics, social science;
+slide 21 shows thumbnails of many models).
+
+\begin{nbexample}{Schelling's segregation model (the model selected on slide 4)}
+The model on slide 4: two types of turtles, red and green, live in a ``mythical pond''. They
+get along with one another, but each turtle wants to make sure that it lives near
+\emph{some} of ``its own'': each red turtle wants at least some red neighbours, each green
+turtle at least some green ones. The simulation shows how these individual preferences
+ripple through the pond, leading to large-scale patterns. (It is inspired by Thomas
+Schelling's writings about social systems such as housing patterns in cities.)
+
+The rule of each agent, at each tick (simplified sketch in NetLogo style):
+\begin{minted}[linenos=false]{text}
+to go
+  ask turtles [
+    let total   count (turtles-on neighbors)
+    let similar count (turtles-on neighbors) with [color = [color] of myself]
+    if total > 0 and similar / total < 0.3 [ move-to one-of patches with [not any? turtles-here] ]
+  ]
+  tick
+end
+\end{minted}
+Each turtle is \emph{happy} if at least 30\% of its neighbours (the 8 surrounding cells) have
+its colour; otherwise it moves to a random empty cell. Example: a red turtle with neighbours
+\{green, green, red, green, empty, \ldots\}: \code{total} $= 4$, \code{similar} $= 1$,
+$1/4 = 25\% < 30\%$: it moves. With 2 red out of 4, $50\% \geq 30\%$: it stays.
+
+\textbf{What emerges.} Starting from a random mix, after a few dozen ticks the pond is
+divided into large red and green regions, with typically far more than 30\% similar
+neighbours on average. Nobody wanted segregation (everyone accepts being a minority of 70\%
+in its neighbourhood), yet the city is segregated: a global pattern that no individual
+intends, visible only by running the simulation. This is the ``third way of doing science''
+of Section~\ref{sec:uses-of-mas}.
+\end{nbexample}
+
+\begin{nbintuition}[Simple agents, complex worlds]
+The agents of an ABMS are usually \emph{reactive} (condition--action rules,
+Section~\ref{sec:reactive-architectures}): that is why the professor listed ABMS among the
+pros of reactive architectures (Whiteboard~\ref{wb:reactive-pros-cons}). The complexity is
+not inside each agent, but in their \emph{interaction} (Section~\ref{sec:what-is-a-mas}).
+In contrast, the BDI agents of Section~\ref{sec:bdi-agentspeak} are \emph{cognitive}: richer
+individuals, typically fewer of them, used when the intelligence of the individual matters.
+\end{nbintuition}

@@ -194,3 +194,32 @@ references and overfull boxes above ~5pt; render the new pages and look at them
 - Never use `\code{...}` (purple) in box titles: it is invisible on the coloured bar. Use
   `\texttt{...}` there.
 - Long query/answer listings in two columns: use `fontsize=\footnotesize` in minted.
+
+## Conventions established while writing
+
+- Code that must appear inside an `nbsolution` (Prolog/AgentSpeak solutions) lives in a
+  file in the sub-section's `assets/` and is included with `\inputminted{prolog}{...}`.
+- AgentSpeak and FIPA-ACL listings use the `prolog` and `text` minted lexers.
+- Answers to Prolog queries are written as SWI-Prolog prints them (`true`/`false`); when
+  the slides (tuProlog/SICStus: `Yes`/`No`, `_G123`, `'.'` list functor) differ, say so.
+- Material moved away from its lecture position gets `\movedfrom{...}` (used for the AOSE
+  deck, placed before the EMAS research directions).
+- The professor's own remarks printed on slides ("I disagree ... VM") go in `nbwarning`
+  boxes titled "Prof. Mascardi's remark": they are exam-relevant opinions.
+
+## Coverage status (keep updated)
+
+| Deck / photo                    | Section folder            | Status   |
+|---------------------------------|---------------------------|----------|
+| 1                               | `ai-introduction`         | complete |
+| 2, 3                            | `propositional-logic`     | complete (all 24 exercises solved; 3 invalid as printed) |
+| 4, 5, 6.1, 6.2                  | `first-order-logic`       | complete |
+| 7                               | `agents-and-mas`          | complete |
+| 8, 8.1                          | `agent-architectures`     | complete |
+| 9, 9.1–9.3, 10                  | `engineering-mas`         | complete |
+| 11, 12, 13, 14, 15              | `prolog`                  | complete (lecture order I, II, IV, V, III) |
+| 16, 18                          | `bdi-agentspeak`          | complete |
+| 17                              | `agent-communication`     | complete |
+| 19                              | `jade`                    | complete |
+| 20                              | `abms`                    | complete |
+| labs/                           | —                         | not covered (on request) |

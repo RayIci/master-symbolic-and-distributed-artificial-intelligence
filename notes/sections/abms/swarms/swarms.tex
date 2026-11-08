@@ -1,0 +1,119 @@
+\subsection{Swarms and swarm intelligence}
+\label{sec:swarms}
+\slidesrc{ABMS: 5--17}
+
+\begin{nbdef}{Swarm (slide 5)}
+A \textbf{swarm} is a loosely structured collection of interacting \textbf{agents}:
+individuals that
+\begin{itemize}[nosep]
+  \item belong to a group (but are not necessarily identical);
+  \item contribute to and benefit from the group;
+  \item can recognise, communicate and/or interact with each other.
+\end{itemize}
+The instinctive perception of a swarm is a group of agents in motion, but that does not
+always have to be the case: a swarm is better understood as agents exhibiting a
+\textbf{collective behaviour}.
+\end{nbdef}
+
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Swarm} & \textbf{Agents} \\
+\midrule
+swarm of bees (the classic example) & bees \\
+ant colony & ants \\
+flock of birds & birds \\
+school of fish & fish \\
+traffic & cars \\
+crowd & humans \\
+immune system & cells and molecules \\
+the mind? & ``partially autonomous agents'' (Minsky) \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Examples of swarms (slides 6--13).}
+\end{center}
+
+\begin{nbfact}{The mind as a swarm (slide 13)}
+``We shall envision the mind (or brain) as composed of many partially autonomous `agents',
+as a `Society' of smaller minds. [\ldots] (we suggest) the local mechanisms for resolving
+conflicts could be the precursors of what we know later as reasoning, useful ways to
+combine different fragments of knowledge.'' (M.~Minsky, \emph{K-Lines: A Theory of Memory},
+1980). Minsky was one of the founding fathers of AI (Section~\ref{sec:ai-history}); his
+\emph{society of mind} links swarms, MAS and intelligence itself.
+\end{nbfact}
+
+\begin{nbdef}{Swarm intelligence (slides 14--16)}
+\textbf{Swarm intelligence} (SI) is the collective behaviour of \textbf{decentralised},
+\textbf{self-organised} systems, natural or artificial. The expression was introduced by
+G.~Beni and J.~Wang in 1989, for cellular robotic systems; Bonabeau, Dorigo and Theraulaz
+(\emph{Swarm Intelligence: From Natural to Artificial Systems}, 1999) extended it to
+``devices inspired by the collective behavior of insect colonies and other animal
+societies''.
+
+SI systems typically consist of a population of \textbf{simple agents} (or \emph{boids})
+interacting \textbf{locally} with one another and with their environment. The agents follow
+very simple rules and there is no centralised control; local, and to a certain degree
+random, interactions lead to the \textbf{emergence} of ``intelligent'' global behaviour,
+unknown to the individual agents.
+\end{nbdef}
+
+\begin{nbexample}{boids: flocking from three rules}
+\emph{Boids} (``bird-oid objects'') is an artificial-life program by Craig Reynolds (1986;
+ACM SIGGRAPH 1987) that simulates the flocking behaviour of birds (slide 16). Each boid only
+looks at its nearby flockmates and follows three rules (added):
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth, scale=0.9]
+  \foreach \cx/\title in {0/separation, 4.6/alignment, 9.2/cohesion} {
+    \node[font=\small\bfseries] at (\cx,1.7) {\title};
+    \draw[nbgray, dashed] (\cx,0) circle (1.4cm);
+  }
+  % separation
+  \fill[nbblue] (0,0) circle (3pt); \fill[nbgray] (0.5,0.3) circle (2.5pt); \fill[nbgray] (0.4,-0.4) circle (2.5pt);
+  \draw[->, thick, nbred] (0,0) -- (-0.8,0.05);
+  % alignment
+  \fill[nbblue] (4.6,0) circle (3pt);
+  \draw[->, nbgray, thick] (5.1,0.5) -- ++(0.5,0.35); \draw[->, nbgray, thick] (4.0,-0.6) -- ++(0.5,0.35);
+  \draw[->, thick, nbred] (4.6,0) -- ++(0.7,0.5);
+  % cohesion
+  \fill[nbblue] (8.3,-0.2) circle (3pt); \fill[nbgray] (9.5,0.6) circle (2.5pt); \fill[nbgray] (9.8,-0.3) circle (2.5pt); \fill[nbgray] (9.3,-0.7) circle (2.5pt);
+  \draw[thick, nbgreen!60!black] (9.53,-0.13) circle (2pt);
+  \draw[->, thick, nbred] (8.3,-0.2) -- (9.3,-0.15);
+\end{tikzpicture}
+\end{center}
+\begin{enumerate}[nosep]
+  \item \textbf{separation}: steer away from flockmates that are too close (avoid crowding);
+  \item \textbf{alignment}: steer towards the average heading of the neighbours;
+  \item \textbf{cohesion}: steer towards the average position (centre) of the neighbours.
+\end{enumerate}
+No boid knows the shape of the flock, nor is there a leader: the murmuration of starlings on
+slide 8 emerges from these local rules. The same idea animates crowds and herds in films and
+video games, and drone light shows.
+\end{nbexample}
+
+\begin{nbfact}{Advantages of swarm intelligence (slide 17)}
+\begin{itemize}[nosep]
+  \item \textbf{Scalable}: the same control architecture can be applied to a couple of
+        agents or to thousands of agents.
+  \item \textbf{Flexible}: agents can be easily added or removed without influencing the
+        structure.
+  \item \textbf{Robust}: agents are simple in design, the reliance on individual agents is
+        small, and the failure of a single agent has little impact on the system's
+        performance.
+\end{itemize}
+\end{nbfact}
+
+\begin{nbintuition}[Robustness: individual vs.\ collective]
+Compare with Prof.\ Mascardi's remark on the reactive-architecture slides
+(Section~\ref{sec:reactive-architectures}): robustness is a property of the \emph{swarm}
+(the MAS), which does not depend on any single member, not of the architecture of an
+individual reactive agent.
+\end{nbintuition}
+
+\begin{nbwhy}
+\notinslides
+Swarm intelligence is also an optimisation technique: \emph{ant colony optimisation}
+(Dorigo) finds short routes the way ants do, by depositing and following ``pheromone'' on
+good paths, and is used for vehicle routing and network routing; \emph{particle swarm
+optimisation} searches a solution space with a flock of candidate solutions.
+\end{nbwhy}

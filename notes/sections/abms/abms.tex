@@ -1,2 +1,35 @@
 \section{Agent-based modelling and simulation}
 \label{sec:abms}
+\slidesrc{ABMS: 1--21}
+
+The third use of MAS (Section~\ref{sec:uses-of-mas}) is \textbf{simulation}: instead of
+building agents that act in the real world, we build a population of (usually simple)
+agents in an artificial world and observe what \emph{emerges} from their interaction. The
+deck (also based on tutorials by S.~Coffman-Wolph, S.~Kaisler and G.~Madey) starts by
+recalling the Macal and North quotes on ABMS as ``a third way of doing science''
+(slides 2--3, see Section~\ref{sec:uses-of-mas}) and NetLogo (slide 4), then discusses
+swarms and swarm intelligence, and finally ABMS proper.
+
+\input{sections/abms/swarms/swarms}
+\input{sections/abms/abms-netlogo/abms-netlogo}
+
+\begin{nbsummary}[Agent-based modelling and simulation]
+\begin{itemize}[nosep]
+  \item \textbf{Swarm}: a loosely structured collection of interacting agents (not
+        necessarily identical) that contribute to and benefit from the group; better seen as
+        agents exhibiting a \textbf{collective behaviour}. Examples: bees, ants, birds, fish,
+        traffic, crowds, the immune system, even the mind (Minsky's society of mind).
+  \item \textbf{Swarm intelligence} (Beni and Wang 1989; extended by Bonabeau, Dorigo,
+        Theraulaz 1999): collective behaviour of decentralised, self-organised systems;
+        simple agents, local (partly random) interactions, no central control, emergent
+        ``intelligent'' global behaviour. Boids (Reynolds 1986).
+  \item Advantages: \textbf{scalable}, \textbf{flexible}, \textbf{robust}.
+  \item \textbf{ABMS}: computational methodology to create, analyse and experiment with
+        artificial worlds of interacting agents; agents compete and/or collaborate towards
+        individual and social goals; good simulation needs good science behind the model.
+  \item Why: the real system is inaccessible, cannot be disturbed, has the wrong time scale,
+        does not exist (anymore / yet); modelling forces hypotheses to be precise.
+  \item Tools: \textbf{NetLogo} (turtles on patches, models library: e.g.\ Schelling's
+        segregation), MASSIVE (crowds in films).
+\end{itemize}
+\end{nbsummary}
