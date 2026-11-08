@@ -1,0 +1,203 @@
+\subsection{Communication and yellow pages}
+\label{sec:jade-messaging}
+\slidesrc{JADE: 13--19}
+
+\subsubsection{The communication model}
+\slidesrc{JADE: 13--15}
+
+JADE communication is based on \textbf{asynchronous message passing}, and the message format
+is defined by the FIPA \textbf{ACL} language (Section~\ref{sec:fipa-acl}).
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth]
+  \node[circle, draw, thick, fill=nbblue!60, text=white, minimum size=1.2cm] (a1) at (0,0) {\textbf{A1}};
+  \node[circle, draw, thick, fill=nbblue!60, text=white, minimum size=1.2cm] (a2) at (8.4,0) {\textbf{A2}};
+  \foreach \y in {0,1,2,3} \draw[thick, fill=white] (6.3,-0.6+\y*0.3) rectangle (6.9,-0.3+\y*0.3);
+  \node[font=\scriptsize, anchor=south] at (6.6,0.65) {A2's queue};
+  \fill[nbred!70] (-0.6,-2.1) rectangle (9.0,-1.5);
+  \node[text=white, font=\small\bfseries] at (4.2,-1.8) {Distributed JADE runtime};
+  \draw[->, thick] (a1.south) -- node[right, font=\scriptsize]{1. send the message} (0,-1.5);
+  \draw[->, thick] (6.6,-1.5) -- node[left, font=\scriptsize, align=right]{2. post it in\\A2's queue} (6.6,-0.6);
+  \draw[->, thick] (6.9,0.0) -- (a2.west);
+  \node[font=\scriptsize, align=center, anchor=south] at (8.4,0.65) {3. A2 reads it\\when it wants};
+  \node[font=\scriptsize, anchor=south] at (0,0.65) {prepare the message to A2};
+\end{tikzpicture}
+\captionof{figure}{The communication model (slide 13): the sender never waits for the receiver;
+the runtime delivers the message into the receiver's private queue, where it stays until the
+receiver reads it.}
+\end{center}
+
+Messages are instances of \code{jade.lang.acl.ACLMessage}, with accessor methods for all the
+ACL fields (slide 14):
+\begin{center}
+\begin{tabular}{@{}lll@{}}
+\code{get/setPerformative()} & \code{get/setSender()} & \code{add/getAllReceiver()} \\
+\code{get/setLanguage()} & \code{get/setOntology()} & \code{get/setContent()}, \ldots
+\end{tabular}
+\end{center}
+
+\begin{nbfact}{Sending and receiving (slide 15)}
+Sending a message = creating an \code{ACLMessage} and calling the agent's \code{send()}:
+\begin{minted}{java}
+ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+msg.addReceiver(new AID("Peter", AID.ISLOCALNAME));
+msg.setLanguage("English");
+msg.setOntology("Weather-Forecast-Ontology");
+msg.setContent("Today it's raining");
+send(msg);
+\end{minted}
+Reading from the private message queue uses \code{receive()}, which returns the first message
+of the queue (removing it), or \code{null} if the queue is empty:
+\begin{minted}{java}
+ACLMessage msg = receive();
+if (msg != null) {
+    // Process the message
+}
+\end{minted}
+\end{nbfact}
+
+\subsubsection{Waiting for messages: block()}
+\slidesrc{JADE: 16--18}
+
+A behaviour that processes incoming messages does not know when a message will arrive. It
+could poll the queue by calling \code{myAgent.receive()} continuously, but this would waste
+CPU time. The \code{block()} method of \code{Behaviour} removes the behaviour from the pool of
+active behaviours and puts it in a \emph{blocked} state (\textbf{it is not a blocking
+call}: \code{action()} still returns normally). Each time a message is received, all blocked
+behaviours are put back into the pool and have a chance to read it.
+
+\begin{nbfact}{The strongly recommended pattern (slide 16)}
+\begin{minted}{java}
+public void action() {
+    ACLMessage msg = myAgent.receive();
+    if (msg != null) {
+        // Process the message
+    } else {
+        block();
+    }
+}
+\end{minted}
+\end{nbfact}
+
+\paragraph{Selective reading (slide 17).} \code{receive()} returns the first message in the
+queue. If two or more behaviours receive messages, one may ``steal'' a message the other was
+interested in. To avoid this, read only messages with certain characteristics (e.g.\ whose
+sender is ``Peter'') by passing a \code{jade.lang.acl.MessageTemplate}:
+\begin{minted}{java}
+MessageTemplate tpl = MessageTemplate.MatchOntology("Test-Ontology");
+
+public void action() {
+    ACLMessage msg = myAgent.receive(tpl);
+    if (msg != null) {
+        // Process the message
+    } else {
+        block();
+    }
+}
+\end{minted}
+
+\paragraph{Blocking mode (slide 18).} \code{Agent} also provides \code{blockingReceive()},
+which returns only when there is a message in the queue; overloaded versions accept a
+\code{MessageTemplate} (wait for a matching message) and/or a timeout (if it expires, the
+method returns \code{null}). Since it is a \emph{blocking} call, it is ``dangerous'' inside a
+behaviour: no other behaviour can run until it returns.
+
+\begin{nbfact}{Rule of thumb (slide 18)}
+\begin{itemize}[nosep]
+  \item Use \code{receive()} $+$ \code{Behaviour.block()} to receive messages
+        \textbf{within behaviours}.
+  \item Use \code{blockingReceive()} to receive messages within the agent's \code{setup()}
+        and \code{takeDown()} methods.
+\end{itemize}
+\end{nbfact}
+
+\begin{nbexample}{a weather station and a subscriber}
+\notinslides
+The station sends the forecast to \code{Peter} with the code of slide 15 (with the ontology name shortened to \code{"Weather"}). Peter's agent:
+\begin{minted}{java}
+public class PeterAgent extends Agent {
+    protected void setup() {
+        addBehaviour(new CyclicBehaviour(this) {
+            public void action() {
+                MessageTemplate tpl = MessageTemplate.and(
+                    MessageTemplate.MatchPerformative(ACLMessage.INFORM),
+                    MessageTemplate.MatchOntology("Weather"));
+                ACLMessage msg = myAgent.receive(tpl);
+                if (msg != null) {
+                    System.out.println("Forecast: " + msg.getContent());
+                    ACLMessage reply = msg.createReply();
+                    reply.setPerformative(ACLMessage.AGREE);
+                    reply.setContent("thanks, taking an umbrella");
+                    myAgent.send(reply);
+                } else {
+                    block();
+                }
+            }
+        });
+    }
+}
+\end{minted}
+Timeline: Peter starts, the cyclic behaviour finds the queue empty and calls \code{block()}
+(no CPU used). The station's \code{INFORM} arrives: the behaviour is woken up, \code{receive}
+matches the template, the forecast is printed, a reply is sent (\code{createReply()} fills in
+receiver, conversation-id and in-reply-to). Then \code{action()} returns, is called again,
+finds the queue empty, blocks. Other messages (e.g.\ a \code{REQUEST}) stay in the queue for
+other behaviours.
+\end{nbexample}
+
+\subsubsection{The yellow pages service}
+\slidesrc{JADE: 19}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  ag/.style={circle, draw, thick, minimum size=0.9cm, fill=nbgreen!15}]
+  \draw[thick, fill=nbgray!8] (4,0) ellipse (2.0cm and 2.6cm);
+  \node[draw, thick, fill=yellow!40, text width=2.6cm, align=left, font=\scriptsize\ttfamily] (yp) at (4,0.2)
+    {A1: serviceX\\\ \ \ \ serviceY\\[3pt]A2: serviceZ\\[3pt]A3: serviceW\\\ \ \ \ serviceK\\\ \ \ \ serviceH};
+  \node[font=\scriptsize\bfseries] at (4,-1.6) {Yellow Pages service};
+  \node[font=\small\bfseries] at (4,-2.2) {DF};
+  \node[ag] (a1) at (0,1.6) {A1}; \node[ag] (a2) at (0,0) {A2}; \node[ag] (a3) at (0,-1.8) {A3};
+  \node[ag] (a4) at (8,1.6) {A4}; \node[ag] (a5) at (8,0) {A5}; \node[ag] (a6) at (8,-1.8) {A6};
+  \foreach \a in {a1,a2,a3} \draw[->, thick] (\a) -- (yp.west);
+  \foreach \a in {a4,a5,a6} \draw[->, thick] (\a) -- (yp.east);
+  \node[font=\scriptsize, align=center] at (0,2.6) {publish provided services};
+  \node[font=\scriptsize, align=center] at (8,2.6) {search for agents providing\\the required services};
+  \draw[<->, thick, nbblue] (a3) to[bend right=25] node[below, font=\scriptsize]{exploit the required service (direct messages)} (a6);
+\end{tikzpicture}
+\captionof{figure}{The yellow pages service (slide 19): providers register their services with
+the Directory Facilitator; consumers search the DF to discover providers, then talk to them
+directly.}
+\end{center}
+
+\begin{nbexample}{registering and searching (JADE API)}
+\notinslides
+\begin{minted}{java}
+// Provider, in setup(): publish the service
+DFAgentDescription dfd = new DFAgentDescription();
+dfd.setName(getAID());
+ServiceDescription sd = new ServiceDescription();
+sd.setType("weather-forecast");
+sd.setName("genoa-weather");
+dfd.addServices(sd);
+try { DFService.register(this, dfd); } catch (FIPAException e) { e.printStackTrace(); }
+
+// Consumer: find all agents offering "weather-forecast"
+DFAgentDescription template = new DFAgentDescription();
+ServiceDescription wanted = new ServiceDescription();
+wanted.setType("weather-forecast");
+template.addServices(wanted);
+DFAgentDescription[] result = DFService.search(this, template);  // may throw FIPAException
+for (DFAgentDescription d : result) System.out.println(d.getName());
+\end{minted}
+The provider should call \code{DFService.deregister(this)} in \code{takeDown()}. The DF is
+itself an agent: these methods exchange FIPA \code{request} messages with it under the hood.
+\end{nbexample}
+
+\begin{nbwhy}
+\notinslides
+Yellow pages give \textbf{loose coupling}: the consumer does not need to know the names of
+the providers at compile time, and providers can join or leave an \emph{open} system at any
+time. The same idea is service discovery in microservice architectures (a service registry)
+and, combined with Contract Net, gives dynamic task allocation: search the DF for all agents
+offering a service, send them a \code{cfp}, accept the best \code{propose}.
+\end{nbwhy}

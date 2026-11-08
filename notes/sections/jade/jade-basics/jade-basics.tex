@@ -1,0 +1,117 @@
+\subsection{JADE agents}
+\label{sec:jade-basics}
+\slidesrc{JADE: 4--9}
+
+\begin{nbdef}{JADE (slides 4--5)}
+\textbf{JADE} (Java Agent DEvelopment Framework; Bellifemine, Caire, Greenwood,
+\emph{Developing Multi-Agent Systems with JADE}, Wiley 2007; latest release December 2022)
+is a software framework fully implemented in Java. It simplifies the implementation of MAS
+through
+\begin{itemize}[nosep]
+  \item a \textbf{middleware} that complies with the FIPA specifications, and
+  \item a set of \textbf{tools} that support debugging and deployment (e.g.\ the sniffer
+        that draws message exchanges, Section~\ref{sec:uses-of-mas}).
+\end{itemize}
+The agent platform can be \textbf{distributed} across machines, which need not share the
+same operating system, and the configuration can be controlled via a remote GUI. It can be
+changed at run time by \textbf{moving agents} from one machine to another, as and when
+required.
+\end{nbdef}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  host/.style={draw, thick, rounded corners, minimum width=4.3cm, minimum height=2.0cm, fill=#1},
+  ag/.style={circle, draw, thick, fill=nbgreen!25, minimum size=0.6cm, font=\scriptsize}]
+  \node[host=nbblue!6] (h1) at (0,0) {};
+  \node[font=\scriptsize\bfseries, anchor=north] at (h1.north) {Main container (Linux)};
+  \node[ag] at (-1.0,-0.2) {A1}; \node[ag] at (0,-0.2) {AMS}; \node[ag] at (1.0,-0.2) {DF};
+  \node[host=nbblue!6] (h2) at (4.8,0) {};
+  \node[font=\scriptsize\bfseries, anchor=north] at (h2.north) {Container 1 (Windows)};
+  \node[ag] (a2) at (4.3,-0.2) {A2}; \node[ag] at (5.3,-0.2) {A3};
+  \node[host=nbblue!6] (h3) at (9.6,0) {};
+  \node[font=\scriptsize\bfseries, anchor=north] at (h3.north) {Container 2 (macOS)};
+  \node[ag] (a4) at (9.6,-0.2) {A4};
+  \draw[very thick, nbred!70] (-2.2,-1.6) -- (11.8,-1.6) node[midway, below, font=\scriptsize, text=black]{one JADE platform = distributed runtime (FIPA message transport)};
+  \foreach \h in {h1,h2,h3} \draw[thick, nbred!70] (\h.south) -- (\h.south |- 0,-1.6);
+  \draw[->, thick, dashed, nborange] (a2.south) to[bend right=20] node[pos=0.35, above, font=\scriptsize]{agent mobility} (a4.south);
+\end{tikzpicture}
+\captionof{figure}{A JADE platform spread over three machines (added drawing). The main
+container hosts the AMS (white pages) and the DF (yellow pages); agents can move between
+containers at run time.}
+\end{center}
+
+\subsubsection{The HelloWorld agent and AIDs}
+\slidesrc{JADE: 6--7}
+
+A \textbf{type of agent} is created by extending the \code{jade.core.Agent} class and
+redefining the \code{setup()} method (called when the agent starts). Each agent instance is
+identified by an \textbf{AID} (\code{jade.core.AID}), composed of a unique \emph{name} plus
+some \emph{addresses}; an agent retrieves its own AID with \code{getAID()}.
+\begin{minted}{java}
+import jade.core.Agent;
+
+public class HalloWorldAgent extends Agent {
+    protected void setup() {
+        System.out.println("Hallo World! my name is " + getAID().getName());
+    }
+}
+\end{minted}
+
+\begin{nbfact}{Names, GUID and addresses (slide 7)}
+\begin{itemize}[nosep]
+  \item Agent names have the form \code{<local-name>@<platform-name>}, and the complete
+        name must be \textbf{globally unique} (GUID).
+  \item The default platform name is \code{<main-host>:<main-port>/JADE}; it can be set with
+        the \code{-name} option.
+  \item Within a single platform, agents are referred to by their (local) names only.
+  \item Given a name, an AID is created as \code{new AID(localname, AID.ISLOCALNAME)} or
+        \code{new AID(name, AID.ISGUID)}.
+  \item The addresses in an AID are those of the platform's MTPs (message transport
+        protocols) and are used \textbf{only} for communication between agents on
+        \emph{different} FIPA platforms.
+\end{itemize}
+Example: an agent started as \code{peter} on the platform \code{myhost:1099/JADE} has GUID
+\code{peter@myhost:1099/JADE}; \code{new AID("peter", AID.ISLOCALNAME)} refers to it from
+the same platform.
+\end{nbfact}
+
+\subsubsection{Arguments and termination}
+\slidesrc{JADE: 8--9}
+
+It is possible to pass arguments to an agent at start-up,
+\code{java jade.Boot ... a:myPackage.MyAgent(arg1 arg2)}, and retrieve them with
+\code{getArguments()}. An agent terminates when its \code{doDelete()} method is called; on
+termination its \code{takeDown()} method is invoked (intended for clean-up operations).
+\begin{minted}{java}
+protected void setup() {
+    System.out.println("Hallo World! my name is " + getAID().getName());
+    Object[] args = getArguments();
+    if (args != null) {
+        System.out.println("My arguments are:");
+        for (int i = 0; i < args.length; ++i) {
+            System.out.println("- " + args[i]);
+        }
+    }
+    doDelete();        // terminate immediately after greeting
+}
+
+protected void takeDown() {
+    System.out.println("Bye...");
+}
+\end{minted}
+
+\begin{nbexample}{what is printed}
+\notinslides
+Started as \code{a:myPackage.MyAgent(red 42)} on platform \code{myhost:1099/JADE}:
+\begin{minted}[linenos=false]{text}
+Hallo World! my name is a@myhost:1099/JADE
+My arguments are:
+- red
+- 42
+Bye...
+\end{minted}
+\code{doDelete()} does not stop the agent in the middle of \code{setup()}: \code{setup()}
+completes, then the agent sees the deletion request, calls \code{takeDown()} and dies (see
+the execution model in the next sub-section). Arguments arrive as \code{Object}s (strings
+from the command line).
+\end{nbexample}

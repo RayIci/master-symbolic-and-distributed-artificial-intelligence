@@ -1,2 +1,43 @@
 \section{JADE: a platform for multi-agent systems}
 \label{sec:jade}
+\slidesrc{JADE: 1--19}
+
+To develop and run a MAS we need software infrastructure: tools that transform MAS
+specifications (e.g.\ AUML diagrams) into agent code, and middleware that provides the
+services needed by distributed agents (naming, message transport, directories). To be
+\emph{interoperable}, such infrastructures should comply with the \textbf{FIPA abstract
+architecture} (slides 2--3; the abstract agent platform of Section~\ref{sec:research-directions}).
+\textbf{JADE} is one of the most well-known and widely used FIPA-compliant platforms
+(``Remember this framework!'', EMAS keynote slide 45). This chapter explains how a JADE agent
+is written, how it executes its \emph{behaviours}, how it exchanges FIPA ACL messages, and
+how it finds other agents through the yellow pages.
+
+\input{sections/jade/jade-basics/jade-basics}
+\input{sections/jade/behaviours/behaviours}
+\input{sections/jade/messaging/messaging}
+
+\begin{nbsummary}[JADE]
+\begin{itemize}[nosep]
+  \item JADE = Java Agent DEvelopment framework: FIPA-compliant middleware + tools; a
+        platform can span several machines (different OSes), with agents moving at run time.
+  \item Agent type = subclass of \code{jade.core.Agent} redefining \code{setup()}
+        (initialisation) and optionally \code{takeDown()} (clean-up); \code{doDelete()}
+        terminates the agent; \code{getArguments()} reads start-up arguments.
+  \item Every agent has an \textbf{AID}: a globally unique name
+        \code{<local-name>@<platform-name>} plus transport addresses (used only between
+        different platforms).
+  \item Work is done in \textbf{behaviours}: subclasses of
+        \code{jade.core.behaviours.Behaviour} with \code{action()} and \code{done()}, added
+        with \code{addBehaviour()}. Scheduling is \textbf{cooperative}, in a single Java
+        thread: a switch happens only when \code{action()} returns.
+  \item Communication: asynchronous message passing of \code{ACLMessage} objects; each agent
+        has a private message queue. \code{send(msg)}; \code{receive()} returns a message or
+        \code{null}.
+  \item Pattern: \code{msg = myAgent.receive(); if (msg != null) \{\ldots\} else block();}
+        (\code{block()} is not blocking: it parks the behaviour until a new message
+        arrives). \code{MessageTemplate} for selective reading.
+        \code{blockingReceive()} only in \code{setup()}/\code{takeDown()}.
+  \item \textbf{Yellow pages} (DF): agents publish services; others search them and then
+        interact directly.
+\end{itemize}
+\end{nbsummary}

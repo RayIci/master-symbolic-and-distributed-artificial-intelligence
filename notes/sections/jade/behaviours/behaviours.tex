@@ -1,0 +1,76 @@
+\subsection{Behaviours and the execution model}
+\label{sec:jade-behaviours}
+\slidesrc{JADE: 10--12}
+
+\begin{nbdef}{Behaviour (slide 10)}
+The actual job of an agent is typically carried out within \textbf{behaviours}. Behaviours
+are created by extending \code{jade.core.behaviours.Behaviour}. To make an agent execute a
+task, create an instance of the corresponding subclass and call the agent's
+\code{addBehaviour()} method. Each subclass must implement:
+\begin{itemize}[nosep]
+  \item \code{public void action()}: what the behaviour actually does;
+  \item \code{public boolean done()}: whether the behaviour is finished.
+\end{itemize}
+\end{nbdef}
+
+\begin{nbfact}{Cooperative scheduling (slide 11)}
+An agent can execute several behaviours in parallel, however behaviour scheduling is
+\textbf{not preemptive} but \textbf{cooperative}, and everything occurs within a
+\textbf{single Java thread}: \emph{a behaviour switch occurs only when the \code{action()}
+method of the currently scheduled behaviour returns.}
+\end{nbfact}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth, node distance=0.45cm,
+  b/.style={draw, thick, minimum width=4.6cm, minimum height=0.7cm, align=center, fill=#1},
+  d/.style={draw, thick, diamond, aspect=2.6, inner sep=1pt, align=center, fill=#1}]
+  \node[b=nbred!12] (setup) {\code{setup()}};
+  \node[d=nbblue!8, below=of setup] (killed) {agent killed?\\(\code{doDelete()} called)};
+  \node[b=white, below=of killed] (next) {get the next behaviour $b$\\from the pool of active behaviours};
+  \node[b=nbred!12, below=of next] (act) {\code{b.action()}};
+  \node[d=nbblue!8, below=of act] (done) {\code{b.done()}?};
+  \node[b=white, below=of done] (rem) {remove $b$ from the pool};
+  \node[b=nbred!12, right=2.2cm of rem] (td) {\code{takeDown()}};
+  \draw[->, thick] (setup) -- (killed);
+  \draw[->, thick] (killed) -- node[right, font=\scriptsize]{NO} (next);
+  \draw[->, thick] (next) -- (act);
+  \draw[->, thick] (act) -- (done);
+  \draw[->, thick] (done) -- node[right, font=\scriptsize]{YES} (rem);
+  \draw[->, thick] (done.west) -- node[above, font=\scriptsize]{NO} ++(-1.2,0) |- (killed.west);
+  \draw[->, thick] (rem.west) -- ++(-1.6,0) |- (killed.west);
+  \draw[->, thick] (killed.east) -- node[above, font=\scriptsize]{YES} (killed.east -| td) -- (td);
+  \node[font=\scriptsize, align=left, anchor=west] at ([xshift=0.4cm]setup.east) {initialisations,\\addition of initial behaviours};
+  \node[font=\scriptsize, align=left, anchor=west] at ([xshift=0.3cm]td.east) {clean-up};
+\end{tikzpicture}
+\captionof{figure}{The agent execution model (slide 12). In red the methods the programmer
+writes. The loop in the middle is the agent's ``life'': pick a behaviour, run
+\code{action()} once, check \code{done()}, repeat.}
+\end{center}
+
+\begin{nbwarning}[Never block inside \texttt{action()}]
+Since all behaviours share one thread, an \code{action()} that never returns (an infinite
+loop, a \code{Thread.sleep(60000)}, a blocking read) freezes \emph{all} the behaviours of the
+agent, including those that should react to messages. Write \code{action()} as a short step
+and let the scheduler call it again: long tasks are split into many short \code{action()}
+calls, keeping their progress in fields of the behaviour.
+\end{nbwarning}
+
+\begin{nbexample}{three kinds of behaviour}
+\notinslides
+JADE provides ready-made subclasses: \code{OneShotBehaviour} (\code{done()} always true: runs
+once), \code{CyclicBehaviour} (\code{done()} always false: runs forever),
+\code{TickerBehaviour} (runs periodically). A custom behaviour that counts to three:
+\begin{minted}{java}
+public class CountTo3 extends Behaviour {
+    private int i = 0;
+    public void action() { i++; System.out.println("step " + i); }
+    public boolean done() { return i == 3; }
+}
+// in setup():  addBehaviour(new CountTo3());
+\end{minted}
+If an agent has \code{CountTo3} and a cyclic behaviour \code{C} printing ``tick'', the output
+interleaves: \code{step 1}, \code{tick}, \code{step 2}, \code{tick}, \code{step 3},
+\code{tick}, \code{tick}, \ldots{} Each \code{action()} runs to completion; after
+\code{step 3}, \code{done()} is true and \code{CountTo3} is removed from the pool, while
+\code{C} runs forever (round-robin among active behaviours).
+\end{nbexample}
