@@ -1,0 +1,106 @@
+\subsection{Communication as action}
+\label{sec:communication-as-action}
+\slidesrc{Communication: 2--8}
+
+\begin{nbdef}{Communication (slide 2)}
+Communication, in general, is the \textbf{intentional} exchange of information brought about
+by the production and perception of \textbf{signs} drawn from a \textbf{shared system of
+conventional signs}.
+\end{nbdef}
+
+Two views of language:
+\begin{itemize}[nosep]
+  \item \textbf{``classical'' view} (before 1953): language consists of sentences that are
+        true or false, as in logic (Part~II);
+  \item \textbf{``modern'' view} (after 1953): language is a \textbf{form of action}.
+\end{itemize}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+\textbf{Who} & \textbf{Work} & \textbf{Key idea} \\
+\midrule
+Wittgenstein & \emph{Philosophical Investigations} (1953) & The structure of reality
+  determines the structure of language. \textbf{Meaning is determined by use}, in the
+  context of a ``language game'': words are defined not by the objects they designate, nor
+  by the mental representations associated with them, but by how they are used in
+  effective, ordinary communication. \\
+Austin & \emph{How to Do Things with Words} (1962) & \textbf{In saying something, we do
+  something}: a minister saying ``I now pronounce you husband and wife'' does not describe a
+  marriage, he \emph{makes} it. \\
+Searle & \emph{Speech Act Theory} (1969) & Each \textbf{illocution} can be described by what
+  it attempts to do: an assertion is an undertaking that something is the case; a question
+  is an attempt to elicit information; thanking is an expression of gratitude. What counts
+  is the assumed intent of the speaker. \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{From ``language describes'' to ``language acts'' (slides 3--5).}
+\end{center}
+
+\begin{nbintuition}[Locution, illocution, perlocution]
+\notinslides
+Austin distinguishes three levels in ``Close the window'': the \emph{locution} (the words
+uttered), the \emph{illocution} (the act performed \emph{in} saying them: a request), and the
+\emph{perlocution} (the effect obtained \emph{by} saying them: the hearer closes the window,
+or refuses). Agent communication languages standardise the \emph{illocutionary} level: a
+message says explicitly which act it performs (\code{request}, \code{inform}, \ldots).
+\end{nbintuition}
+
+\begin{nbfact}{Speech acts achieve the speaker's goals (slide 6)}
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Speech act} & \textbf{Example} \\
+\midrule
+inform & ``There's a pit in front of you'' \\
+query & ``Can you see the gold?'' \\
+command & ``Pick it up'' \\
+promise & ``I'll share the gold with you'' \\
+acknowledge & ``OK'' \\
+\bottomrule
+\end{tabular}
+\end{center}
+(The examples come from the ``wumpus world'' of Russell and Norvig: agents exploring a cave
+with pits and gold.) \textbf{Speech act planning} requires knowledge of the situation, of
+semantic and syntactic conventions, and of the hearer's goals, knowledge base and
+rationality.
+\end{nbfact}
+
+Treating speech as action means that an agent can \emph{plan} its utterances like any other
+action: ``I want $H$ to believe $P$; informing $H$ that $P$ has this effect if $H$ trusts me;
+so I inform''.
+
+\begin{nbfact}{Stages in communication (slide 7)}
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  s/.style={draw, thick, rounded corners, text width=3.0cm, align=center, minimum height=0.9cm, fill=#1}]
+  \node[s=nbblue!10] (a) at (0,0) {\textbf{Intention}\\$S$ wants to inform $H$ that $P$};
+  \node[s=nbblue!10] (b) at (3.6,0) {\textbf{Generation}\\$S$ selects words $W$ to express $P$ in context $C$};
+  \node[s=nbblue!10] (c) at (7.2,0) {\textbf{Synthesis}\\$S$ utters words $W$};
+  \node[s=nbgreen!10] (d) at (10.8,0) {\textbf{Perception}\\$H$ perceives $W'$ in context $C'$};
+  \node[s=nbgreen!10] (e) at (10.8,-2.0) {\textbf{Analysis}\\$H$ infers possible meanings $P_1,\ldots,P_n$};
+  \node[s=nbgreen!10] (f) at (7.2,-2.0) {\textbf{Disambiguation}\\$H$ infers intended meaning $P_i$};
+  \node[s=nbgreen!10] (g) at (3.6,-2.0) {\textbf{Incorporation}\\$H$ incorporates $P_i$ into its KB};
+  \draw[->, thick] (a) -- (b); \draw[->, thick] (b) -- (c); \draw[->, thick, nbred] (c) -- (d);
+  \draw[->, thick] (d) -- (e); \draw[->, thick] (e) -- (f); \draw[->, thick] (f) -- (g);
+\end{tikzpicture}
+\end{center}
+Blue: speaker $S$; green: hearer $H$. Note $W'$ and $C'$: what the hearer perceives and its
+context may differ from what the speaker uttered and meant.
+\end{nbfact}
+
+\begin{nbwarning}[How could this go wrong? (slide 8)]
+\begin{itemize}[nosep]
+  \item \textbf{Insincerity}: $S$ does not believe $P$ (a lie, or a malicious agent);
+  \item \textbf{recognition errors}: the slide's joke ``speech wreck ignition failure'' is
+        how a speech recogniser might hear ``speech recognition failure'' ($W' \neq W$);
+  \item \textbf{ambiguous utterance}: several meanings $P_1, \ldots, P_n$ remain;
+  \item \textbf{differing understanding of the current context} ($C \neq C'$).
+\end{itemize}
+Software agents avoid most of these problems by \emph{design}: messages are structured, the
+act is explicit, and the meaning of the words is fixed by a shared ontology (next
+sub-sections). Insincerity remains a real issue in open systems (trust and reputation).
+\end{nbwarning}

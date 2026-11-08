@@ -1,2 +1,36 @@
 \section{Agent communication}
 \label{sec:agent-communication}
+\slidesrc{Communication: 1--23}
+
+Agents in a MAS have limited viewpoints and no global control
+(Section~\ref{sec:what-is-a-mas}): they must \emph{talk} to each other to coordinate,
+cooperate and negotiate. This chapter (from a PhD course on distributed systems with MAS,
+University of Milano-Bicocca, 2020) explains the idea that \textbf{communication is a form of
+action} and how the FIPA standards turn it into a precise agent communication language.
+
+\input{sections/agent-communication/communication-as-action/communication-as-action}
+\input{sections/agent-communication/fipa-acl/fipa-acl}
+\input{sections/agent-communication/ontologies-protocols/ontologies-protocols}
+
+\begin{nbsummary}[Agent communication]
+\begin{itemize}[nosep]
+  \item Communication = intentional exchange of information through shared conventional
+        signs. Classical view: sentences are true/false; modern view (after 1953):
+        \textbf{language is action}.
+  \item Wittgenstein (1953): meaning is use (language games). Austin (1962): in saying
+        something we do something (performatives). Searle (1969): \textbf{speech act
+        theory}: each illocution has a point (assert, ask, thank, \ldots).
+  \item Speech acts: inform, query, command, promise, acknowledge. Stages: intention,
+        generation, synthesis, perception, analysis, disambiguation, incorporation; failures:
+        insincerity, recognition errors, ambiguity, different contexts.
+  \item \textbf{FIPA ACL}: messages with parameters (performative; sender, receiver,
+        reply-to; content; language, encoding, ontology; protocol, conversation-id,
+        reply-with, in-reply-to, reply-by) and 22 \textbf{communicative acts} (inform,
+        request, agree, refuse, cfp, propose, accept/reject-proposal, query-if/ref, \ldots).
+  \item Each act has a formal semantics: \textbf{feasibility precondition} (FP) and
+        \textbf{rational effect} (RE), in a BDI logic ($B_i$ believes, $I_i$ intends).
+  \item Shared \textbf{ontology} (Ontology Agent), \textbf{content languages} (SL, CCL, KIF,
+        RDF), \textbf{interaction protocols} (Request, Query, Contract Net, auctions,
+        Subscribe, \ldots).
+\end{itemize}
+\end{nbsummary}

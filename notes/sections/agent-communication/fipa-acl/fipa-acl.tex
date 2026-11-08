@@ -1,0 +1,193 @@
+\subsection{FIPA ACL: the agent communication language}
+\label{sec:fipa-acl}
+\slidesrc{Communication: 9--18}
+
+\textbf{FIPA} (Foundation for Intelligent Physical Agents, Section~\ref{sec:research-directions})
+publishes the standard specifications for agent platforms (slide 9 lists them by subject:
+abstract architecture, agent management, message transport, agent communication,
+applications). The \textbf{agent communication} specifications (slide 10) have three parts:
+
+\begin{center}
+\begin{forest}
+for tree={draw, thick, rounded corners, font=\small, align=center, l sep=6mm, s sep=6mm, edge={thick}}
+[{Agent\\Communication}, fill=yellow!40
+  [{Interaction\\Protocols}, fill=nbblue!8]
+  [{Communicative\\Acts}, fill=nbblue!8]
+  [{Content\\Languages}, fill=nbblue!8]]
+\end{forest}
+\captionof{figure}{FIPA communication specifications (slide 10): \emph{what} kind of act a
+message performs (communicative acts), \emph{how} its content is written (content languages),
+and \emph{which sequences} of messages are allowed (interaction protocols).}
+\end{center}
+
+\subsubsection{Message structure}
+\slidesrc{Communication: 11}
+
+\begin{nbfact}{FIPA ACL message parameters (slide 11)}
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{3.3cm} l X@{}}
+\toprule
+\textbf{Category} & \textbf{Parameter} & \textbf{Meaning (added)} \\
+\midrule
+type of communicative act & \code{performative} & which act: \code{inform}, \code{request}, \ldots \\
+\midrule
+participants in communication & \code{sender} & who sends \\
+ & \code{receiver} & who receives (one or more agents) \\
+ & \code{reply-to} & where replies should go (if not to the sender) \\
+\midrule
+content of message & \code{content} & what the act is about \\
+\midrule
+description of content & \code{language} & language of the content (e.g.\ \code{fipa-sl}) \\
+ & \code{encoding} & encoding of the content \\
+ & \code{ontology} & vocabulary giving meaning to the symbols \\
+\midrule
+control of conversation & \code{protocol} & interaction protocol being followed \\
+ & \code{conversation-id} & identifies the conversation \\
+ & \code{reply-with} & label the answer must refer to \\
+ & \code{in-reply-to} & label of the message being answered \\
+ & \code{reply-by} & deadline for the answer \\
+\bottomrule
+\end{tabularx}
+\end{center}
+Only \code{performative} is mandatory; most messages also have sender, receiver and content.
+\end{nbfact}
+
+\begin{nbexample}{a request from a buyer to a seller}
+\notinslides
+\begin{minted}[linenos=false]{text}
+(request
+   :sender          (agent-identifier :name buyer@shop-platform)
+   :receiver        (set (agent-identifier :name seller@shop-platform))
+   :content         "((action (agent-identifier :name seller)
+                              (deliver book42 (address Genova))))"
+   :language        fipa-sl
+   :ontology        book-trading
+   :protocol        fipa-request
+   :conversation-id order-7781
+   :reply-with      req-1
+   :reply-by        20261110T120000000Z)
+\end{minted}
+The seller's answer \code{agree} will carry \code{:in-reply-to req-1} and the same
+\code{:conversation-id}, so the buyer can match it with its question even if it is running
+many conversations at once.
+\end{nbexample}
+
+\subsubsection{Communicative acts}
+\slidesrc{Communication: 12--13}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.12}
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\textbf{Communicative act} & \textbf{Meaning (from the FIPA Communicative Act Library, added)} \\
+\midrule
+\code{accept-proposal} & accept a previously submitted proposal to perform an action \\
+\code{agree} & agree to perform some action, possibly in the future \\
+\code{cancel} & tell another agent that the sender no longer intends it to perform an action requested earlier \\
+\code{cfp} (call for proposal) & call for proposals to perform a given action \\
+\code{confirm} & tell the receiver that a proposition is true, when it is uncertain about it \\
+\code{disconfirm} & tell the receiver that a proposition is false, when it believes or suspects it is true \\
+\code{failure} & tell that an action was attempted but failed \\
+\code{inform} & tell that a proposition is true \\
+\code{inform-if} & tell \emph{whether} a proposition is true \\
+\code{inform-ref} & tell the object that corresponds to a description (e.g.\ ``the price is 12'') \\
+\code{not-understood} & the sender did not understand a message \\
+\code{propagate} & the receiver must forward the embedded message to the agents matching a description, and treat it as sent to itself \\
+\code{propose} & submit a proposal to perform an action, under certain conditions \\
+\code{proxy} & the receiver must forward the embedded message to the agents matching a description \\
+\code{query-if} & ask whether a proposition is true \\
+\code{query-ref} & ask for the object referred to by an expression \\
+\code{refuse} & refuse to perform an action, giving the reason \\
+\code{reject-proposal} & reject a proposal during a negotiation \\
+\code{request} & ask the receiver to perform an action \\
+\code{request-when} & ask to perform an action when a proposition becomes true \\
+\code{request-whenever} & ask to perform an action every time a proposition becomes true \\
+\code{subscribe} & ask to be notified of the value of a reference, and again whenever it changes \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{The 22 FIPA communicative acts listed on slides 12--13.}
+\end{center}
+
+\begin{nbintuition}[Families of acts]
+\emph{Information passing}: inform, inform-if, inform-ref, confirm, disconfirm.
+\emph{Requesting information}: query-if, query-ref, subscribe. \emph{Performing actions}:
+request, request-when, request-whenever, agree, refuse, cancel, failure.
+\emph{Negotiation}: cfp, propose, accept-proposal, reject-proposal. \emph{Error handling}:
+not-understood, failure. \emph{Forwarding}: propagate, proxy.
+\end{nbintuition}
+
+\subsubsection{Anatomy of a communicative act: accept-proposal}
+\slidesrc{Communication: 14--18}
+
+Each act is specified by a summary, its content, a description, a \textbf{formal model} and an
+example. The slides show \code{accept-proposal}.
+
+\begin{itemize}
+  \item \textbf{Summary} (slide 14): the action of accepting a previously submitted proposal
+        to perform an action.
+  \item \textbf{Content} (slide 15): a tuple of an \emph{action expression} (the action to be
+        done) and a \emph{proposition} (the conditions of the agreement).
+  \item \textbf{Description} (slide 16): a general-purpose acceptance of a proposal that was
+        previously submitted (typically through a \code{propose} act). The agent sending the
+        acceptance informs the receiver that it intends that (at some point in the future)
+        the receiver will perform the action, once the given precondition is, or becomes,
+        true. The proposition indicates the preconditions the agent is attaching to the
+        acceptance: e.g.\ after an offer to ``hold a meeting anytime on Tuesday'', the
+        acceptance may add the condition that the meeting is at 11.00. (Future extension: an
+        agent may intend that an action is done without necessarily intending the
+        precondition, e.g.\ ``I bid price $p$, but I am prepared to accept $p'$''.)
+\end{itemize}
+
+\begin{nbdef}{Formal model of accept-proposal (slide 17)}
+\[
+\langle i, \mathit{accept\text{-}proposal}(j, \langle j, act\rangle, \phi)\rangle \;\equiv\;
+\langle i, \mathit{inform}(j, I_i\,\mathit{Done}(\langle j, act\rangle, \phi))\rangle
+\]
+\begin{align*}
+\text{FP:}\quad & B_i\,\alpha \;\land\; \neg B_i\,(\mathit{Bif}_j\,\alpha \lor \mathit{Uif}_j\,\alpha) \\
+\text{RE:}\quad & B_j\,\alpha \\
+\text{where}\quad & \alpha = I_i\,\mathit{Done}(\langle j, act\rangle, \phi)
+\end{align*}
+\end{nbdef}
+
+How to read it, symbol by symbol (the logic is the BDI modal logic of FIPA-SL):
+\begin{itemize}[nosep]
+  \item $\langle i, X\rangle$: agent $i$ performs communicative act $X$;
+  \item $B_i\,p$: $i$ \emph{believes} $p$; $I_i\,p$: $i$ \emph{intends} $p$;
+  \item $\mathit{Done}(\langle j, act\rangle, \phi)$: $j$ has performed $act$, and $\phi$ was
+        true when it did;
+  \item $\mathit{Bif}_j\,\alpha$: $j$ knows whether $\alpha$ (believes $\alpha$ or believes
+        $\neg\alpha$); $\mathit{Uif}_j\,\alpha$: $j$ is uncertain about $\alpha$;
+  \item \textbf{FP} (\emph{feasibility precondition}): what must hold \emph{for the sender}
+        to perform the act sincerely: $i$ believes $\alpha$, and $i$ does not believe that
+        $j$ already knows or is uncertain about $\alpha$ (no point in telling otherwise);
+  \item \textbf{RE} (\emph{rational effect}): what the sender \emph{wants to achieve}: that
+        $j$ comes to believe $\alpha$. The receiver is not forced to adopt it: it is the
+        expected effect, not a guaranteed one.
+\end{itemize}
+In words: \emph{accepting $j$'s proposal means informing $j$ that $i$ intends that $j$ performs
+the action under condition $\phi$}. Every FIPA act is defined this way, in terms of mental
+states: this is the strong, BDI notion of agency applied to communication.
+
+\begin{nbexample}{accept-proposal (slide 18)}
+Agent $i$ informs $j$ that it accepts an offer from $j$ to stream a given multimedia title to
+channel 19 when the customer is ready. Agent $i$ will inform $j$ of this fact when
+appropriate.
+\begin{minted}[linenos=false]{text}
+(accept-proposal
+  :sender (agent-identifier :name i)
+  :receiver (set (agent-identifier :name j))
+  :in-reply-to bid089
+  :content
+    "((action (agent-identifier :name j)
+              (stream-content movie1234 19))
+      (B (agent-identifier :name j)
+         (ready customer78)))"
+  :language fipa-sl)
+\end{minted}
+The content pairs the action (\code{stream-content movie1234 19}, by \code{j}) with the
+condition (\code{j} believes that \code{customer78} is ready). \code{:in-reply-to bid089}
+links the acceptance to \code{j}'s earlier \code{propose} message.
+\end{nbexample}

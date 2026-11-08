@@ -1,0 +1,104 @@
+\subsection{Ontologies, content languages, interaction protocols}
+\label{sec:ontologies-protocols}
+\slidesrc{Communication: 19--23}
+
+\subsubsection{The FIPA Ontology Agent}
+\slidesrc{Communication: 19--21}
+
+The FIPA communication model assumes that two agents who wish to converse \textbf{share a
+common ontology} for the domain of discourse: this ensures that they ascribe the same
+meaning to the symbols used in the message. Designers may use ontologies that are
+\emph{explicit}, declaratively represented and stored somewhere, or \emph{implicit}, encoded
+in the agents' software and not formally published.
+
+\begin{nbdef}{Ontology}
+\notinslides
+An \textbf{ontology} is a shared, explicit description of the concepts of a domain, their
+properties and their relations: e.g.\ in a book-trading ontology, \code{Book} has a
+\code{title} and a \code{price}; \code{sell(seller, Book)} is an action;
+\code{owns(agent, Book)} a predicate. It fixes \emph{what the words mean}, so that ``price''
+is understood in the same way (and the same currency!) by buyer and seller.
+\end{nbdef}
+
+The FIPA \emph{Ontology Service Specification} deals with explicit ontologies. The service
+is provided by a dedicated agent, the \textbf{Ontology Agent} (OA), which offers some or all
+of these services:
+\begin{enumerate}[nosep]
+  \item \textbf{discovery} of public ontologies, in order to access them;
+  \item \textbf{maintenance} of a set of public ontologies (register with the DF, upload,
+        download, modify);
+  \item \textbf{translation} of expressions between different ontologies and/or content
+        languages;
+  \item \textbf{answers} to queries about relationships between terms or between ontologies;
+  \item help in \textbf{identifying a shared ontology} for communication between two agents.
+\end{enumerate}
+
+\subsubsection{Content languages}
+\slidesrc{Communication: 22}
+
+The FIPA Content Language specifications deal with different representations of the
+\code{content} of ACL messages. Four languages are specified (others can be added):
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l >{\raggedright\arraybackslash}p{4.6cm} X@{}}
+\toprule
+\textbf{Spec} & \textbf{Language} & \textbf{Note (added)} \\
+\midrule
+SC00008 & FIPA SL (Semantic Language) & the reference language, a BDI modal logic; used in the examples above \\
+XC00009 & FIPA CCL (Constraint Choice Language) & for constraint problems \\
+XC00010 & FIPA KIF (Knowledge Interchange Format) & a first-order logic syntax \\
+XC00011 & FIPA RDF (Resource Description Framework) & Semantic Web data \\
+\bottomrule
+\end{tabularx}
+\end{center}
+(SC = standard, XC = experimental.)
+
+\subsubsection{Interaction protocols}
+\slidesrc{Communication: 23}
+
+FIPA Interaction Protocols are pre-agreed message exchange patterns for ACL messages:
+\begin{center}
+\small
+\begin{tabular}{@{}ll|ll@{}}
+\toprule
+SC00026 & Request & SC00031 & English Auction (experimental) \\
+SC00027 & Query & SC00032 & Dutch Auction (experimental) \\
+SC00028 & Request When & SC00033 & Brokering \\
+SC00029 & Contract Net & SC00034 & Recruiting \\
+SC00030 & Iterated Contract Net & SC00035 & Subscribe \\
+ & & SC00036 & Propose \\
+\bottomrule
+\end{tabular}
+\end{center}
+The \textbf{Request} protocol was drawn in Section~\ref{sec:research-directions} (``remember
+this protocol!''); the \textbf{Contract Net} is the FIPA version of Davis and Smith's protocol
+(Section~\ref{sec:agents-history}):
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth, x=1cm, y=-0.72cm]
+  \node[draw, thick, fill=nbblue!8, minimum width=2.4cm] at (0,0) {Initiator};
+  \node[draw, thick, fill=nbgreen!8, minimum width=2.4cm] at (7,0) {Participant};
+  \draw[dashed, nbgray] (0,0.6) -- (0,8.0); \draw[dashed, nbgray] (7,0.6) -- (7,8.0);
+  \draw[->, thick] (0,1.2) -- node[above]{\code{cfp}} (7,1.2);
+  \draw[->, thick, nbred] (7,2.2) -- node[above]{\code{refuse}} (0,2.2);
+  \draw[->, thick, nbgreen!60!black] (7,3.1) -- node[above]{\code{propose}} (0,3.1);
+  \node[font=\scriptsize, nbgray] at (-1.3,3.85) {deadline};
+  \draw[nbgray, thick] (-0.3,3.7) -- (0.3,3.7);
+  \draw[->, thick, nbred] (0,4.6) -- node[above]{\code{reject-proposal}} (7,4.6);
+  \draw[->, thick, nbgreen!60!black] (0,5.5) -- node[above]{\code{accept-proposal}} (7,5.5);
+  \draw[->, thick, nbred] (7,6.4) -- node[above]{\code{failure}} (0,6.4);
+  \draw[->, thick, nbblue] (7,7.3) -- node[above]{\code{inform-done} / \code{inform-result}} (0,7.3);
+\end{tikzpicture}
+\captionof{figure}{FIPA Contract Net (added drawing): the initiator sends a call for proposals;
+each participant refuses or proposes; after the deadline the initiator accepts the best
+proposal(s) and rejects the others; an accepted participant finally reports failure or
+success.}
+\end{center}
+
+\begin{nbwhy}
+\notinslides
+Protocols make conversations \emph{predictable}: an agent knows which replies are legal at
+each point, and a monitor can check them at run time (Section~\ref{sec:safe-mas}). JADE
+(next chapter) provides ready-made Java classes for the initiator and responder roles of
+these protocols, and Jason agents use the same performatives in \code{.send} actions.
+\end{nbwhy}
