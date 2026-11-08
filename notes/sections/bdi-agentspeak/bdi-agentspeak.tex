@@ -1,2 +1,43 @@
 \section{Cognitive agents: BDI and AgentSpeak(L)}
 \label{sec:bdi-agentspeak}
+\slidesrc{BDI architecture: 1--19; EMAS keynote: 33--36}
+
+This chapter brings together the two halves of the course: \emph{symbolic} reasoning (logic,
+Prolog) and \emph{agents}. A \textbf{cognitive} (or ``strong'') agent is described and
+programmed with mentalistic notions: \textbf{beliefs}, \textbf{desires} (goals) and
+\textbf{intentions}. The deck is part of a talk on logic-based agents given at the
+International Conference on Logic Programming (2012).
+\begin{enumerate}[nosep]
+  \item from logic-based agents to the BDI architecture;
+  \item the language AgentSpeak(L): syntax and informal semantics (the reasoning cycle);
+  \item a complete example, the \emph{Jelly-fish busters} agent, traced step by step;
+  \item Jason and the other AgentSpeak interpreters (Whiteboard~\ref{wb:bdi-family}).
+\end{enumerate}
+
+\input{sections/bdi-agentspeak/logic-based-agents/logic-based-agents}
+\input{sections/bdi-agentspeak/bdi-architecture/bdi-architecture}
+\input{sections/bdi-agentspeak/agentspeak-language/agentspeak-language}
+\input{sections/bdi-agentspeak/jellyfish-busters/jellyfish-busters}
+
+\begin{nbsummary}[BDI and AgentSpeak(L)]
+\begin{itemize}[nosep]
+  \item \textbf{Logic-based agents}: logical formulae represent the environment and the
+        desired behaviour; deduction decides what to do.
+  \item \textbf{BDI}: \emph{beliefs} (information about the world), \emph{desires/goals}
+        (states to achieve), \emph{intentions} (plans the agent has committed to); a
+        \emph{reasoner} selects plans from a \emph{plan library} and acts on the environment.
+  \item \textbf{AgentSpeak(L)} (Rao, 1996): agent = beliefs + plans. Plan
+        \code{te : ct <- h}: \emph{triggering event} (\code{+b}, \code{-b}, \code{+!g},
+        \code{-!g}, \ldots), \emph{context} (condition on beliefs), \emph{body} (actions
+        \code{a}, goals \code{!g} achieve / \code{?g} test, belief updates \code{+b}/\code{-b}).
+  \item Reasoning cycle: select an \emph{event}; find \emph{relevant} plans (trigger
+        unifies) and \emph{applicable} plans (context is a logical consequence of the
+        beliefs); select one (option); push it on an \emph{intention} (new intention for an
+        external event, on top of the generating intention for a subgoal); select an
+        intention and execute one step of its top plan.
+  \item Intentions = stacks of partially instantiated plans.
+  \item Family tree (Whiteboard~\ref{wb:bdi-family}): cognitive agents $\to$ BDI
+        (architecture) $\to$ AgentSpeak(L) (language) $\to$ Jason (Java), ICAROS (Python),
+        AS-C++ (C++).
+\end{itemize}
+\end{nbsummary}

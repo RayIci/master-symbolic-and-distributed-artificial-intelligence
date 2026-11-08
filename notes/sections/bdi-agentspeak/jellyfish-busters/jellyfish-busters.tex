@@ -1,0 +1,100 @@
+\subsection{Example: Jelly-fish busters}
+\label{sec:jellyfish-busters}
+\slidesrc{BDI architecture: 9--18}
+
+A one-dimensional world of four cells \code{a}, \code{b}, \code{c}, \code{d}. The agent
+(SpongeBob in the slides) starts in \code{a}, a jellyfish is in \code{b}, the bin is in
+\code{d}. Goal: catch the jellyfish and throw it into the bin.
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \foreach \x/\c in {0/a,2.0/b,4.0/c,6.0/d} \draw[thick, fill=nbblue!8] (\x,0) rectangle ++(1.9,1.0) node[pos=0.15, font=\scriptsize] {\c};
+  \node at (0.95,0.5) {\textbf{agent}};
+  \node at (2.95,0.5) {\textcolor{nbpurple}{\textbf{jellyfish}}};
+  \node at (6.95,0.5) {\textcolor{nbgreen!60!black}{\textbf{bin}}};
+\end{tikzpicture}
+\end{center}
+
+\inputminted{prolog}{sections/bdi-agentspeak/jellyfish-busters/assets/jellyfish.asl}
+
+\begin{itemize}[nosep]
+  \item \textbf{Initial beliefs} (slide 9): the map (\code{adjacent/2}) and the positions
+        (\code{location/2}).
+  \item \textbf{Plan 1} (slide 10): \emph{if} I am where the jellyfish is, \emph{then} pick
+        it, move to the bin, drop it. \code{!pick} and \code{!drop} are subgoals.
+  \item \textbf{Plan 2} (slide 11): \emph{if} the jellyfish is not here, \emph{then} move to
+        an adjacent cell and try again: a \emph{recursive} goal, like a recursive Prolog
+        predicate.
+  \item \textbf{Initial goal} (slide 12): \code{!bust\_jellyfishes}, which generates the
+        external event \code{+!bust\_jellyfishes} at start-up.
+\end{itemize}
+
+\begin{nbexample}{the run, step by step (slides 13--17)}
+\small
+\begin{tabularx}{\linewidth}{@{}c >{\raggedright\arraybackslash}p{2.9cm} X >{\raggedright\arraybackslash}p{2.7cm}@{}}
+\toprule
+\textbf{Step} & \textbf{Event} & \textbf{Plan selection} & \textbf{Effect} \\
+\midrule
+1 & \code{+!bust_jellyfishes} (external) &
+  Relevant: plans 1 and 2. Plan 1: context \code{location(myself,X)} gives \code{X = a},
+  but \code{location(jellyfish, a)} is false: not applicable. Plan 2: \code{X = a},
+  \code{not location(jellyfish, a)} true, \code{adjacent(a, Z)} gives \code{Z = b}:
+  applicable. & new intention; executes \code{move_to(b)} \\
+2 & --- & the body continues & a percept updates the agent's position to \code{b} \\
+3 & \code{+!bust_jellyfishes} (internal) &
+  posted by plan 2's body. Plan 1: \code{X = b}, \code{location(jellyfish, b)} true,
+  \code{location(bin, Y)} gives \code{Y = d}: applicable. Plan 2: not applicable
+  (\code{not location(jellyfish, b)} is false). & plan 1 pushed on the same intention \\
+4 & \code{+!pick}\newline\code{(jellyfish,b)} & handled by a \code{pick} plan (not shown) & jellyfish
+  picked up (slide 15) \\
+5 & --- & \code{move_to(d)} & agent carries it to \code{d} (slide 16) \\
+6 & \code{+!drop}\newline\code{(jellyfish,d)} & handled by a \code{drop} plan (not shown) & jellyfish in
+  the bin (slide 17); plans popped: intention completed \\
+\bottomrule
+\end{tabularx}
+\end{nbexample}
+
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize\ttfamily, >=Stealth,
+  f/.style={draw, thick, minimum width=3.6cm, minimum height=0.5cm, fill=#1}]
+  \node[font=\small\rmfamily] at (0,1.0) {after step 1};
+  \node[f=nbblue!10] at (0,0.3) {plan 2 [X=a, Z=b]};
+  \node[font=\small\rmfamily] at (4.6,1.6) {after step 3};
+  \node[f=nborange!12] at (4.6,0.9) {plan 1 [X=b, Y=d]};
+  \node[f=nbblue!10] at (4.6,0.3) {plan 2 [X=a, Z=b]};
+  \node[font=\small\rmfamily] at (9.2,2.2) {during step 4};
+  \node[f=nbpurple!10] at (9.2,1.5) {pick plan};
+  \node[f=nborange!12] at (9.2,0.9) {plan 1 [X=b, Y=d]};
+  \node[f=nbblue!10] at (9.2,0.3) {plan 2 [X=a, Z=b]};
+  \draw[thick] (-1.9,0.02) -- (1.9,0.02); \draw[thick] (2.7,0.02) -- (6.5,0.02); \draw[thick] (7.3,0.02) -- (11.1,0.02);
+\end{tikzpicture}
+\captionof{figure}{The single intention of the run as a stack of partially instantiated plans:
+each subgoal pushes a new plan on top; when the top plan finishes it is popped and the plan
+below continues.}
+\end{center}
+
+\begin{nbwarning}[What the slides leave implicit]
+\begin{itemize}[nosep]
+  \item The program has no plans for \code{+!pick(\ldots)} and \code{+!drop(\ldots)}: in a
+        complete program they would be plans (or be written as actions \code{pick(\ldots)},
+        \code{drop(\ldots)} without \code{!}). An achievement goal with no relevant plan
+        \emph{fails}, and so does the intention.
+  \item The belief \code{location(myself, \ldots)} must be updated after each move: in
+        Jason this is done by the \emph{environment} through percepts (or by the plan with
+        \code{-+location(myself, Z)}). Otherwise plan 2 would move to \code{b} forever.
+  \item If the jellyfish were in no reachable cell, plan 2 would reach \code{d}, find no
+        \code{adjacent(d, \_)}, and no plan would be applicable: goal failure (a
+        \code{-!bust\_jellyfishes} plan could handle it).
+\end{itemize}
+\end{nbwarning}
+
+\begin{nbwhy}[Jason (slide 18)]
+\textbf{Jason} (Bordini, H\"ubner, Wooldridge, \emph{Programming Multi-Agent Systems in
+AgentSpeak Using Jason}, Wiley 2007) is the best-known interpreter of an extended
+AgentSpeak, written in Java. Slide 18 shows its ``Mars world'' example: robots \code{r1} and
+\code{r2} on a grid, collecting garbage \code{G} and carrying it to an incinerator, with the
+mind inspector showing beliefs, events and intentions at each reasoning cycle. Jason adds to
+AgentSpeak(L) communication between agents (via speech-act based messages,
+Section~\ref{sec:agent-communication}), annotations on beliefs (e.g.\ \code{[source(percept)]}),
+environments in Java, and much more; it is the platform of the course labs.
+\end{nbwhy}

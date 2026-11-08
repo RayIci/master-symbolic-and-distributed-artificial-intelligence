@@ -1,0 +1,86 @@
+\subsection{The BDI architecture}
+\label{sec:bdi-architecture}
+\slidesrc{BDI architecture: 7; EMAS keynote: 17}
+
+BDI stands for \textbf{Belief--Desire--Intention}. It is a \emph{practical reasoning}
+architecture (Section~\ref{sec:agents-history}): it models how humans decide \emph{what to
+do}, in two steps: \emph{deliberation} (which goals should I pursue?) and \emph{means--ends
+reasoning} (how do I achieve them?).
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  m/.style={draw, thick, rounded corners, minimum width=2.2cm, minimum height=0.9cm, align=center, fill=#1}]
+  \node[m=nbblue!12] (B) at (0,0) {\textbf{Beliefs}};
+  \node[m=nborange!15] (G) at (0,2.2) {\textbf{Goals}\\(desires)};
+  \node[m=nbpurple!12] (R) at (3.6,1.1) {\textbf{Reasoner}};
+  \node[m=nbgray!15] (P) at (3.6,3.3) {\textbf{Plans}\\(plan library)};
+  \node[m=nbgreen!15] (I) at (7.8,1.1) {\textbf{Intentions}};
+  \node[draw, thick, ellipse, fill=nbteal!10, minimum width=3cm] (E) at (3.6,-1.6) {\textbf{Environment}};
+  \draw[->, thick] (B) -- (R); \draw[->, thick] (G) -- (R); \draw[->, thick] (P) -- (R);
+  \draw[->, thick] (R) -- node[above, font=\scriptsize]{commits to} (I);
+  \draw[->, thick, nbred] (I) |- node[pos=0.25, right, font=\scriptsize]{actions} (E);
+  \draw[->, thick, nbteal] (E) -| node[pos=0.75, left, font=\scriptsize]{percepts} (B);
+\end{tikzpicture}
+\captionof{figure}{The BDI architecture (slide 7). Percepts update the beliefs; the reasoner,
+given beliefs and goals, selects plans from the library and commits to them as intentions;
+executing intentions acts on the environment.}
+\end{center}
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{}l X X@{}}
+\toprule
+\textbf{Component} & \textbf{What it is} & \textbf{Robot vacuum example} \\
+\midrule
+Beliefs & what the agent knows (or thinks it knows) about the world and itself; may be wrong or out of date & ``the kitchen is dirty'', ``battery at 15\%'' \\
+Desires / goals & states of the world the agent wants to bring about & ``all rooms clean'', ``never run out of battery'' \\
+Plans & recipes: how to achieve a goal, under which conditions & ``to clean a room: go there, sweep, report'' \\
+Intentions & the plans the agent has \emph{committed} to and is executing now & ``currently: going back to the dock'' \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{The BDI components with an everyday agent.}
+\end{center}
+
+\begin{nbintuition}[Why intentions, if we already have goals?]
+Desires can be many and conflicting (``clean everything'' and ``save battery''). An
+intention is a desire the agent has \emph{committed} to: it will not reconsider it at every
+instant (that would be too slow in a dynamic world, the problem of the deliberative
+architectures of Section~\ref{sec:deliberative-hybrid}), but it will drop or change it if
+beliefs make it impossible or pointless. Intentions give \emph{stability} (proactiveness);
+events and belief updates give \emph{reactivity}. BDI is a principled way of balancing the
+two.
+\end{nbintuition}
+
+\begin{nbwhiteboard}[label=wb:bdi-family]{From cognitive agents to Jason}{written during the BDI / Jason lectures}
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth, node distance=0.65cm,
+  m/.style={draw, thick, rounded corners, align=center, minimum height=0.8cm, fill=#1}]
+  \node[m=nbblue!10] (ca) {\textbf{Cognitive agents}\\(``strong'' agents)};
+  \node[m=nbpurple!10, below=of ca] (bdi) {\textbf{BDI}\\(architecture)};
+  \node[m=nborange!12, below=of bdi] (as) {\textbf{AgentSpeak(L)}\\(language, Rao \& Georgeff)};
+  \node[m=nbgreen!12, below left=0.8cm and 1.6cm of as] (jason) {\textbf{Jason}\\Java};
+  \node[m=nbgreen!12, below=0.8cm of as] (icaros) {\textbf{ICAROS}\\Python};
+  \node[m=nbgreen!12, below right=0.8cm and 1.6cm of as] (ascpp) {\textbf{AS-C++}\\C++};
+  \draw[->, thick] (ca) -- (bdi); \draw[->, thick] (bdi) -- (as);
+  \draw[->, thick] (as) -- (jason); \draw[->, thick] (as) -- (icaros); \draw[->, thick] (as) -- (ascpp);
+  \node[draw, nbgray, font=\scriptsize, left=0.2cm of jason, align=center] {H\"ubner,\\Bordini};
+  \node[draw, nbgray, font=\scriptsize, right=0.1cm of icaros, align=center] {Gatti};
+  \node[draw, nbgray, font=\scriptsize, right=0.2cm of ascpp, align=center] {Matano};
+\end{tikzpicture}
+\end{center}
+\wbphoto{sections/bdi-agentspeak/bdi-architecture/assets/whiteboard-18.jpg}
+\textbf{Reading.} Three levels of abstraction: a \emph{kind of agent} (cognitive, strong
+agents with mentalistic notions), an \emph{architecture} that realises it (BDI), a
+\emph{programming language} for that architecture (AgentSpeak(L)), and finally
+\emph{interpreters} of the language in different host languages, with their authors (boxed
+on the board):
+\begin{itemize}[nosep]
+  \item \textbf{Jason} (Java), by J.~F.~H\"ubner and R.~H.~Bordini (with M.~Wooldridge, book
+        2007): the reference implementation, used in the labs;
+  \item \textbf{ICAROS} (Python), by A.~Gatti;
+  \item \textbf{AS-C++} (C++), by Matano.
+\end{itemize}
+The board credits AgentSpeak(L) to Rao and Georgeff: the BDI model is their joint work
+(1991--1995); the AgentSpeak(L) paper itself is by A.~S.~Rao alone (1996).
+\end{nbwhiteboard}

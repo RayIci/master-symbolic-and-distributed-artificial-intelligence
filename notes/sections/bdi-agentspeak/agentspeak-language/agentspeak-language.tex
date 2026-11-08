@@ -1,0 +1,136 @@
+\subsection{The AgentSpeak(L) language}
+\label{sec:agentspeak-language}
+\slidesrc{BDI architecture: 8; EMAS keynote: 34--36}
+
+\subsubsection{Ingredients}
+\slidesrc{EMAS keynote: 34}
+
+\begin{itemize}[nosep]
+  \item \textbf{Beliefs} represent the knowledge of the agent: ground atoms such as
+        \code{location(bin, d)}, exactly like Prolog facts.
+  \item \textbf{Goals} are beliefs (or conjunctions/disjunctions of beliefs) which must be
+        \textbf{achieved} (\code{!g}: ``bring about a state where \code{g} holds'') or
+        \textbf{tested} (\code{?g}: ``check whether \code{g} holds, retrieving values for
+        its variables'') in the current state.
+  \item \textbf{Plans} contain the \emph{procedural} knowledge of the agent; in the full
+        model a plan has a trigger, a context, a body, a maintenance condition, a set of
+        ``success actions'' and a set of ``failure actions''; AgentSpeak(L) keeps trigger,
+        context and body.
+  \item \textbf{Intentions} are \emph{partially instantiated} plans: plans the agent is
+        executing, with some variables already bound.
+\end{itemize}
+
+\subsubsection{Syntax}
+\slidesrc{BDI architecture: 8; EMAS keynote: 35}
+
+\begin{nbdef}{AgentSpeak(L) grammar (slide 8)}
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{@{}r@{\ }c@{\ }l l l@{}}
+$ag$ & $::=$ & $bs\ \ ps$ & & agent = beliefs + plans \\
+$bs$ & $::=$ & $at_1 \ldots at_n$ & $(n \geq 0)$ & belief base: a list of atoms \\
+$at$ & $::=$ & $P(t_1, \ldots, t_n)$ & $(n \geq 0)$ & atom: predicate with terms \\
+$ps$ & $::=$ & $p_1 \ldots p_n$ & $(n \geq 1)$ & plan library: at least one plan \\
+$p$ & $::=$ & $te : ct \leftarrow h$ & & plan: trigger, context, body \\
+$te$ & $::=$ & $+at \mid -at \mid +g \mid -g$ & & triggering event \\
+$ct$ & $::=$ & $at \mid \neg at \mid ct \land ct \mid \top$ & & context: a condition on beliefs \\
+$h$ & $::=$ & $a \mid g \mid u \mid h ; h$ & & body: sequence of steps \\
+$g$ & $::=$ & $!at \mid ?at$ & & achievement / test goal \\
+$u$ & $::=$ & $+at \mid -at$ & & belief update: add / delete \\
+\end{tabular}
+\end{center}
+($a$ is an action, $\top$ is ``true''.) In concrete syntax (Jason): \code{<-} for
+$\leftarrow$, \code{\&} for $\land$, \code{not} for $\neg$, \code{;} between body steps, and
+each plan ends with a full stop.
+\end{nbdef}
+
+\begin{center}
+\begin{tikzpicture}[font=\small\ttfamily, >=Stealth, node distance=0.25cm]
+  \node[draw, thick, rounded corners, fill=nborange!15] (te) {+!go(Home)};
+  \node[right=of te] (c1) {:};
+  \node[draw, thick, rounded corners, fill=nbblue!12, right=of c1] (ct) {at(X) \& X \textbackslash== Home};
+  \node[right=of ct] (c2) {<-};
+  \node[draw, thick, rounded corners, fill=nbgreen!12, right=of c2] (h) {step(Home); !go(Home).};
+  \node[font=\scriptsize\rmfamily, below=0.25cm of te, align=center] {triggering event:\\when is the plan \emph{relevant}?};
+  \node[font=\scriptsize\rmfamily, below=0.25cm of ct, align=center] {context:\\when is it \emph{applicable}?};
+  \node[font=\scriptsize\rmfamily, below=0.25cm of h, align=center] {body:\\what to do};
+\end{tikzpicture}
+\captionof{figure}{Anatomy of a plan (example added).}
+\end{center}
+
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Triggering event} & \textbf{Meaning: the plan reacts to\ldots} \\
+\midrule
+\code{+b} & the addition of belief \code{b} (e.g.\ a new percept) \\
+\code{-b} & the deletion of belief \code{b} \\
+\code{+!g} & a new achievement goal \code{g} (``how to achieve \code{g}'') \\
+\code{-!g} & the failure of achievement goal \code{g} (``what to do if \code{g} fails'') \\
+\code{+?g}, \code{-?g} & the addition / failure of a test goal (rarely used) \\
+\bottomrule
+\end{tabular}
+\captionof{table}{Triggering events. The grammar writes $+g$ and $-g$ with $g$ being
+$!at$ or $?at$.}
+\end{center}
+
+\begin{nbwarning}[AgentSpeak looks like Prolog, but it is not Prolog]
+Beliefs and contexts are Prolog-like (unification, \code{not} as negation as failure). But
+plan bodies are \emph{executed}, step by step, interleaved with perception: actions change
+the world, \code{!g} posts a new goal (handled by another plan), \code{+b}/\code{-b} change the
+belief base (like \code{assert}/\code{retract}, Section~\ref{sec:meta-programming}). There is
+no backtracking into an action already performed.
+\end{nbwarning}
+
+\subsubsection{Informal semantics: the reasoning cycle}
+\slidesrc{EMAS keynote: 36}
+
+\begin{nbdef}{AgentSpeak(L) agent (Rao 1996, Definitions 6--8)}
+An agent is a tuple $\langle E, B, P, I, A, S_E, S_O, S_I \rangle$: a set of \textbf{events}
+$E$, a set of base \textbf{beliefs} $B$, a set of \textbf{plans} $P$, a set of
+\textbf{intentions} $I$, a set of \textbf{actions} $A$, and three \textbf{selection
+functions}: $S_E$ selects an event from $E$; $S_O$ selects an \emph{option}, i.e.\ an
+applicable plan, among the applicable ones; $S_I$ selects an intention from $I$.
+\begin{itemize}[nosep]
+  \item Each \textbf{intention} is a \emph{stack} of partially instantiated plans
+        $[p_1 \ddagger \ldots \ddagger p_z]$, $p_1$ at the bottom, $p_z$ on top. The special
+        intention $[\,+!\mathit{true} : \mathit{true} \leftarrow \mathit{true}\,]$ is the
+        \emph{true intention}, written $\top$.
+  \item Each \textbf{event} is a pair $\langle e, i \rangle$: a triggering event $e$ and the
+        intention $i$ that generated it. If $i = \top$ the event is \textbf{external}
+        (from perception or from outside); otherwise it is \textbf{internal} (a subgoal
+        posted by a plan body).
+\end{itemize}
+\end{nbdef}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  s/.style={draw, thick, rounded corners, text width=3.2cm, align=center, minimum height=1.0cm, fill=#1}]
+  \node[s=nbteal!10] (1) at (0,0) {1. perceive, update beliefs, generate events};
+  \node[s=nborange!12] (2) at (4.4,0) {2. $S_E$: select an event $\langle e, i \rangle$};
+  \node[s=nbblue!10] (3) at (8.8,0) {3. \textbf{relevant} plans: trigger unifies with $e$};
+  \node[s=nbblue!10] (4) at (8.8,-2.0) {4. \textbf{applicable} plans: context follows from $B$};
+  \node[s=nbpurple!10] (5) at (4.4,-2.0) {5. $S_O$: choose one; push it on an intention};
+  \node[s=nbgreen!12] (6) at (0,-2.0) {6. $S_I$: select an intention; execute one step of its top plan};
+  \draw[->, thick] (1) -- (2); \draw[->, thick] (2) -- (3); \draw[->, thick] (3) -- (4);
+  \draw[->, thick] (4) -- (5); \draw[->, thick] (5) -- (6); \draw[->, thick] (6) -- (1);
+\end{tikzpicture}
+\captionof{figure}{The reasoning cycle of an AgentSpeak(L) interpreter, repeated forever.}
+\end{center}
+
+In step 5, the new plan, with the unifier applied, becomes a \textbf{new intention} if the
+event is external; if the event is internal (a subgoal \code{!g} of intention $i$), it is
+\textbf{pushed on top of} $i$: the subgoal must be completed before $i$ continues. In step 6,
+executing the top plan's next body step means: perform an action; or, for \code{!g},
+generate the internal event $\langle +!g, i \rangle$ and suspend $i$; or, for \code{?g},
+query the belief base; or, for \code{+b}/\code{-b}, update the beliefs (generating events).
+When a plan's body is finished it is popped from the stack.
+
+\begin{nbintuition}[Relevant vs.\ applicable]
+\emph{Relevant} = ``this plan is about this event'' (the trigger matches): like a recipe in
+the right chapter of the cookbook. \emph{Applicable} = ``and I can use it now'' (the context
+holds in my current beliefs): I have the ingredients. Several plans can be relevant for the
+same goal, each applicable in different situations: this is how an agent chooses
+\emph{context-dependent} behaviour.
+\end{nbintuition}

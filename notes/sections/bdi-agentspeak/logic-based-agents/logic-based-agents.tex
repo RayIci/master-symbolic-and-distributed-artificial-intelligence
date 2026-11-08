@@ -1,0 +1,36 @@
+\subsection{From logic-based agents to BDI}
+\label{sec:logic-based-agents}
+\slidesrc{BDI architecture: 1--6}
+
+The deck opens with the two definitions of agent already seen in
+Section~\ref{sec:what-is-an-agent}:
+\begin{itemize}[nosep]
+  \item \textbf{weak notion} (Jennings, Sycara, Wooldridge 1998): situated, autonomous,
+        flexible (reactive, proactive, social);
+  \item \textbf{strong notion}: a computer system either \emph{conceptualised} or
+        \emph{implemented} using concepts that are more usually applied to humans:
+        \emph{mentalistic notions} (Shoham, \emph{Agent-oriented programming}, 1993) and
+        \emph{emotional notions} (Bates, \emph{The role of emotion in believable agents},
+        1994).
+\end{itemize}
+
+\paragraph{Logic-based agents (slide 5).} The simplest way to give an agent ``a mind'' is to
+give it a logic program: knowledge as clauses, reasoning as proof.
+\begin{minted}[linenos=false]{prolog}
+mortal(X) :- human(X).
+human(socrates).
+?- mortal(socrates).
+yes
+\end{minted}
+This is the ``traditional'' approach to building intelligent systems (EMAS keynote, slide
+32): \textbf{logical formulae} give a symbolic representation of the agent's environment and
+desired behaviour, and \textbf{logical deduction} (theorem proving) manipulates it. A pure
+theorem prover, however, only answers questions; an agent must also \emph{act}, pursue goals
+over time and react to changes. This is what the BDI architecture adds.
+
+\begin{nbfact}{AgentSpeak(L) (slide 6)}
+The \textbf{BDI architecture} is one of the best known and most studied architectures for
+\textbf{cognitive agents}. \textbf{AgentSpeak(L)} is an elegant, logic-based programming
+language inspired by the BDI architecture (A.~S.~Rao, ``AgentSpeak(L): BDI agents speak out
+in a logical computable language'', MAAMAW 1996).
+\end{nbfact}
