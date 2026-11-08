@@ -191,3 +191,6 @@ references and overfull boxes above ~5pt; render the new pages and look at them
 - `fitchproof` cannot sit in an LR-mode table cell (`c` column): use `p{...}` columns.
 - Long formulas in tables inside boxes overflow: abbreviate predicate names (say so in the
   text) rather than shrinking the font.
+- Never use `\code{...}` (purple) in box titles: it is invisible on the coloured bar. Use
+  `\texttt{...}` there.
+- Long query/answer listings in two columns: use `fontsize=\footnotesize` in minted.

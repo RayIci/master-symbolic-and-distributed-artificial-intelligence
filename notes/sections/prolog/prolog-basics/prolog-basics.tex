@@ -1,0 +1,510 @@
+\subsection{Prolog basics}
+\label{sec:prolog-basics}
+\slidesrc{Prolog I: 1--37}
+
+\subsubsection{Predicates and facts}
+\slidesrc{Prolog I: 4--5}
+
+In most programming languages the basic abstraction is the \emph{function} (or method): a
+mapping from inputs to outputs. In Prolog the basic abstraction is the \textbf{predicate}
+(or \textbf{relation}): it indicates \emph{whether or not some entities are related} in a
+particular way. In logic programming we may \emph{test} whether entities are related, or
+\emph{find} entities that are related to other entities.
+
+\begin{nbexample}{the royal family program (slide 5)}
+\begin{minted}{prolog}
+parent(elizabeth, charles).
+parent(diana, william).
+parent(diana, harry).
+parent(philip, charles).
+parent(charles, william).
+parent(charles, harry).
+\end{minted}
+\begin{itemize}[nosep]
+  \item \code{parent} is a \textbf{predicate} (of arity 2, written \code{parent/2});
+  \item each line is a separate \textbf{clause}, terminated by a full stop;
+  \item each clause is a separate \emph{true statement}, understandable on its own:
+        ``Elizabeth is a parent of Charles'';
+  \item names of individuals (\code{elizabeth}) are \textbf{atoms}: constants, starting
+        with a lower-case letter.
+\end{itemize}
+A Prolog program may consist of many files, each defining many predicates, each defined by
+many clauses.
+\end{nbexample}
+
+\begin{center}
+\begin{forest}
+for tree={draw, rounded corners, font=\small, l sep=6mm, s sep=4mm, edge={->, thick}, fill=nbblue!8}
+[{elizabeth $+$ philip}, fill=nbpurple!10
+  [charles
+    [william, fill=nbgreen!10] [harry, fill=nbgreen!10]]]
+\end{forest}
+\hspace{1.5cm}
+\begin{forest}
+for tree={draw, rounded corners, font=\small, l sep=6mm, s sep=4mm, edge={->, thick}, fill=nbblue!8}
+[{charles $+$ diana}, fill=nbpurple!10
+  [william, fill=nbgreen!10] [harry, fill=nbgreen!10]]
+\end{forest}
+\captionof{figure}{The family encoded by the \code{parent/2} facts (arrows go from parent to
+child).}
+\end{center}
+
+\subsubsection{Making queries}
+\slidesrc{Prolog I: 6--7}
+
+Prolog systems provide an interactive environment to load and test code. The prompt is
+\code{?-}. A source file (extension \code{.pl}) is loaded by writing its name in single
+quotes inside square brackets, followed by a full stop: \code{?- ['royals.pl'].} Queries are
+typed at the prompt and Prolog answers them:
+\begin{minted}[linenos=false]{prolog}
+?- parent(diana, harry).
+true.
+?- parent(elizabeth, diana).
+false.
+\end{minted}
+(The slides' tuProlog prints \code{Yes} and \code{No}.)
+
+\begin{nbwarning}[``false'' means ``not provable'', not ``false in reality'']
+\code{parent(elizabeth, diana)} fails because it cannot be derived from the program. Prolog
+works under the \textbf{closed-world assumption}: what is not known to be true is treated
+as false. Ask \code{?- parent(elizabeth, anne).} and you also get \code{false}, although
+Princess Anne is Elizabeth's daughter: she is simply not in the program.
+\end{nbwarning}
+
+\subsubsection{Variables and multiple directions}
+\slidesrc{Prolog I: 8--11}
+
+\begin{minted}[linenos=false]{prolog}
+?- parent(elizabeth, X).
+X = charles.
+\end{minted}
+Read the query as ``find \code{X} such that Elizabeth is a parent of \code{X}''.
+
+\begin{nbdef}{Prolog variables (slide 8)}
+Prolog variables begin with a \textbf{capital letter or an underscore}, followed by letters,
+digits and underscores (\code{X}, \code{Kid}, \code{\_tmp}). They are very different from
+variables in other programming languages: like in Haskell, \textbf{you cannot change the value
+of a variable once it is set}. A variable stands for an \emph{unknown} object, as in algebra.
+\end{nbdef}
+
+Some queries have more than one answer. Prolog prints one answer and waits: type \code{;}
+to ask for the next one, Return to stop.
+\begin{minted}[linenos=false]{prolog}
+?- parent(diana, X).
+X = william ;
+X = harry.
+\end{minted}
+(The slides show \code{X = harry ;} followed by \code{No}: tuProlog only discovers that
+there are no more answers after you ask; SWI-Prolog often knows it already and ends with a
+full stop.)
+
+\begin{nbfact}{Multiple directions (slides 10--11)}
+The same predicate can be queried ``the other way around'':
+\begin{minted}[linenos=false]{prolog}
+?- parent(X, william).
+X = diana ;
+X = charles.
+\end{minted}
+``Find \code{X} such that \code{X} is a parent of William.'' This works because the program
+is \textbf{declarative}: it specifies information without specifying how it must be used.
+For each argument we may pass a value or a variable; values \emph{constrain} the solutions,
+variables do not. \code{?- parent(X, Y).} imposes no constraint and enumerates all six
+pairs. Well-written logic programs exhibit this flexibility, although it is not always
+practical (see \code{rev/2} in Section~\ref{sec:meta-programming}).
+\end{nbfact}
+
+\begin{nbintuition}[A predicate is a table, a query is a database question]
+\notinslides
+\code{parent/2} is like a two-column database table. \code{parent(diana, X)} is
+``\code{SELECT child WHERE parent = 'diana'}''; \code{parent(X, william)} is
+``\code{SELECT parent WHERE child = 'william'}''. In Java you would need two methods
+(\code{getChildren}, \code{getParents}); in Prolog one relation answers both questions.
+\end{nbintuition}
+
+\subsubsection{Compound queries and constraints}
+\slidesrc{Prolog I: 12--18}
+
+A query can invoke several predicates separated by commas (``and''). If a variable appears
+more than once, all occurrences must have the \emph{same value}, as in algebra.
+\begin{minted}[linenos=false]{prolog}
+?- parent(elizabeth, X), parent(X, Y).
+X = charles, Y = william ;
+X = charles, Y = harry.
+\end{minted}
+
+\begin{nbexample}{how Prolog solves a compound query (backtracking)}
+\notinslides
+\begin{enumerate}[nosep]
+  \item First goal \code{parent(elizabeth, X)}: scan the facts top-down; the first match is
+        \code{parent(elizabeth, charles)}, so \code{X = charles}. Remember this choice point.
+  \item Second goal, now \code{parent(charles, Y)}: first match
+        \code{parent(charles, william)}, \code{Y = william}. Print the answer.
+  \item You type \code{;}: Prolog \textbf{backtracks} to the most recent choice point, the
+        second goal, and continues scanning: \code{parent(charles, harry)},
+        \code{Y = harry}. Print.
+  \item \code{;} again: no more \code{parent(charles, \_)} facts; back to the first goal:
+        no other \code{parent(elizabeth, \_)} fact. No more answers.
+\end{enumerate}
+\end{nbexample}
+
+Let us add gender information (slide 13):
+\begin{minted}{prolog}
+female(elizabeth).   female(diana).
+male(philip).        male(charles).      male(william).     male(harry).
+\end{minted}
+Predicates can take any number of arguments; the number is the \textbf{arity}. A predicate
+with one argument defines a \emph{property} that certain entities may have.
+
+\begin{nbexample}{Motherhood (slides 14--16)}
+Give a Prolog query that determines the mother of William.
+\begin{minted}[linenos=false]{prolog}
+?- parent(X, william), female(X).
+X = diana.
+?- female(X), parent(X, william).     % equally good
+X = diana.
+\end{minted}
+In the first version Prolog tries \code{X = diana} (fact 2), which is female: answer. (On
+\code{;} it would try \code{X = charles}, who is not female: no more answers.) In the
+second, it tries \code{X = elizabeth} first (not a parent of William), then
+\code{X = diana}: answer.
+\end{nbexample}
+
+\begin{nbfact}{Constraints (slides 17--18)}
+Think of each part of a compound query as a \textbf{constraint} on the solution: Prolog only
+shows solutions that satisfy all of them. Some constraints have no solutions; in general
+constraints can be placed in any order, but some orders are more efficient than others, and
+some orders may not work as expected (more later).
+\begin{minted}[linenos=false]{prolog}
+?- parent(X,Y), parent(Y,Z), male(Z), female(X).
+X = elizabeth, Y = charles, Z = william ;
+X = elizabeth, Y = charles, Z = harry ;
+false.
+?- parent(X,Y), parent(Y,X).
+false.
+?- male(X), female(X).
+false.
+\end{minted}
+\end{nbfact}
+
+\subsubsection{Rules: clause bodies}
+\slidesrc{Prolog I: 19--21}
+
+\begin{nbdef}{Clause, head, body, fact, rule (slide 19)}
+A clause may have two parts, a \textbf{head} and a \textbf{body}, separated by \code{:-}
+(read ``\textbf{if}''). The head looks like a predicate with arguments (some may be
+variables), the body looks like a query. Meaning: \emph{the head is true if the body is
+true}. If the body is empty, \code{:-} is omitted: a clause with no body is a \textbf{unit
+clause} or \textbf{fact}. A clause with a body is a \textbf{rule}.
+\end{nbdef}
+
+\begin{minted}{prolog}
+grandparent(G, C) :-
+    parent(G, P),
+    parent(P, C).
+\end{minted}
+Read: ``\code{G} is a grandparent of \code{C} \emph{if} \code{G} is a parent of \code{P}
+\emph{and} \code{P} is a parent of \code{C}''. Variables in a rule are universally
+quantified: in FOL, $\forall G\,\forall C\,\forall P\,(\mathit{parent}(G,P) \land
+\mathit{parent}(P,C) \limp \mathit{grandparent}(G,C))$.
+
+\begin{minted}[linenos=false]{prolog}
+?- grandparent(elizabeth, X).
+X = william ;
+X = harry.
+?- grandparent(X, william).
+X = elizabeth ;
+X = philip ;
+false.
+\end{minted}
+
+\begin{center}
+\begin{forest}
+for tree={draw, rounded corners, font=\small\ttfamily, l sep=5mm, s sep=8mm, edge={thick}, align=center}
+[{?- grandparent(elizabeth, X)}, fill=nbblue!10
+  [{?- parent(elizabeth, P), parent(P, X)}, fill=nbblue!10, edge label={node[midway, right, font=\scriptsize\rmfamily]{rule, G = elizabeth, C = X}}
+    [{?- parent(charles, X)}, fill=nbblue!10, edge label={node[midway, right, font=\scriptsize\rmfamily]{P = charles}}
+      [{success\\X = william}, fill=nbgreen!15]
+      [{success\\X = harry}, fill=nbgreen!15]]]]
+\end{forest}
+\captionof{figure}{The search tree of \code{?- grandparent(elizabeth, X).}: each node is the
+list of goals still to prove; each edge is the choice of a clause. Answers are the leaves
+where nothing is left to prove. Section~\ref{sec:logical-foundations} calls this an
+\emph{SLD tree}.}
+\end{center}
+
+\begin{nbexercise}{P1.1}{Family relationships (slide 21)}
+\begin{enumerate}[nosep]
+  \item Define a predicate \code{father(Dad, Kid)} that holds when \code{Dad} is the father
+        of \code{Kid}.
+  \item Define a predicate \code{greatgrandparent(Adult, Child)} that holds when
+        \code{Adult} is a great-grandparent of \code{Child}.
+\end{enumerate}
+\end{nbexercise}
+\begin{nbsolution}
+\inputminted{prolog}{sections/prolog/prolog-basics/assets/family-solutions.pl}
+\code{?- father(X, harry).} gives \code{X = charles} (the parents of Harry are Diana and
+Charles; only Charles is male). With the six facts of the program,
+\code{greatgrandparent/2} has \emph{no} solutions (the family tree has only three
+generations): \code{?- greatgrandparent(A, C).} answers \code{false}. Adding, e.g.,
+\code{parent(william, george).} makes \code{?- greatgrandparent(A, george).} answer
+\code{A = elizabeth ; A = philip}. \textbf{Lesson}: reuse existing predicates; a
+great-grandparent is a parent of a grandparent.
+\end{nbsolution}
+
+\subsubsection{Recursive predicates}
+\slidesrc{Prolog I: 22--23}
+
+\begin{minted}{prolog}
+ancestor(A, A).
+ancestor(A, D) :-
+    parent(A, C),
+    ancestor(C, D).
+\end{minted}
+The first clause says that everyone is their own ancestor (not the usual definition, but
+common in computer science); the second that the parents of your ancestors are your
+ancestors. The same code finds both ancestors and descendants:
+\begin{minted}[linenos=false]{prolog}
+?- ancestor(A, harry).
+A = harry ; A = elizabeth ; A = diana ; A = philip ; A = charles ; false.
+?- ancestor(elizabeth, D).
+D = elizabeth ; D = charles ; D = william ; D = harry ; false.
+\end{minted}
+
+\begin{nbexample}{why the answers of \texttt{ancestor(A, harry)} come in that order}
+\notinslides
+\begin{enumerate}[nosep]
+  \item Clause 1 unifies \code{ancestor(A, A)} with \code{ancestor(A, harry)}: \code{A = harry}.
+  \item Clause 2: prove \code{parent(A, C), ancestor(C, harry)}, trying the parent facts in order:
+  \begin{itemize}[nosep]
+    \item \code{parent(elizabeth, charles)}: need \code{ancestor(charles, harry)}; clause 1
+          fails (\code{charles} $\neq$ \code{harry}); clause 2: \code{parent(charles, william)}
+          then \code{ancestor(william, harry)}: fails (William has no children);
+          \code{parent(charles, harry)} then \code{ancestor(harry, harry)}: clause 1 succeeds.
+          Answer \code{A = elizabeth}.
+    \item \code{parent(diana, william)}: \code{ancestor(william, harry)} fails.
+    \item \code{parent(diana, harry)}: \code{ancestor(harry, harry)} succeeds: \code{A = diana}.
+    \item \code{parent(philip, charles)}: as for Elizabeth: \code{A = philip}.
+    \item \code{parent(charles, william)}: fails; \code{parent(charles, harry)}: \code{A = charles}.
+  \end{itemize}
+\end{enumerate}
+The order of answers follows the order of the facts, exactly as in a depth-first search.
+\end{nbexample}
+
+\begin{nbwarning}[Put the base case first and recurse on something smaller]
+If the body were written \code{ancestor(C, D), parent(A, C)} (recursive call first), the
+query \code{?- ancestor(A, harry).} would find the first answers and then call
+\code{ancestor} with both arguments unknown, again and again, without ever consuming a
+\code{parent} fact: an infinite loop (\emph{left recursion}). Same logic, different
+behaviour: the order of goals matters for termination (Section~\ref{sec:logical-foundations}).
+\end{nbwarning}
+
+\subsubsection{Disjunction}
+\slidesrc{Prolog I: 24}
+
+Disjunction (``or'') in Prolog uses the \code{;} operator; it is equivalent to writing two
+clauses:
+\begin{center}
+\begin{minipage}{0.42\linewidth}
+\begin{minted}[linenos=false]{prolog}
+person(X) :-
+    ( good(X) ; bad(X) ).
+\end{minted}
+\end{minipage}
+\quad$\equiv$\quad
+\begin{minipage}{0.42\linewidth}
+\begin{minted}[linenos=false]{prolog}
+person(X) :- good(X).
+person(X) :- bad(X).
+\end{minted}
+\end{minipage}
+\end{center}
+
+\subsubsection{Terms and variables}
+\slidesrc{Prolog I: 25--28}
+
+How can a variable be a data structure? A Prolog variable is \emph{just a term whose value
+you don't know yet}. Don't \emph{assign} to variables, \emph{constrain} them. A variable can
+be bound to any term, even another variable, but cannot change value once bound. It is
+more like a variable in algebra than in a conventional programming language.
+
+\begin{nbdef}{Compound term (slide 26)}
+The \textbf{compound term} is Prolog's only data-structuring abstraction. It has a
+\textbf{functor}, which is an atom, and one or more \textbf{arguments}, which can be any
+terms. Syntax: functor first, then the arguments in parentheses, separated by commas. The
+number of arguments is the \textbf{arity}. No need to declare it: just use it.
+\end{nbdef}
+
+Compound terms look just like predicate invocations (Whiteboard~\ref{wb:terms-atoms}: the
+same syntax builds terms and atoms), but they are \emph{data}. Use them where you would use
+(a pointer to) a \code{struct} in C; the functor indicates the kind of term:
+\begin{center}
+\code{position(20, 10)} \qquad \code{employee(1234, 'Jones', 'James', 100000)}
+\end{center}
+No allocation, no assignment to members: just write it down. Terms may contain variables,
+whether or not their values are determined: \code{position(X, Y)},
+\code{employee(Num, Surname, Firstname, Salary)}.
+
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Kind of term} & \textbf{Examples} & \textbf{Rule} \\
+\midrule
+atom & \code{elizabeth}, \code{[]}, \code{'Jones'}, \code{+} & lower-case start, or quoted \\
+number & \code{42}, \code{-3}, \code{3.14} & \\
+variable & \code{X}, \code{Kid}, \code{\_}, \code{\_tmp} & upper-case or \code{\_} start \\
+compound & \code{position(20,10)}, \code{s(s(0))}, \code{[1,2]} & functor(args) \\
+\bottomrule
+\end{tabular}
+\captionof{table}{The kinds of Prolog terms (added). Atoms and numbers are called
+\emph{atomic}; a term with no variables is \emph{ground}.}
+\end{center}
+
+\subsubsection{Unification}
+\slidesrc{Prolog I: 29--33}
+
+In Prolog, \code{=} is used both for giving values to variables and for comparing terms:
+\begin{minted}[linenos=false]{prolog}
+?- 4 = 4.            true.
+?- 4 = 5.            false.
+?- X = 5.            X = 5.
+?- 5 = V.            V = 5.
+?- X = Y.            X = Y.
+\end{minted}
+(For the last query the slides show \code{X = \_G168, Y = \_G168}: both variables are bound
+to the same fresh variable.) Variables appearing in different queries are unrelated.
+
+\begin{nbdef}{Unification (slide 30)}
+\code{=} performs \textbf{unification}: it tries to make two terms the \emph{same} by binding
+the variables appearing in them. It is a powerful sort of pattern matching, and Prolog also
+uses it for argument passing (calling \code{parent(diana, X)} unifies the call with the
+head of each clause).
+\begin{minted}[linenos=false]{prolog}
+?- foo(A,2,C,D) = foo(1,X,Y,X).
+A = 1, X = 2, D = 2, C = Y.
+?- bar(X, X) = bar(1, 2).
+false.
+\end{minted}
+\end{nbdef}
+
+\begin{nbfact}{How to unify two terms (the algorithm, added)}
+\notinslides
+To unify $s$ and $t$:
+\begin{enumerate}[nosep]
+  \item if one of them is an unbound variable, bind it to the other (if both are the same
+        variable, do nothing);
+  \item if both are atomic (atoms or numbers), they unify iff they are identical;
+  \item if both are compound, they unify iff they have the \textbf{same functor and arity}
+        and their arguments unify \textbf{pairwise}, left to right, carrying the bindings
+        along;
+  \item otherwise they do not unify.
+\end{enumerate}
+The result is the \textbf{most general unifier} (mgu): the bindings that make the terms
+equal while committing to as little as possible.
+\end{nbfact}
+
+\begin{nbexample}{\texttt{foo(A,2,C,D) = foo(1,X,Y,X)} step by step}
+Same functor \code{foo}, same arity 4: unify the arguments pairwise.
+\begin{center}
+\small
+\begin{tabular}{@{}clll@{}}
+\toprule
+\textbf{Pair} & \textbf{Left} & \textbf{Right} & \textbf{Result} \\
+\midrule
+1 & \code{A} & \code{1} & bind \code{A = 1} \\
+2 & \code{2} & \code{X} & bind \code{X = 2} \\
+3 & \code{C} & \code{Y} & bind \code{C = Y} (two variables, now the same unknown) \\
+4 & \code{D} & \code{X} & \code{X} is already \code{2}: bind \code{D = 2} \\
+\bottomrule
+\end{tabular}
+\end{center}
+For \code{bar(X, X) = bar(1, 2)}: pair 1 binds \code{X = 1}; pair 2 must unify
+\code{1} with \code{2}: different atomic terms, failure.
+\end{nbexample}
+
+\begin{nbexercise}{P1.2}{Unification (slides 31--33)}
+Find bindings that make these pairs of terms the same:
+(1) \code{f(X, 17) = f(Y, Y)}; \quad (2) \code{f(42, U, a) = f(V, f(V,W), W)}.
+(\code{f} is used with arity 2 and 3: no problem, they are different functors.)
+\end{nbexercise}
+\begin{nbsolution}
+(1) Pair 1: \code{X = Y}. Pair 2: \code{17 = Y}, so \code{Y = 17}, hence \code{X = 17}.
+Answer: \code{X = 17, Y = 17}.
+
+(2) Pair 1: \code{42 = V}, so \code{V = 42}. Pair 2: \code{U = f(V, W)} $=$ \code{f(42, W)}.
+Pair 3: \code{a = W}, so \code{W = a}, and therefore \code{U = f(42, a)}. Answer:
+\code{V = 42, W = a, U = f(42, a)}.
+\end{nbsolution}
+
+\begin{nbwarning}[Unification is not assignment, and not arithmetic]
+\code{X = 1 + 2} binds \code{X} to the \emph{term} \code{+(1,2)}, not to \code{3}
+(arithmetic needs \code{is}, Section~\ref{sec:arithmetic-nondeterminism}). And
+\code{X = f(X)}: standard unification would need the \emph{occurs check} (a variable cannot
+be bound to a term containing itself) and fail; SWI-Prolog skips the check for speed and
+builds a cyclic term. Avoid such goals.
+\end{nbwarning}
+
+\subsubsection{Recursive structures: numbers as terms}
+\slidesrc{Prolog I: 34--37}
+
+Any argument of a compound term can be any term, including a term with the same functor:
+this is how Prolog implements recursive structures (lists, trees, \ldots). A good strategy to
+write predicates on recursive structures:
+\begin{enumerate}[nosep]
+  \item write a predicate that \emph{recognises} the recursive data structure;
+  \item use it as a ``skeleton'' for other predicates, adding arguments and goals.
+\end{enumerate}
+
+For example, represent a natural number as either \code{0} or \code{s(X)} (``one more than
+\code{X}'', the \emph{successor}), where \code{X} is a natural number: $3$ is
+\code{s(s(s(0)))}. (This is \emph{not} how Prolog really does maths.)
+\begin{minted}{prolog}
+nat(0).                     % 0 is a natural number
+nat(s(X)) :- nat(X).        % s(X) is a nat if X is
+
+add(0, Y, Y).               % adding 0 to Y gives Y
+add(s(X), Y, s(Z)) :-       % adding X+1 to Y gives Z+1
+    add(X, Y, Z).           %   where Z is X + Y
+\end{minted}
+The structure of \code{add/3} follows that of \code{nat/1}. We refer to predicates as
+\code{name/arity} because Prolog allows different predicates with the same name and
+different arity.
+
+\begin{nbexample}{\texttt{add(s(s(0)), s(s(s(0))), X)}: $2 + 3$}
+\begin{align*}
+&\code{add(s(s(0)), s(s(s(0))), X)} && \reason{clause 2: \code{X = s(Z1)}} \\
+&\code{add(s(0), s(s(s(0))), Z1)} && \reason{clause 2: \code{Z1 = s(Z2)}} \\
+&\code{add(0, s(s(s(0))), Z2)} && \reason{clause 1: \code{Z2 = s(s(s(0)))}}
+\end{align*}
+Back-substituting: \code{X = s(Z1) = s(s(Z2)) = s(s(s(s(s(0)))))}, i.e.\ $5$. Check:
+$2 + 3 = 5$.
+\end{nbexample}
+
+\begin{nbfact}{Example queries (slide 36)}
+\begin{minted}[linenos=false, fontsize=\footnotesize]{prolog}
+?- nat(s(s(0))).                         true.
+?- nat(X).                               X = 0 ; X = s(0) ; X = s(s(0)) ; ...
+?- add(s(s(0)), X, Y).                   Y = s(s(X)).
+?- add(s(s(0)), X, s(s(s(s(s(0)))))).    X = s(s(s(0))).        % 5 - 2
+?- add(X, s(s(s(0))), s(s(s(s(s(0)))))). X = s(s(0)) ;  false.  % 5 - 3
+?- add(X, Y, s(s(0))).                   X = 0, Y = s(s(0)) ;
+                                         X = s(0), Y = s(0) ;
+                                         X = s(s(0)), Y = 0 ; false.
+\end{minted}
+The same definition of addition also computes \textbf{subtraction} and enumerates all ways
+of writing a number as a sum: multiple directions again. \code{nat(X)} generates the natural
+numbers forever.
+\end{nbfact}
+
+\begin{nbexercise}{P1.3}{Multiplication (slide 37)}
+Define \code{mult(X, Y, Z)}, true when \code{X} times \code{Y} equals \code{Z}, using
+\code{add/3}.
+\end{nbexercise}
+\begin{nbsolution}
+\inputminted{prolog}{sections/prolog/prolog-basics/assets/mult-solution.pl}
+This follows the skeleton of \code{nat/1} on the first argument: $0 \cdot Y = 0$ and
+$(X+1)\cdot Y = X\cdot Y + Y$. Trace of $2 \cdot 3$: \code{mult(s(s(0)), s(s(s(0))), Z)}
+calls \code{mult(s(0), \ldots, W1)}, which calls \code{mult(0, \ldots, W0)}, giving
+\code{W0 = 0}; then \code{add(0, s(s(s(0))), W1)} gives $W_1 = 3$; then
+\code{add(s(s(s(0))), s(s(s(0))), Z)} gives $Z = 6$ = \code{s(s(s(s(s(s(0))))))}.
+\end{nbsolution}

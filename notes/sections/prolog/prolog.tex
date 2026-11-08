@@ -1,2 +1,65 @@
 \section{Prolog}
 \label{sec:prolog}
+\slidesrc{Prolog I: 1--37; Prolog II: 1--9; Prolog IV: 1--15; Prolog V: 1--24; Prolog III: 1--9}
+
+\textbf{Prolog} (PROgramming in LOGic, Colmerauer and Roussel, 1972;
+Section~\ref{sec:ai-history}) is the language in which symbolic AI is most directly
+\emph{programmed}. A Prolog program is a set of logical statements (facts and rules, i.e.\
+Horn clauses of first-order logic, Section~\ref{sec:first-order-logic}); running a program
+means asking a question (a \emph{query}) and letting Prolog \emph{prove} it. The professor's
+slides are based on material by Peter Schachte (University of Melbourne).
+
+The five decks are presented in \textbf{lecture order}: I (basics), II (lists),
+IV (nondeterminism, arithmetic, all-solutions), V (meta-programming and the database),
+III (logical foundations: Horn clauses and SLD resolution). Part III comes last, as in class:
+it explains \emph{why} everything seen before works.
+
+\begin{nbwhy}[How to try the examples]
+\notinslides
+The slides show sessions of tuProlog and SICStus Prolog, which answer \code{Yes}/\code{No}.
+Today the most common system is \textbf{SWI-Prolog} (free, \url{https://www.swi-prolog.org}):
+write the program in a file \code{royals.pl}, start \code{swipl}, load it with
+\code{?- [royals].} (or \code{consult(royals)}) and type queries after \code{?-}. SWI-Prolog
+answers \code{true}/\code{false} instead of \code{Yes}/\code{No}, names fresh variables
+\code{\_123} or \code{\_A} instead of \code{\_G168}, and asks for more answers when you press
+\code{;} (or space). In these notes answers are written in SWI-Prolog style, with the slides'
+output where it differs.
+\end{nbwhy}
+
+\input{sections/prolog/prolog-basics/prolog-basics}
+\input{sections/prolog/lists/lists}
+\input{sections/prolog/arithmetic-nondeterminism/arithmetic-nondeterminism}
+\input{sections/prolog/meta-programming/meta-programming}
+\input{sections/prolog/logical-foundations/logical-foundations}
+
+\begin{nbsummary}[Prolog]
+\small
+\begin{itemize}[nosep]
+  \item Program = \textbf{facts} (\code{parent(diana, harry).}) + \textbf{rules}
+        (\code{H :- B1, B2.}, ``H if B1 and B2''). Query \code{?- G.}: Prolog tries to prove
+        \code{G}, returning variable bindings; \code{;} asks for more answers.
+  \item \textbf{Variables} start with upper case or \code{\_}; they are unknowns,
+        \emph{bound once} (no assignment). \code{\_} is anonymous. Arguments can be input or
+        output (``multiple directions'').
+  \item \textbf{Terms}: atoms, numbers, variables, compound terms \code{f(t1,...,tn)}
+        (functor/arity, written \code{name/arity}). Lists: \code{[]}, \code{[H|T]}.
+  \item \textbf{Unification} \code{=}: makes two terms identical by binding variables;
+        used for argument passing. \code{==} tests identity without binding.
+        \code{is} evaluates arithmetic; \code{=:=}, \code{<}, \code{>=}\ldots{} compare numbers.
+  \item Execution: goals left to right, clauses top to bottom, depth-first search with
+        \textbf{backtracking}. Order of goals/clauses affects efficiency and
+        \emph{termination}, not the logical meaning.
+  \item Several clauses are \textbf{not} an if-then-else: every applicable clause can give
+        an answer (absolute value bug); add guards (\code{X < 0}).
+  \item \code{member/2}, \code{append/3}, \code{length/2}; accumulators for efficiency;
+        \code{findall/3}, \code{bagof/3}, \code{setof/3} collect all solutions.
+  \item Meta: \code{=..} (univ), \code{functor/3}, \code{arg/3}; standard order
+        \code{@<}; type tests \code{var}, \code{nonvar}, \code{atom}, \ldots;
+        \code{clause/2}, \code{assert/asserta}, \code{retract} (declare \code{:- dynamic}).
+  \item Foundations: a clause is a disjunction of literals; \textbf{Horn clause}: at most
+        one positive literal (facts, rules, goals). \textbf{SLD resolution}: select an atom
+        of the goal, resolve it with a renamed program clause using the mgu; an
+        \textbf{SLD tree} shows all choices; success leaves $\Box$ give answers. Prolog =
+        leftmost selection + depth-first, top-to-bottom search.
+\end{itemize}
+\end{nbsummary}

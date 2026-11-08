@@ -1,0 +1,207 @@
+\subsection{Logical foundations}
+\label{sec:logical-foundations}
+\slidesrc{Prolog III: 1--9}
+
+Why does Prolog compute correct answers? Because running a Prolog program is building a
+\emph{proof} in first-order logic, with a single, very efficient inference rule:
+\textbf{SLD resolution}. This deck was shown last; it ties Part~IV back to Part~II.
+
+\subsubsection{Clauses and Horn clauses}
+\slidesrc{Prolog III: 4--6}
+
+\begin{nbdef}{Clause (slide 4)}
+A \textbf{clause} is a disjunction of atoms or their negations (\textbf{literals}), where the
+variables are implicitly \emph{universally quantified}:
+\[
+A_1 \lor A_2 \lor \cdots \lor A_n \lor \neg B_1 \lor \neg B_2 \lor \cdots \lor \neg B_m
+\]
+It is equivalent to
+\[
+(A_1 \lor \cdots \lor A_n) \leftarrow (B_1 \land \cdots \land B_m)
+\]
+usually written (conclusion $\leftarrow$ precondition) as
+$A_1, \ldots, A_n \leftarrow B_1, \ldots, B_m$.
+\end{nbdef}
+
+Why are the two forms equivalent? With the rules of Section~\ref{sec:tautologies}:
+\begin{align*}
+&(A_1 \lor \cdots \lor A_n) \leftarrow (B_1 \land \cdots \land B_m) \\
+&\quad\equiv \neg(B_1 \land \cdots \land B_m) \lor (A_1 \lor \cdots \lor A_n)
+     && \reason{$q \leftarrow p \;\equiv\; \neg p \lor q$} \\
+&\quad\equiv (\neg B_1 \lor \cdots \lor \neg B_m) \lor A_1 \lor \cdots \lor A_n
+     && \reason{De Morgan} \\
+&\quad\equiv A_1 \lor \cdots \lor A_n \lor \neg B_1 \lor \cdots \lor \neg B_m
+     && \reason{commutativity}
+\end{align*}
+The positive literals end up on the left (conclusions), the negative ones on the right
+(conditions).
+
+\begin{nbdef}{Horn clause (slide 5)}
+A \textbf{Horn clause} is a clause with \textbf{at most one positive literal} (a literal is a
+predicate symbol applied to its arguments, or its negation).
+\begin{center}
+\small
+\begin{tabular}{@{}l l l l@{}}
+\toprule
+\textbf{Kind} & \textbf{Logic} & \textbf{Prolog} & \textbf{Positive literals} \\
+\midrule
+definite clause: \textbf{rule} & $A \leftarrow B_1, \ldots, B_m$ & \code{a :- b1, ..., bm.} & 1 \\
+definite clause: \textbf{fact} & $A \leftarrow$ & \code{a.} & 1 \\
+negative clause: \textbf{goal} & $\leftarrow B_1, \ldots, B_m$ & \code{?- b1, ..., bm.} & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{nbdef}
+
+\begin{nbfact}{Programs and questions (slide 6)}
+\begin{itemize}[nosep]
+  \item \textbf{Definite clauses represent knowledge}: a \textbf{logic program} is a set of
+        definite clauses.
+  \item \textbf{Negative clauses are questions}: the query \code{?- b1, ..., bm.} asks
+        whether $\exists X_1 \ldots X_n.\,(B_1 \land \cdots \land B_m)$ holds (the
+        $X_i$ are the variables of the query).
+  \item To answer, Prolog uses \textbf{refutation}: it adds the \emph{negation} of the
+        question and tries to derive a contradiction:
+        \begin{align*}
+        &\neg\,\exists X_1 \ldots X_n.\,(B_1 \land \cdots \land B_m) \\
+        &\quad\equiv \forall X_1 \ldots X_n.\,(\neg B_1 \lor \cdots \lor \neg B_m)
+          && \reason{duality, De Morgan} \\
+        &\quad\equiv\; \leftarrow B_1, \ldots, B_m
+          && \reason{a negative clause}
+        \end{align*}
+\end{itemize}
+\end{nbfact}
+
+\begin{nbintuition}[Refutation = proof by contradiction]
+It is the $\neg$\,Intro idea of natural deduction (Section~\ref{sec:natural-deduction-prop}):
+to show that ``someone is mortal'', assume ``nobody is mortal'' and derive a contradiction
+from it and the program. The contradiction is the \textbf{empty clause} $\Box$ (a disjunction
+with no literals, which can never be true). The bindings used along the way tell \emph{who}
+is mortal: they are the answer.
+\end{nbintuition}
+
+\subsubsection{SLD resolution}
+\slidesrc{Prolog III: 7}
+
+\begin{nbdef}{SLD resolution (slide 7)}
+\textbf{S}election-function, \textbf{L}inear resolution for \textbf{D}efinite clauses.
+Start from a definite program $P$ and a goal
+\[ G_0 = \;\leftarrow A_1, \ldots, A_m \qquad (m \geq 0). \]
+\begin{enumerate}[nosep]
+  \item The \textbf{selection rule} selects a sub-goal $A_i$.
+  \item Choose a program clause, \textbf{renamed} with fresh variables,
+        $B_0 \leftarrow B_1, \ldots, B_n$ ($n \geq 0$), whose head $B_0$ unifies with $A_i$,
+        with most general unifier $\theta_1$.
+  \item The new goal is
+        \[ G_1 = \;\leftarrow (A_1, \ldots, A_{i-1}, B_1, \ldots, B_n, A_{i+1}, \ldots, A_m)\,\theta_1 \]
+        i.e.\ $A_i$ is \emph{replaced by the body} of the clause, and the unifier is applied
+        to the whole goal.
+\end{enumerate}
+Repeat until the goal is empty ($\Box$: success) or no clause unifies with the selected atom
+(failure of that branch). The answer is the composition of all the unifiers, restricted to
+the variables of $G_0$.
+\end{nbdef}
+
+\begin{nbexample}{SLD derivation of \texttt{?- mortal(X).}}
+Program: \code{mortal(X) :- human(X).} \ \code{human(socrates).}
+\begin{align*}
+G_0 &= \;\leftarrow \mathit{mortal}(X) \\
+  &\quad \text{clause renamed } \mathit{mortal}(X_1) \leftarrow \mathit{human}(X_1),\quad
+     \theta_1 = \{X_1 / X\} \\
+G_1 &= \;\leftarrow \mathit{human}(X) \\
+  &\quad \text{clause } \mathit{human}(\mathit{socrates}) \leftarrow,\quad
+     \theta_2 = \{X / \mathit{socrates}\} \\
+G_2 &= \;\Box \qquad \text{(empty goal: success)}
+\end{align*}
+Answer: $X = \mathit{socrates}$. It is Whiteboard~\ref{wb:modus-ponens} again: unification
+does the instantiation, resolution does the Modus Ponens.
+\end{nbexample}
+
+\subsubsection{SLD trees}
+\slidesrc{Prolog III: 8--9}
+
+\begin{nbdef}{SLD tree (slide 8)}
+Let $P$ be a definite program, $G_0$ a goal and $\mathcal{R}$ a selection rule. The SLD tree
+of $G_0$ (using $P$ and $\mathcal{R}$) is a (possibly infinite) labelled tree such that:
+\begin{itemize}[nosep]
+  \item the root is labelled by $G_0$;
+  \item if $\leftarrow A_1, \ldots, A_n$ is a node and $A_m$ is the atom selected by
+        $\mathcal{R}$, the node has one child for each clause $A \leftarrow B_1, \ldots, B_q$
+        of $P$ such that $A$ and $A_m$ are unifiable; the child is
+        \[ \leftarrow (A_1, \ldots, A_{m-1}, B_1, \ldots, B_q, A_{m+1}, \ldots, A_n)\,\theta \]
+        where $\theta$ is the mgu of $A_m$ and $A$.
+\end{itemize}
+Leaves labelled $\Box$ are \textbf{success} leaves (each gives an answer); leaves where no
+clause applies are \textbf{failure} leaves.
+\end{nbdef}
+
+(The slide writes the child as $(A_1, \ldots, A_{m-1}, B_1, \ldots, A_{m+1}, \ldots, A_n)\theta$,
+dropping $B_q$: the whole body $B_1, \ldots, B_q$ replaces $A_m$.)
+
+\begin{nbexample}{SLD tree with the \emph{rightmost} selection rule (slide 9)}
+Program (colours as on the slide):
+\begin{center}
+\textcolor{nbred}{(1)\ $p(X, Z) \leftarrow p(Y, Z), q(X, Y)$} \qquad
+\textcolor{nbblue}{(2)\ $p(X, X)$} \qquad
+\textcolor{nbgreen!60!black}{(3)\ $q(a, b)$}
+\end{center}
+Goal $\leftarrow p(X, b)$; the selection function picks the \textbf{rightmost} atom.
+\begin{center}
+\begin{forest}
+for tree={draw, rounded corners, font=\small, l sep=8mm, s sep=10mm, edge={thick}, align=center}
+[{$\leftarrow p(X, b)$}, fill=nbblue!8
+  [{$\leftarrow p(Y, b),\ q(X, Y)$}, fill=nbblue!8, edge={nbred}, edge label={node[midway, left, font=\scriptsize]{(1)}}
+    [{$\leftarrow p(b, b)$}, fill=nbblue!8, edge={nbgreen!60!black}, edge label={node[midway, right, font=\scriptsize]{(3): $X = a,\ Y = b$}}
+      [{$\leftarrow p(Y', b),\ q(b, Y')$\\failure: no $q(b, \_)$}, fill=nbred!10, edge={nbred}, edge label={node[midway, left, font=\scriptsize]{(1)}}]
+      [{$\Box$\\answer $X = a$}, fill=nbgreen!15, edge={nbblue}, edge label={node[midway, right, font=\scriptsize]{(2)}}]]]
+  [{$\Box$\\answer $X = b$}, fill=nbgreen!15, edge={nbblue}, edge label={node[midway, right, font=\scriptsize]{(2): $X = b$}}]]
+\end{forest}
+\end{center}
+Step by step:
+\begin{enumerate}[nosep]
+  \item Root $\leftarrow p(X, b)$: only one atom. Clause (1), renamed
+        $p(X_1, Z_1) \leftarrow p(Y_1, Z_1), q(X_1, Y_1)$, unifies with $X_1 = X$, $Z_1 = b$:
+        child $\leftarrow p(Y, b), q(X, Y)$ (writing $Y$ for $Y_1$). Clause (2), $p(X_2,
+        X_2)$, unifies with $X_2 = X = b$: child $\Box$, answer $X = b$.
+  \item Node $\leftarrow p(Y, b), q(X, Y)$: rightmost atom $q(X, Y)$; only clause (3)
+        unifies: $X = a$, $Y = b$; child $\leftarrow p(b, b)$.
+  \item Node $\leftarrow p(b, b)$: clause (1) gives $\leftarrow p(Y', b), q(b, Y')$, whose
+        rightmost atom $q(b, Y')$ unifies with no clause: failure. Clause (2) unifies
+        $p(b, b)$ with $p(X_2, X_2)$: $\Box$, answer $X = a$.
+\end{enumerate}
+The tree is \emph{finite}: two answers, $X = b$ and $X = a$.
+\end{nbexample}
+
+\begin{nbwarning}[What real Prolog does with the same program]
+\notinslides
+Prolog's selection rule is \textbf{leftmost}, its search is \textbf{depth-first} with clauses
+tried \textbf{top to bottom}. With the leftmost rule the first child of
+$\leftarrow p(X, b)$ is $\leftarrow p(Y, b), q(X, Y)$, whose leftmost atom $p(Y, b)$ is again
+resolved first with clause (1): $\leftarrow p(Y', b), q(Y, Y'), q(X, Y)$, and so on. The
+leftmost branch of the SLD tree is \emph{infinite}, and depth-first search explores it first:
+\code{?- p(X, b).} never returns an answer (stack overflow), although $X = b$ and $X = a$ are
+logical consequences of the program.
+\begin{itemize}[nosep]
+  \item The \emph{set of answers} does not depend on the selection rule (every SLD tree
+        contains the same success leaves), but the \emph{shape} of the tree, and hence
+        termination, does.
+  \item Depth-first search is fast and memory-cheap, but \emph{incomplete}: it can get lost in
+        an infinite branch before reaching a success leaf. This is the ``left recursion''
+        problem of Section~\ref{sec:prolog-basics}. Writing clause (2) first, or the body as
+        \code{q(X, Y), p(Y, Z)}, would make Prolog find both answers.
+\end{itemize}
+\end{nbwarning}
+
+\begin{center}
+\begin{tikzpicture}[font=\small, >=Stealth,
+  b/.style={draw, thick, rounded corners, text width=3.6cm, align=center, minimum height=1.3cm, fill=#1}]
+  \node[b=nbblue!8] (fol) at (0,0) {\textbf{FOL}\\full first-order logic, undecidable};
+  \node[b=nbpurple!8] (horn) at (4.5,0) {\textbf{Horn clauses}\\facts, rules, goals};
+  \node[b=nbgreen!10] (sld) at (9,0) {\textbf{SLD resolution}\\+ leftmost, depth-first\\= \textbf{Prolog}};
+  \draw[->, thick] (fol) -- node[above, font=\scriptsize]{restrict} (horn);
+  \draw[->, thick] (horn) -- node[above, font=\scriptsize]{one rule} (sld);
+\end{tikzpicture}
+\captionof{figure}{From logic to Prolog: restrict FOL to Horn clauses, use one inference rule
+(SLD resolution), and fix a search strategy. The price of efficiency is that some logically
+valid answers may not be found (non-termination).}
+\end{center}

@@ -1,0 +1,275 @@
+\subsection{Nondeterminism, arithmetic, all solutions}
+\label{sec:arithmetic-nondeterminism}
+\slidesrc{Prolog IV: 1--15}
+
+\subsubsection{Arithmetic in Prolog: a short primer}
+\notinslides
+
+The Prolog~IV deck uses arithmetic without introducing it (that part was in a deck not
+shown in class). The essentials:
+
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+\textbf{Operator} & \textbf{Example} & \textbf{Meaning} \\
+\midrule
+\code{X is Expr} & \code{X is 2 + 3} gives \code{X = 5} & \textbf{evaluate} the right side (must be fully known), unify the result with the left side \\
+\code{=:=}, \code{=\textbackslash=} & \code{1 + 2 =:= 3} true & arithmetic equal / not equal (both sides evaluated) \\
+\code{<}, \code{>}, \code{=<}, \code{>=} & \code{X >= 0} & arithmetic comparison (both sides must be known numbers) \\
+\code{=} & \code{X = 2 + 3} gives \code{X = 2+3} & \textbf{unification}: no evaluation, \code{X} becomes the term \code{+(2,3)} \\
+\code{==} & \code{X == Y} & identical terms, without binding (Section~\ref{sec:meta-programming}) \\
+\bottomrule
+\end{tabularx}
+\captionof{table}{The four ``equalities'' of Prolog. Note \code{=<} (not \code{<=}).}
+\end{center}
+
+\begin{nbwarning}[The classic \texttt{=} vs.\ \texttt{is} trap]
+\begin{itemize}[nosep]
+  \item \code{X = 3 + 4, X == 7} fails: \code{X} is the term \code{3+4}, not the number 7.
+  \item \code{7 is X + 4} with \code{X} unknown raises an error (``Arguments are not
+        sufficiently instantiated''): \code{is} cannot solve equations, it only evaluates.
+        Arithmetic predicates therefore work in \emph{one direction only}, unlike
+        \code{add/3} on \code{s(...)} numbers.
+  \item \code{N is N + 1} always fails (for a bound \code{N}): variables cannot change value.
+        Use a new variable: \code{N1 is N + 1}.
+\end{itemize}
+\end{nbwarning}
+
+\subsubsection{Managing nondeterminism}
+\slidesrc{Prolog IV: 4--7}
+
+A common Prolog programming error is treating multiple clauses as if they formed an
+\textbf{if-then-else} construct. This is an \emph{erroneous} definition of absolute value:
+\begin{minted}{prolog}
+absolute_value(X, X) :- X >= 0.
+absolute_value(X, Y) :- Y is -X.
+\end{minted}
+\begin{minted}[linenos=false]{prolog}
+?- absolute_value(-3, V).      V = 3.
+?- absolute_value(42, V).      V = 42 ;
+                               V = -42.         % wrong!
+\end{minted}
+The problem: the second clause promises that $|n| = -n$ \emph{for any} $n$, regardless of its
+sign. Each clause must be \emph{true on its own}, because Prolog may use any of them on
+backtracking. The correct definition:
+\begin{minted}{prolog}
+absolute_value(X, X) :- X >= 0.
+absolute_value(X, Y) :- X < 0, Y is -X.
+\end{minted}
+Now \code{?- absolute_value(42, V).} gives only \code{V = 42} (the second clause fails at
+\code{42 < 0}).
+
+\begin{nbintuition}[Read every clause as a separate true statement]
+In a procedural language, ``else'' means ``in all other cases''. Prolog has no implicit
+``else'': clause 2 is a logical statement ``for all \code{X}, the absolute value of \code{X}
+is \code{-X}'', which is false for positive numbers. A good test: read each clause aloud
+alone. If it is not true, add the missing condition (the \emph{guard}).
+\end{nbintuition}
+
+\begin{nbexercise}{P4.1}{Maximum of two numbers (slides 6--7)}
+Define \code{maximum(X, Y, Z)} such that \code{Z} is the larger of \code{X} and \code{Y}.
+\end{nbexercise}
+\begin{nbsolution}
+Two clauses, each with its own guard, so each is true on its own:
+\code{maximum(X, Y, X) :- X >= Y.} \quad and \quad \code{maximum(X, Y, Y) :- X < Y.}
+\\ \code{?- maximum(3, 7, Z).} gives \code{Z = 7}; \code{?- maximum(7, 3, Z).} gives
+\code{Z = 7} and nothing else on backtracking. The guards are mutually exclusive
+($\geq$ vs.\ $<$), so exactly one clause applies for every pair of numbers.
+\end{nbsolution}
+
+\subsubsection{Fibonacci numbers}
+\slidesrc{Prolog IV: 8}
+
+Fibonacci numbers: $1, 1, 2, 3, 5, 8, 13, \ldots$ (each is the sum of the previous two).
+\begin{minted}{prolog}
+fib(0, 1).
+fib(1, 1).
+fib(N, F) :-
+    N1 is N - 1,
+    N2 is N - 2,
+    fib(N1, F1),
+    fib(N2, F2),
+    F is F1 + F2.
+\end{minted}
+\code{?- fib(4, F).} gives \code{F = 5}. The slide asks three questions:
+
+\begin{enumerate}
+  \item \textbf{What if we change the order of goals? What if we do \code{F is F1 + F2}
+        first?} Then \code{is} is called while \code{F1} and \code{F2} are still unknown:
+        error ``Arguments are not sufficiently instantiated''. Arithmetic goals must come
+        \emph{after} the goals that compute their inputs. (Moving \code{N1 is N - 1} after
+        \code{fib(N1, F1)} breaks it in the same way, and worse: \code{fib(N1, F1)} with
+        unknown \code{N1} would match the facts and then loop.)
+  \item \textbf{Each call makes two recursive calls. Are there better ways?} The number of
+        calls $T(n)$ satisfies $T(n) = 1 + T(n-1) + T(n-2)$ with $T(0) = T(1) = 1$:
+        \begin{center}
+        \small
+        \begin{tabular}{@{}l*{7}{r}@{}}
+        \toprule
+        $n$ & 2 & 3 & 4 & 5 & 10 & 20 & 30 \\
+        \midrule
+        $\mathit{fib}(n)$ & 2 & 3 & 5 & 8 & 89 & 10\,946 & 1\,346\,269 \\
+        calls $T(n)$ & 3 & 5 & 9 & 15 & 177 & 21\,891 & 2\,692\,537 \\
+        \bottomrule
+        \end{tabular}
+        \end{center}
+        Exponential: the same values are recomputed again and again. Better: carry the last
+        two values as accumulators (linear time), or remember computed values with
+        \code{asserta} (Section~\ref{sec:meta-programming}).
+\end{enumerate}
+
+\begin{nbwarning}[Hidden bug: asking for more answers loops forever]
+\notinslides
+After \code{F = 5}, type \code{;}. Prolog backtracks into \code{fib(1, F1)} and tries clause 3
+\emph{also for N = 1} (nothing forbids it): \code{N1 = 0}, \code{N2 = -1}, then
+\code{fib(-1, \_)}, \code{fib(-2, \_)}, \ldots{} forever (stack overflow). Same disease as the
+absolute value: clause 3 is only true for $N > 1$. Fix: \code{fib(N, F) :- N > 1, N1 is N -
+1, \ldots}
+\end{nbwarning}
+
+\subsubsection{Lists and arithmetic}
+\slidesrc{Prolog IV: 9--13}
+
+Summing a list combines arithmetic with list processing:
+\begin{minted}{prolog}
+sumlist([], 0).                 % sum([]) = 0
+sumlist([X|Xs], Sum) :-         % sum([X|Xs]) = Sum if
+    sumlist(Xs, Sum1),          %   sum(Xs) = Sum1 and
+    Sum is Sum1 + X.            %   Sum = Sum1 + X
+\end{minted}
+This can be done more efficiently with an \textbf{accumulator}:
+\begin{minted}{prolog}
+sumlist(L, Sum) :-              % sumlist/2 defined in terms of sumlist/3
+    sumlist(L, 0, Sum).         %   (third argument is the accumulator)
+sumlist([], Sum, Sum).          % sum([]) + Sum = Sum
+sumlist([X|Xs], Sum0, Sum) :-   % sum([X|Xs]) + Sum0 = Sum if
+    Sum1 is Sum0 + X,           %   Sum1 = Sum0 + X, and
+    sumlist(Xs, Sum1, Sum).     %   sum(Xs) + Sum1 = Sum
+\end{minted}
+
+\begin{nbexample}{the two versions on \texttt{[1,2,3]}}
+\begin{center}
+\small
+\begin{tabular}{@{}l|l@{}}
+\textbf{Naive} & \textbf{Accumulator} \\
+\hline
+\code{sumlist([1,2,3], S)} & \code{sumlist([1,2,3], 0, S)} \\
+\quad \code{sumlist([2,3], S1)} & \quad \code{sumlist([2,3], 1, S)} \\
+\quad\quad \code{sumlist([3], S2)} & \quad\quad \code{sumlist([3], 3, S)} \\
+\quad\quad\quad \code{sumlist([], S3)}: \code{S3 = 0} & \quad\quad\quad \code{sumlist([], 6, S)}: \code{S = 6} \\
+\quad\quad \code{S2 is 0 + 3} $= 3$ & \\
+\quad \code{S1 is 3 + 2} $= 5$ & \\
+\code{S is 5 + 1} $= 6$ & \\
+\end{tabular}
+\end{center}
+The naive version must keep every call open waiting for the recursive result, then adds on
+the way back; the accumulator version adds on the way \emph{down}, and the recursive call is
+the \emph{last} goal (\textbf{tail recursion}): Prolog can reuse the same stack frame, like a
+loop. Both give \code{S = 6}.
+\end{nbexample}
+
+\paragraph{List maximum (slide 10).}
+\begin{minted}{prolog}
+maxlist([X], X).
+maxlist([X|Xs], Max) :-
+    maxlist(Xs, Max1),
+    maximum(Max1, X, Max).
+\end{minted}
+No clause for \code{[]}: the base case is the singleton list, because \code{[]} has no
+maximum. Example: \code{maxlist([3,1,4], M)}: \code{maxlist([4], M2)} gives 4, then
+\code{maximum(4, 1, M1)} gives 4, then \code{maximum(4, 3, M)} gives \code{M = 4}.
+
+\paragraph{List length (slide 11).} \code{length/2} relates a list to its length:
+\begin{minted}[linenos=false]{prolog}
+?- length([a,b,c], 3).     true.
+?- length([a,b,c], N).     N = 3.
+?- length(L, 3).           L = [_, _, _].
+?- length(L, N).           L = [], N = 0 ;  L = [_], N = 1 ;  L = [_, _], N = 2 ; ...
+\end{minted}
+It is built in most Prolog systems; in SICStus it is in a library, loaded with
+\code{:- use\_module(library(lists)).}
+
+\begin{nbfact}{List handling with \texttt{append} and \texttt{length} (slides 12--13)}
+\begin{minted}{prolog}
+member(X, L) :-             % X is a member of L if L is of the form
+    append(_, [X|_], L).    %   any list ++ [X] ++ any list
+
+element(N, L, E) :-         % E is the Nth element of L (counting from 0)
+    append(F, [E|_], L),    %   if L = F ++ [E] ++ any list
+    length(F, N).           %   and the length of F is N
+
+take(N, L, T) :-            % T is the first N elements of L
+    append(T, _, L),        %   if L = T ++ any list
+    length(T, N).           %   and the length of T is N
+
+drop(N, L, T) :-            % T is what is left after removing the first N elements
+    append(F, T, L),        %   if L = F ++ T
+    length(F, N).           %   and the length of F is N
+
+listof([], _).              % [] is a list of anything
+listof([E|Es], E) :-        % [E|Es] is a list of Es if
+    listof(Es, E).          %   Es is
+\end{minted}
+\code{?- element(1, [a,b,c], E).} gives \code{E = b}; \code{?- take(2, [a,b,c], T).} gives
+\code{T = [a,b]}; \code{?- drop(1, [a,b,c], T).} gives \code{T = [b,c]};
+\code{?- listof([x,x,x], x).} is true.
+\end{nbfact}
+
+\begin{nbwarning}[Comments of slide 13]
+The comments of \code{drop/3} on the slide are copied from \code{take/3} (``T is the first N
+elements of L'', ``if L = T ++ any list''): the correct reading is the one above, where
+\code{F} (not \code{T}) is the prefix of length \code{N}.
+\end{nbwarning}
+
+\begin{nbintuition}[Generate and test]
+\code{element}, \code{take} and \code{drop} all follow the pattern ``\code{append}
+\emph{generates} all the ways to split the list; \code{length} \emph{tests} which split has
+the right size''. Simple and declarative, though not the fastest (a direct recursion stops
+earlier).
+\end{nbintuition}
+
+\subsubsection{All-solutions predicates}
+\slidesrc{Prolog IV: 14--15}
+
+Normally Prolog gives one answer at a time. Built-in predicates collect them all:
+
+\begin{nbdef}{findall, setof, bagof (slide 15)}
+\begin{itemize}[nosep]
+  \item \code{findall(T, G, L)}: \code{L} is the list of all terms \code{T} that satisfy goal
+        \code{G}, in the order solutions are found; variables in \code{G} are left
+        uninstantiated; deterministic (if there are no solutions, \code{L = []}).
+  \item \code{setof(T, G, L)}: \code{L} is a \textbf{non-empty} list of all terms \code{T}
+        that satisfy \code{G}, \textbf{sorted with duplicates removed}; variables appearing
+        only in \code{G} can be instantiated; can be nondeterministic (one answer for each
+        different instantiation of those variables).
+  \item \code{bagof(T, G, L)}: like \code{setof/3} but without the sorting.
+\end{itemize}
+The template term \code{T} is left uninstantiated by all of these predicates.
+\end{nbdef}
+
+\begin{nbexample}{all solutions on the royal family}
+\notinslides
+\begin{minted}[linenos=false, fontsize=\footnotesize]{prolog}
+?- findall(C, parent(charles, C), L).    L = [william, harry].
+?- findall(C, parent(P, C), L).          L = [charles, william, harry, charles, william, harry].
+?- findall(C, parent(harry, C), L).      L = [].
+?- bagof(C, parent(harry, C), L).        false.
+?- bagof(C, parent(P, C), L).            P = charles,   L = [william, harry] ;
+                                         P = diana,     L = [william, harry] ;
+                                         P = elizabeth, L = [charles] ;
+                                         P = philip,    L = [charles].
+?- setof(C, P^parent(P, C), L).          L = [charles, harry, william].
+\end{minted}
+\code{findall} ignores \code{P}; \code{bagof} groups the answers by each value of the free
+variable \code{P}; \code{P\textasciicircum{}} (``there exists a \code{P}'') tells
+\code{setof}/\code{bagof} not to group by \code{P}. \code{setof} sorts and removes duplicates.
+\end{nbexample}
+
+\begin{nbwhy}
+\notinslides
+All-solutions predicates turn a \emph{search} into a \emph{data structure}: ``the list of all
+free rooms'', ``all plans applicable now''. Agent interpreters do exactly this when they
+compute the set of relevant plans for an event (Section~\ref{sec:bdi-agentspeak}).
+\end{nbwhy}

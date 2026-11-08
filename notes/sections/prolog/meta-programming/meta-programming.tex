@@ -1,0 +1,314 @@
+\subsection{Terms, comparison, program database}
+\label{sec:meta-programming}
+\slidesrc{Prolog V: 1--24}
+
+This deck covers the ``non-logical'' side of Prolog: predicates that inspect the
+\emph{structure} of terms, compare them, test whether variables are bound, and read or modify
+the \emph{program itself} while it runs.
+
+\subsubsection{Handling terms in general: univ, functor, arg}
+\slidesrc{Prolog V: 3--9}
+
+Sometimes we want predicates that work on \emph{any} kind of term, without knowing its functor
+in advance.
+
+\begin{nbdef}{Univ \texttt{=..} (slide 3)}
+\code{Term =.. List} (pronounced ``univ'') turns a term into a list: the first element is the
+term's functor, the following elements are its arguments, in order. It also works in the
+other direction.
+\begin{minted}[linenos=false]{prolog}
+?- p(1, q(3)) =.. X.       X = [p, 1, q(3)].
+?- T =.. [p, 1, q(3)].     T = p(1, q(3)).
+?- 1 =.. X.                X = [1].
+?- [1,2,3] =.. X.          X = ['[|]', 1, [2,3]].      % slides: ['.', 1, [2,3]]
+\end{minted}
+\end{nbdef}
+
+Since univ builds a list that is often not needed, it is usually better to use
+\code{functor/3} and \code{arg/3}.
+
+\begin{nbdef}{functor/3 (slides 4--5)}
+\code{functor(Term, Name, Arity)} holds when the functor of \code{Term} is \code{Name} and its
+arity is \code{Arity}. For atomic terms, the whole term is the name and the arity is 0. Either
+\code{Term}, or both \code{Name} and \code{Arity}, must be bound, otherwise \code{functor}
+throws an exception.
+\begin{minted}[linenos=false]{prolog}
+?- functor(p(1, q(3)), F, A).   F = p, A = 2.
+?- functor(T, p, 2).            T = p(_, _).       % builds a "blank" term
+?- functor(1, F, A).            F = 1, A = 0.
+?- functor(X, 42, 0).           X = 42.
+\end{minted}
+\end{nbdef}
+
+\begin{nbdef}{arg/3 (slides 6--7)}
+\code{arg(N, Term, Arg)} holds if \code{Arg} is the \code{N}-th argument of \code{Term}
+(counting from 1). \code{Term} must be bound to a compound term. In most systems \code{N} must
+be bound; SWI-Prolog backtracks over all arguments. \code{arg/3} is deterministic when the
+first two arguments are bound.
+\begin{minted}[linenos=false]{prolog}
+?- arg(2, foo(a,b), Arg).       Arg = b.
+?- arg(N, foo(a,b), Arg).       N = 1, Arg = a ;  N = 2, Arg = b.
+?- arg(N, 3, 3).                ERROR: Type error: `compound' expected, found `3'
+\end{minted}
+\end{nbdef}
+
+\begin{nbexample}{collecting all functors of a ground term (slides 8--9)}
+\begin{minted}{prolog}
+all_functors(Term, List) :- all_functors(Term, List, []).
+
+all_functors(Term, List, List0) :-
+    functor(Term, Name, Arity),
+    (   Arity > 0 ->
+        List = [Name|List1],
+        all_functors1(Arity, Term, List1, List0)
+    ;   List = List0
+    ).
+
+all_functors1(N, Term, List, List0) :-
+    (   N =:= 0 ->
+        List = List0
+    ;   arg(N, Term, Arg),
+        all_functors(Arg, List1, List0),
+        N1 is N - 1,
+        all_functors1(N1, Term, List, List1)
+    ).
+\end{minted}
+How to read it:
+\begin{itemize}[nosep]
+  \item \code{( Cond -> Then ; Else )} is Prolog's \textbf{if-then-else}: if \code{Cond}
+        succeeds, run \code{Then}, otherwise \code{Else} (only the first solution of
+        \code{Cond} is used);
+  \item the pair \code{List}/\code{List0} is a \textbf{difference list}: ``the functors of
+        this term, followed by \code{List0}''; it lets us concatenate without \code{append};
+  \item \code{all\_functors1} visits the arguments from the last (\code{N} = arity) down to
+        the first: the functors of argument \code{N} go in front of \code{List0}, and the
+        functors of arguments $1 \ldots N-1$ go in front of those. So the final order is
+        left to right.
+\end{itemize}
+\begin{minted}[linenos=false, fontsize=\footnotesize]{prolog}
+?- all_functors(foo(bar([1,2],zip,baz(3)),bar(7)), L).
+L = [foo, bar, '[|]', '[|]', baz, bar].         % slides: '.' instead of '[|]'
+?- X = bar(42), all_functors(foo(X), L).
+X = bar(42), L = [foo, bar].
+?- all_functors(foo(X), L), X = bar(42).
+ERROR: Arguments are not sufficiently instantiated
+\end{minted}
+In the first query: \code{foo}, then its first argument \code{bar(...)} gives \code{bar}, then
+the list \code{[1,2]} = \code{'[|]'(1, '[|]'(2, []))} gives two list functors (numbers and
+\code{[]} are atomic: none), \code{zip} is an atom (none), \code{baz(3)} gives \code{baz};
+finally the second argument \code{bar(7)} gives \code{bar}. The last query fails because
+\code{functor(X, Name, Arity)} is called with everything unbound: \textbf{the order of goals
+matters} for these non-logical builtins.
+\end{nbexample}
+
+\subsubsection{Term comparison}
+\slidesrc{Prolog V: 10}
+
+\begin{nbfact}{Standard order of terms (slide 10)}
+\code{@<}, \code{@=<}, \code{@>}, \code{@>=}, \code{==}, \code{\textbackslash==} work like
+\code{<}, \code{=<}, \code{>}, \code{>=}, \code{=:=}, \code{=\textbackslash=} but on
+\emph{any} terms (the sorting predicates are built on them):
+\begin{itemize}[nosep]
+  \item \textbf{Variables} \code{@<} \textbf{numbers} \code{@<} \textbf{atoms} \code{@<}
+        \textbf{compound terms};
+  \item atoms are compared lexicographically (alphabetically), numbers numerically;
+  \item compound terms are compared first by \textbf{arity}, then by \textbf{functor name},
+        then by the \textbf{arguments} in order;
+  \item \code{==} and \code{\textbackslash==} check whether terms are \emph{identical},
+        without binding any variables.
+\end{itemize}
+Beware of variables in terms being sorted!
+\end{nbfact}
+
+\begin{nbexample}{comparing terms}
+\notinslides
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\textbf{Query} & \textbf{Result and why} \\
+\midrule
+\code{X @< 1} & true (variables come first) \\
+\code{42 @< abc} & true (numbers before atoms) \\
+\code{apple @< banana} & true (alphabetical) \\
+\code{z(1,1) @< a(1,1,1)} & true (arity 2 before arity 3, the name is not even looked at) \\
+\code{f(1,b) @< f(1,c)} & true (same arity and name: compare arguments) \\
+\code{X == Y} & false (two different unbound variables) \\
+\code{X = Y, X == Y} & true (after unification they are the same variable) \\
+\code{msort([b,2,f(x),a,1], L)} & \code{L = [1, 2, a, b, f(x)]} \\
+\bottomrule
+\end{tabularx}
+\end{center}
+\end{nbexample}
+
+\subsubsection{Variable and type testing}
+\slidesrc{Prolog V: 11--17}
+
+\paragraph{The problem: \texttt{rev/2} in two directions.} The simple list reversal
+\begin{minted}{prolog}
+rev([], []).
+rev([A|BC], R) :-
+    rev(BC, CB),
+    append(CB, [A], R).
+\end{minted}
+works ``forwards'' (\code{?- rev([1,2,3], R).} gives \code{R = [3,2,1]}), but used
+``backwards'' (\code{?- rev(L, [3,2,1]).}) it goes into an \textbf{infinite loop after finding
+the correct answer}: the recursive call \code{rev(BC, CB)}, with both arguments unknown,
+produces longer and longer lists; once the right length has been found, no other length will
+be correct, but Prolog keeps trying. Exchanging the calls:
+\begin{minted}{prolog}
+rev([], []).
+rev([A|BC], R) :-
+    append(CB, [A], R),
+    rev(BC, CB).
+\end{minted}
+fixes the backwards mode (when \code{R} is bound, \code{append/3} has only one solution), but
+now \code{rev/2} loops in the \emph{forwards} mode after finding the solution
+(\code{append(CB, [A], R)} with \code{R} unbound generates longer and longer lists).
+
+\begin{nbdef}{\texttt{var/1} and other non-logical builtins (slides 13--14)}
+To implement a reversible version we must choose the goal order depending on \emph{which
+arguments are bound}. \code{var(X)} succeeds if \code{X} is an unbound variable, and fails if
+not: \code{?- var(\_).} is true, \code{?- var(a).} is false. Similar tests:
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l X@{}}
+\toprule
+\code{nonvar(X)} & \code{X} is bound \\
+\code{ground(X)} & \code{X} is bound, and every variable in its term is ground (no variables at all) \\
+\code{atom(X)} & \code{X} is bound to an atom \\
+\code{integer(X)}, \code{float(X)}, & \code{X} is bound to an integer / float / \\
+\code{number(X)} & number \\
+\code{atomic(X)} & \code{atom(X) ; number(X)} \\
+\code{compound(X)} & \code{X} is bound to a compound term \\
+\bottomrule
+\end{tabularx}
+\end{center}
+All of them can make conjunction \textbf{not commutative}: \code{var(X), X = 1} succeeds,
+\code{X = 1, var(X)} fails. Logically, ``A and B'' should not depend on the order.
+\end{nbdef}
+
+\begin{nbexample}{defining \texttt{length/2} in both directions (slides 15--17)}
+When the list is supplied:
+\begin{minted}{prolog}
+len1([], 0).
+len1([_|L], N) :-
+    len1(L, N1),
+    N is N1 + 1.
+\end{minted}
+When the length is supplied:
+\begin{minted}{prolog}
+len2([], 0).
+len2([_|L], N) :-
+    N > 0,
+    N1 is N - 1,
+    len2(L, N1).
+\end{minted}
+A version that works in both modes chooses with \code{var/1}:
+\begin{minted}{prolog}
+len(L, N) :-
+    (   var(N) ->
+        len1(L, N)
+    ;   len2(L, N)
+    ).
+\end{minted}
+NB: don't check whether \code{L} is a variable: even if it is not, its tail may be (e.g.\
+\code{[a|T]}).
+\begin{minted}[linenos=false]{prolog}
+?- len(L, 4).          L = [_, _, _, _].
+?- len([a,b,c], N).    N = 3.
+?- len(L, N).          L = [], N = 0 ;  L = [_], N = 1 ;  L = [_, _], N = 2 ; ...
+\end{minted}
+Why the two helpers: \code{len1} cannot be used with \code{N} known and \code{L} unknown
+(\code{N is N1 + 1} with \code{N1} unknown is an error, after the recursion produced
+infinitely many candidates); \code{len2} needs \code{N} known (\code{N > 0} would raise an
+error). The name \code{len} is used because \code{length/2} is a built-in that cannot be
+redefined in SWI-Prolog.
+\end{nbexample}
+
+\subsubsection{Program access and manipulation}
+\slidesrc{Prolog V: 18--24}
+
+So far programs were assumed to be resident in memory, without asking how they are
+represented or how they got there. Many applications need to \emph{access} the clauses of the
+program, and to \emph{modify} it at run time (adding and deleting clauses).
+
+\begin{nbdef}{clause/2, assert/1, asserta/1, retract/1 (slides 19--21)}
+\begin{itemize}
+  \item \code{clause(Head, Body)}: must be called with \code{Head} instantiated. The program
+        is searched for the first clause whose head unifies with \code{Head}; its head and
+        body are unified with \code{Head} and \code{Body}. On backtracking it succeeds once
+        for each unifiable clause. Facts have the atom \code{true} as their body. Clauses
+        cannot be accessed via their body.
+  \item \code{assert(Clause)}: adds \code{Clause} as the \textbf{last} clause of the
+        corresponding predicate (also \code{assertz}). \code{asserta(Clause)} adds it at the
+        \textbf{beginning}. If \code{Clause} is uninstantiated, an error occurs.
+  \item \code{retract(Clause)}: removes the first clause unifying with \code{Clause}. To
+        retract \code{a :- b, c, d.} write \code{retract((a :- (b, c, d)))} or
+        \code{retract((a :- Body))}.
+\end{itemize}
+\end{nbdef}
+
+\begin{nbexample}{the program as data}
+\notinslides
+\begin{minted}[linenos=false, fontsize=\footnotesize]{prolog}
+?- clause(grandparent(X, Y), Body).   Body = (parent(X, _A), parent(_A, Y)).
+?- clause(parent(diana, C), Body).    C = william, Body = true ;  C = harry, Body = true.
+?- assert(visited(rome)), assert(visited(paris)), asserta(visited(oslo)).
+?- findall(C, visited(C), L).          L = [oslo, rome, paris].
+?- retract(visited(rome)), findall(C, visited(C), L).   L = [oslo, paris].
+\end{minted}
+This is how a Prolog agent updates its beliefs when the world changes: \code{retract} the old
+fact, \code{assert} the new one (AgentSpeak's \code{+b} and \code{-b},
+Section~\ref{sec:bdi-agentspeak}).
+\end{nbexample}
+
+\begin{nbwarning}[Declare predicates you modify as dynamic]
+In SWI-Prolog, predicates loaded from a file are \emph{static}: \code{assert}ing a clause of
+\code{fib\_stupid/2} defined in the file raises ``No permission to modify static procedure''.
+Add the directive \code{:- dynamic fib\_stupid/2.} at the top of the file (same for
+\code{fib\_smart/2} and \code{visited/1}).
+\end{nbwarning}
+
+\paragraph{Assert in action: three Fibonacci programs (slides 22--24).} All three print a
+message when the recursive clause is used, so we can count the calls. They have the
+\code{N > 1} guard (Section~\ref{sec:arithmetic-nondeterminism}) after the \code{write}.
+\begin{minted}{prolog}
+fib_print(0, 1).
+fib_print(1, 1).
+fib_print(N, F) :-
+    write('Call of fib_print on '), write(N), nl,
+    N > 1,
+    N1 is N - 1,
+    N2 is N - 2,
+    fib_print(N1, F1),
+    fib_print(N2, F2),
+    F is F1 + F2.
+\end{minted}
+\code{fib\_stupid} is identical but ends with \code{F is F1 + F2, assert(fib\_stupid(N, F))};
+\code{fib\_smart} ends with \code{F is F1 + F2, asserta(fib\_smart(N, F))}.
+
+\begin{nbexample}{what each version prints for \texttt{?- X(4, F).}}
+\notinslides
+\begin{center}
+\small
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+\textbf{Version} & \textbf{Printed calls} & \textbf{Why} \\
+\midrule
+\code{fib\_print} & 4, 3, 2, 2 & plain recursion: \code{fib(2)} is computed twice (once
+  inside \code{fib(3)}, once as $N-2$ of 4). For larger $N$ the calls grow exponentially. \\
+\code{fib\_stupid} & 4, 3, 2, 2 & \code{assert} adds the result \emph{after} the recursive
+  clause: when \code{fib\_stupid(2, F)} is called again, the rule is tried \emph{before}
+  the stored fact, so the memory is never used. A second query prints everything again
+  (and adds duplicate facts). \\
+\code{fib\_smart} & 4, 3, 2 & \code{asserta} puts \code{fib\_smart(2, 2)} \emph{first}:
+  the second call \code{fib\_smart(2, F2)} matches the stored fact immediately. After the
+  query, \code{fib\_smart(4, 5)}, \code{(3, 3)}, \code{(2, 2)} are stored: a second
+  \code{?- fib\_smart(4, F).} prints nothing, and \code{fib\_smart(5, F)} prints only 5. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+All three answer \code{F = 5}. \code{fib\_smart} is \textbf{memoisation} (dynamic
+programming): each value is computed once, so the cost becomes linear.
+\end{nbexample}

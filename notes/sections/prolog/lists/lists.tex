@@ -1,0 +1,159 @@
+\subsection{Lists}
+\label{sec:prolog-lists}
+\slidesrc{Prolog II: 1--9}
+
+\subsubsection{List syntax}
+\slidesrc{Prolog II: 5}
+
+Lists are very widely used in Prolog, and have a special syntax:
+\begin{itemize}[nosep]
+  \item \code{[]} is the \textbf{empty list};
+  \item \code{[H|T]} is the list with \textbf{head} \code{H} (the first element) and
+        \textbf{tail} \code{T} (the list of the remaining elements);
+  \item \code{[1,2]} is a list of two elements; \code{[A,B,C|D]} is a list whose first three
+        elements are \code{A}, \code{B}, \code{C} and whose remaining elements form the
+        list \code{D}.
+\end{itemize}
+A recogniser, in the ``skeleton'' style of Section~\ref{sec:prolog-basics}:
+\begin{minted}{prolog}
+list([]).
+list([_|Tail]) :- list(Tail).
+\end{minted}
+
+\begin{nbfact}{Lists are ordinary terms}
+The bracket notation is special syntax, but lists are ordinary compound terms: the list
+functor is the dot \code{'.'} with arity 2 (in SWI-Prolog~7 and later it is called
+\code{'[|]'}). So
+\[
+\code{[1,2,3]} \;=\; \code{[1|[2,3]]} \;=\; \code{[1|[2|[3|[]]]]} \;=\;
+\code{'.'(1, '.'(2, '.'(3, [])))}
+\]
+\end{nbfact}
+
+\begin{center}
+\begin{forest}
+for tree={draw, rounded corners, font=\small\ttfamily, l sep=4mm, s sep=8mm, edge={thick}}
+[{'.'}, fill=nbpurple!12 [1, fill=nborange!12] [{'.'}, fill=nbpurple!12 [2, fill=nborange!12] [{'.'}, fill=nbpurple!12 [3, fill=nborange!12] [{[\,]}, fill=nbgray!15]]]]
+\end{forest}
+\captionof{figure}{The list \code{[1,2,3]} as a tree: a chain of dot cells, each holding one
+element (left) and the rest of the list (right), ending with \code{[]}. Exactly a linked
+list.}
+\end{center}
+
+\begin{nbexample}{unifying lists}
+\notinslides
+\begin{center}
+\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Query} & \textbf{Answer} \\
+\midrule
+\code{[H|T] = [a,b,c]} & \code{H = a, T = [b,c]} \\
+\code{[H|T] = [a]} & \code{H = a, T = []} \\
+\code{[H|T] = []} & \code{false} (the empty list has no head) \\
+\code{[A,B|R] = [1,2,3,4]} & \code{A = 1, B = 2, R = [3,4]} \\
+\code{[A,B] = [1,2,3]} & \code{false} (different lengths) \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{nbexample}
+
+\subsubsection{List membership}
+\slidesrc{Prolog II: 6--7}
+
+\code{member/2} checks list membership. It is a built-in of SWI-Prolog, but could be
+defined as:
+\begin{minted}{prolog}
+member(X, [X|_]).        % X is member of a list beginning with X
+member(X, [_|L]) :-      % X is member of a list
+    member(X, L).        %   if it is member of its tail
+\end{minted}
+
+\begin{nbfact}{Member in action (slide 7)}
+\begin{minted}[linenos=false, fontsize=\footnotesize]{prolog}
+?- member(c, [a,b,c,d]).          true.
+?- member(e, [a,b,c,d]).          false.
+?- member(X, [a,b,c]).            X = a ; X = b ; X = c.
+?- L = [_,_,_], member(a, L).     L = [a, _, _] ; L = [_, a, _] ; L = [_, _, a].
+\end{minted}
+The same predicate \emph{checks} membership, \emph{enumerates} the elements, and even
+\emph{builds} lists containing a given element.
+\end{nbfact}
+
+\begin{nbexample}{trace of \texttt{member(c, [a,b,c,d])}}
+\notinslides
+\begin{center}
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Goal} & \textbf{Clause 1 \code{member(X,[X|\_])}} & \textbf{Clause 2} \\
+\midrule
+\code{member(c, [a,b,c,d])} & \code{c} vs \code{a}: fail & recurse on \code{[b,c,d]} \\
+\code{member(c, [b,c,d])} & \code{c} vs \code{b}: fail & recurse on \code{[c,d]} \\
+\code{member(c, [c,d])} & \code{c} vs \code{c}: \textbf{success} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+For \code{member(e, [a,b,c,d])} the recursion reaches \code{member(e, [])}: neither clause
+unifies with an empty list, so the query fails.
+\end{nbexample}
+
+\subsubsection{List concatenation: append}
+\slidesrc{Prolog II: 8--9}
+
+\code{append/3} concatenates two lists (\code{++} in Haskell). Again a built-in, but could be
+defined as:
+\begin{minted}{prolog}
+append([], L, L).              % [] ++ L gives L
+append([J|K], L, [J|KL]) :-    % to ++ a list with first element J and remainder K
+    append(K, L, KL).          %   to list L, determine K ++ L and then add J to front
+\end{minted}
+Compare with Haskell: \code{append [] l = l} and \code{append (j:k) l = j : append k l}.
+The same, but Haskell can only append lists, while Prolog's \code{append} is more flexible:
+
+\begin{nbfact}{Append in action (slide 9)}
+\begin{minted}[linenos=false, fontsize=\footnotesize]{prolog}
+?- append([a,b,c], [d,e], L).      L = [a,b,c,d,e].
+?- append(L, [d,e], [a,b,c,d,e]).  L = [a,b,c] ;  false.
+?- append([a,b,c], L, [a,b,c,d,e]).L = [d,e].
+?- append(K, L, [a,b]).            K = [], L = [a,b] ;
+                                   K = [a], L = [b] ;
+                                   K = [a,b], L = [] ; false.
+\end{minted}
+Concatenation, ``what must I prepend?'', ``what remains?'', and ``all ways to split a
+list'': four functions in one relation.
+\end{nbfact}
+
+\begin{nbexample}{\texttt{append([a,b], [c], L)} step by step}
+\begin{align*}
+&\code{append([a,b], [c], L)} && \reason{clause 2: \code{J=a, K=[b], L=[a|KL1]}} \\
+&\code{append([b], [c], KL1)} && \reason{clause 2: \code{KL1=[b|KL2]}} \\
+&\code{append([], [c], KL2)} && \reason{clause 1: \code{KL2=[c]}}
+\end{align*}
+So \code{L = [a|[b|[c]]] = [a,b,c]}. The work is proportional to the length of the
+\emph{first} list.
+\end{nbexample}
+
+\begin{center}
+\begin{forest}
+for tree={draw, rounded corners, font=\small\ttfamily, l sep=5mm, s sep=5mm, edge={thick}, align=center}
+[{append(K, L, [a,b])}, fill=nbblue!10
+  [{success\\K=[], L=[a,b]}, fill=nbgreen!15, edge label={node[midway, left, font=\scriptsize\rmfamily]{cl.\ 1}}]
+  [{append(K1, L, [b])\\K=[a|K1]}, fill=nbblue!10, edge label={node[midway, right, font=\scriptsize\rmfamily]{cl.\ 2}}
+    [{success\\K=[a], L=[b]}, fill=nbgreen!15, edge label={node[midway, left, font=\scriptsize\rmfamily]{cl.\ 1}}]
+    [{append(K2, L, [])\\K1=[b|K2]}, fill=nbblue!10, edge label={node[midway, right, font=\scriptsize\rmfamily]{cl.\ 2}}
+      [{success\\K=[a,b], L=[]}, fill=nbgreen!15, edge label={node[midway, left, font=\scriptsize\rmfamily]{cl.\ 1}}]
+      [{fail\\{[]} has no head}, fill=nbred!12, edge label={node[midway, right, font=\scriptsize\rmfamily]{cl.\ 2}}]]]]
+\end{forest}
+\captionof{figure}{Search tree of \code{?- append(K, L, [a,b]).}: Prolog explores it depth-first,
+left to right; each green leaf is one answer, in the order shown in the slides; the red leaf
+is why the last \code{;} answers \code{false}.}
+\end{center}
+
+\begin{nbwhy}
+\notinslides
+Lists are Prolog's workhorse: an agent's list of pending tasks, a path in a route planner,
+the moves of a game (the exam exercises often ask to move elements between lists with
+\code{select/3}, \code{append/3}, \code{member/2}). \code{append/3} used ``backwards'' is
+also a compact way to express search: ``find a split of the list such that\ldots''.
+\end{nbwhy}
